@@ -1,0 +1,588 @@
+#+TITLE: My init as an org file
+#+PROPERTY: header-args :tangle config.el
+#+OPTIONS: toc:nil
+#+auto_tangle: t
+
+* Helpers
+
+  There are a number of helper functions that we'll need through the
+  rest of this. We'll just define them up here.
+
+** load-if-exists
+
+   This is just a nice function to load a file if it exists, but just
+   print a message rather than an error if it doesn't. This is handy
+   for things like loading specific local config that you don't want
+   to go into github or be shared such as erc nicks, passwords, blog
+   rolls, etc.
+
+   #+BEGIN_SRC emacs-lisp
+     (defun load-if-exists (file)
+       (if (file-exists-p file)
+           (progn
+             (load file)
+             (message (format "Loading file: %s" file)))
+         (message (format "No %s file. So not loading one." file))))
+   #+END_SRC
+
+* Local Config
+
+** custom.el
+
+   custom.el is great for configuring things through that "gui" in
+   emacs, but it is a real pain when it drops junk in your [[../init.el][init.el]] and
+   messes up your pretty config and git history and is stuff that you
+   don't want to leak out on to github. You can change the location of
+   this file though and I like to do this.
+
+   #+BEGIN_SRC emacs-lisp
+     (setq custom-file (concat user-emacs-directory "local/custom.el"))
+     (load-if-exists custom-file)
+   #+END_SRC
+
+* Globals
+
+** passwords and encrypted things
+
+   It is good to store your passwords and things in an encrypted
+   file. I call mine mellon, because you can only read it if you are
+   my friend and have the passphrase.
+
+   This does mean that every time you use it you have to give the
+   passphrase, but it does mean that you can keep all your passwords
+   for things like erc and stuff in a file reasonably safely (though
+   it will be in memory when emacs is running, so it isn't completely
+   secure).
+
+   #+BEGIN_SRC emacs-lisp
+     (load-if-exists (concat user-emacs-directory "local/mellon.el.gpg"))
+   #+END_SRC
+
+** Set initial framesize
+
+   #+BEGIN_SRC emacs-lisp
+     (setq initial-frame-alist '((top . 0) (left . 0) (width . 140)
+     (height . 45)))
+   #+END_SRC
+
+
+** Auto indent on newline
+
+   Again something lifted from
+   www.masteringemacs.org/article/beginners-guide-to-emacs
+
+   #+BEGIN_SRC emacs-lisp
+     (define-key global-map (kbd "RET") 'newline-and-indent)
+   #+END_SRC
+
+** diminish
+
+   As we add lots of useful minor-modes the mode line can get a bit
+   unwieldy. diminish-mode helps us with that. We'll set it up here
+   and use it in various places throughout the setup.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package diminish
+       :ensure t)
+   #+END_SRC
+   
+** Tabs are Evil
+
+   I mean, not like evil-mode is good for vi users who want to use
+   emacs, which is fine, and obviously not like a truly evil thing,
+   but you know, not what I want. Hey, I can use hyperbole in my
+   org-mode files if I want to.
+
+   #+BEGIN_SRC emacs-lisp
+     (setq-default indent-tabs-mode nil)
+   #+END_SRC
+
+** Multiple Cursors
+
+   This is a replacement for the iedit that I used to have. Neale
+   Swinnerton was the one who showed this to me and it looked really
+   cool.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package multiple-cursors	
+       :ensure t
+       :init
+       (multiple-cursors-mode 1)
+       (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+       (global-set-key (kbd "C->") 'mc/mark-next-like-this)
+       (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+       (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
+
+   #+END_SRC
+
+** Remap M-i to back-to-indentation
+
+   I've got used to back-to-indentation mapped to M-i
+
+   #+BEGIN_SRC emacs-lisp
+     (global-set-key (kbd "M-i") 'back-to-indentation)
+   #+END_SRC
+
+** loccur mode
+
+   loccur mode hides all lines except those containing matches
+
+   #+BEGIN_SRC emacs-lisp
+      (maybe-install-and-require 'loccur)
+      (global-set-key (kbd "C-M-o") 'loccur-current)
+      (global-set-key (kbd "C-M-S-o") 'loccur)
+   #+END_SRC
+
+** Tooltips in echo area
+
+   Got this from www.masteringemacs.org
+
+   #+BEGIN_SRC emacs-lisp
+     (tooltip-mode -1)
+     (setq tooltip-use-echo-area nil)
+   #+END_SRC
+
+** Y and N prompts
+
+   Change the yes and no prompts to y and n
+
+   #+BEGIN_SRC emacs-lisp
+     (fset 'yes-or-no-p 'y-or-n-p)
+     (defalias 'yes-or-no-p 'y-or-n-p)
+   #+END_SRC
+
+** Time in status
+
+   #+BEGIN_SRC emacs-lisp
+    (display-time-mode 1)
+   #+END_SRC
+
+** Set fundamental mode for large files
+
+   Performance for loading large files with font lock etc. on is poor
+   so make buffer fundamental and read only for large files.
+
+   #+BEGIN_SRC emacs-lisp
+     (defun my-find-file-check-make-large-file-read-only-hook ()
+       "If a file is over a given size, make the buffer read only."
+       (when (> (buffer-size) (* 1024 1024))
+         (setq buffer-read-only t)
+         (buffer-disable-undo)
+         (fundamental-mode)))
+     (add-hook 'find-file-hook 'my-find-file-check-make-large-file-read-only-hook)
+   #+END_SRC
+
+** Key chord mode
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package key-chord
+       :ensure t
+       :init
+       (setq key-chord-two-keys-delay 0.1)
+       (setq key-chord-one-key-delay 0.2)
+       (key-chord-mode 1))
+   #+END_SRC
+
+** window-number-super mode
+
+   Window number mode shows the number of the window in the
+   mini-buffer. Window number meta mode enables selecting a window by
+   using META-n where n is the windows number.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package window-number
+       :ensure t)
+     (window-number-mode t)
+     (window-number-meta-mode t)
+   #+END_SRC   
+   
+* Macintosh Specific Setup
+	   
+** $PATH is broken
+
+   If you don't run emacs in a terminal on Mac OS X then it can be
+   really awkward to get the stuff you want in your path. This is the
+   best way I've found so far to sort this out and get things like
+   ~/bin and /usr/loca/bin in a $PATH that emacs can access. I quite
+   like running emacs from outside the terminal.
+
+   Thanks to the lovely and helpful [[https://twitter.com/_tobrien][Tom O'Brien]] I've got a better way
+   of doing this and now my emacs environment will be in sync with my
+   shell. You can out more at the github page for
+   [[https://github.com/purcell/exec-path-from-shell][exec-path-from-shell]].
+
+   #+BEGIN_SRC emacs-lisp
+     (when (memq window-system '(mac ns))
+       (progn
+	 (use-package exec-path-from-shell
+	   :ensure t)
+	 (exec-path-from-shell-initialize)))
+   #+END_SRC   
+   
+* Make it Pretty
+
+** color themes
+
+*** custom-theme-directory
+
+    Themes seem to be quite picky about where they live. They require
+    custom-theme-directory to be set. By default this is the same as
+    user-emacs-directory, which is usually ~/.emacs.d. I'd like to
+    keep them separate if possible. I learned this one by reading
+    some of [[https://github.com/sw1nn/dotfiles][Neale Swinnerton's dotfiles]].
+
+    #+BEGIN_SRC emacs-lisp
+      (setq custom-theme-directory (concat user-emacs-directory "themes"))
+    #+END_SRC
+    
+*** VSCode dark theme
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package vscode-dark-plus-theme
+           :ensure t)
+      (enable-theme 'vscode-dark-plus)
+    #+END_SRC
+
+** Default font height
+
+    #+BEGIN_SRC emacs-lisp
+      (set-face-attribute 'default nil :height 100)
+    #+END_SRC
+    
+
+** Default font scale
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package default-text-scale
+	:ensure t
+	:init
+	(setq default-text-scale-mode t))
+    #+END_SRC
+** bars, menus and numbers
+
+   I like no scroll bars, no toolbars and line and column numbers in
+   the mode-line.
+
+   #+BEGIN_SRC emacs-lisp
+     (tool-bar-mode -1)
+     (scroll-bar-mode -1)
+     (line-number-mode -1)
+     (column-number-mode 1)
+     (menu-bar-mode -1)
+     (setq display-line-numbers-type 'absolute)
+     ;; (global-display-line-numbers-mode)
+   #+END_SRC
+** All the icons
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package all-the-icons
+       :ensure t)
+   #+END_SRC
+
+* Tool Configuration
+
+** company
+
+   Complete Anything or [[http://company-mode.github.io/][company-mode]] seems to be the way to complete
+   things in emacs now.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package company
+       :ensure t
+       :init
+       (add-hook 'after-init-hook 'global-company-mode)
+       (diminish 'company-mode "CA")
+       (global-set-key (kbd "C-M-i") 'company-complete)
+       (setq company-tooltip-flip-when-above t)
+       (setq company-minimum-prefix-length 2)               ; WARNING, probably you will get perfomance issue if min len is 0!
+       (setq company-tooltip-limit 20)                      ; bigger popup window
+       (setq company-tooltip-align-annotations 't)          ; align annotations to the right tooltip border
+       (setq company-idle-delay 0.3)                        ; decrease delay before autocompletion popup shows
+       (setq company-begin-commands '(self-insert-command)) ; start autocompletion only after typing
+       (global-set-key (kbd "C-c /") 'company-files)        ; Force complete file names on "C-c /" key
+       )
+   #+END_SRC
+
+** Vertico for completion
+
+   Use vertico for completion.
+
+   #+begin_src emacs-lisp
+     (use-package vertico
+       :ensure t
+       :pin melpa-stable
+       :init
+       (vertico-mode))       
+   #+end_src
+
+** Orderless
+
+  Use orderless for completion pattern matching of chars separated by
+  spaces that match in any order.
+
+  #+begin_src emacs-lisp
+    (use-package orderless
+      :ensure t
+      :custom
+      (completion-styles '(orderless basic)))
+  #+end_src
+
+** Consult
+
+  Use consult for search and navigation commands.
+
+  #+begin_src emacs-lisp
+    ;; Example configuration for Consult
+    (use-package consult
+      :ensure t
+      ;; Replace bindings. Lazily loaded due by `use-package'.
+      :bind (;; C-c bindings in `mode-specific-map'
+             ("C-c M-x" . consult-mode-command)
+             ("C-c h" . consult-history)
+             ("C-c k" . consult-kmacro)
+             ("C-c m" . consult-man)
+             ("C-c i" . consult-info)
+             ([remap Info-search] . consult-info)
+             ;; C-x bindings in `ctl-x-map'
+             ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+             ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+             ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+             ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+             ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+             ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+             ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+             ;; Custom M-# bindings for fast register access
+             ("M-#" . consult-register-load)
+             ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+             ("C-M-#" . consult-register)
+             ;; Other custom bindings
+             ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+             ;; M-g bindings in `goto-map'
+             ("M-g e" . consult-compile-error)
+             ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+             ("M-g g" . consult-goto-line)             ;; orig. goto-line
+             ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+             ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+             ("M-g m" . consult-mark)
+             ("M-g k" . consult-global-mark)
+             ("M-g i" . consult-imenu)
+             ("M-g I" . consult-imenu-multi)
+             ;; M-s bindings in `search-map'
+             ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+             ("M-s c" . consult-locate)
+             ("M-s g" . consult-grep)
+             ("M-s G" . consult-git-grep)
+             ("M-s r" . consult-ripgrep)
+             ("M-s l" . consult-line)
+             ("M-s L" . consult-line-multi)
+             ("M-s k" . consult-keep-lines)
+             ("M-s u" . consult-focus-lines)
+             ;; Isearch integration
+             ("M-s e" . consult-isearch-history)
+             :map isearch-mode-map
+             ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+             ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+             ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+             ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+             ;; Minibuffer history
+             :map minibuffer-local-map
+             ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+             ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+      ;; Enable automatic preview at point in the *Completions* buffer. This is
+      ;; relevant when you use the default completion UI.
+      :hook (completion-list-mode . consult-preview-at-point-mode)
+
+      ;; The :init configuration is always executed (Not lazy)
+      :init
+
+      ;; Optionally configure the register formatting. This improves the register
+      ;; preview for `consult-register', `consult-register-load',
+      ;; `consult-register-store' and the Emacs built-ins.
+      (setq register-preview-delay 0.5
+            register-preview-function #'consult-register-format)
+
+      ;; Optionally tweak the register preview window.
+      ;; This adds thin lines, sorting and hides the mode line of the window.
+      (advice-add #'register-preview :override #'consult-register-window)
+
+      ;; Use Consult to select xref locations with preview
+      (setq xref-show-xrefs-function #'consult-xref
+            xref-show-definitions-function #'consult-xref)
+
+      ;; Configure other variables and modes in the :config section,
+      ;; after lazily loading the package.
+      :config
+
+      ;; Optionally configure preview. The default value
+      ;; is 'any, such that any key triggers the preview.
+      ;; (setq consult-preview-key 'any)
+      ;; (setq consult-preview-key "M-.")
+      ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+      ;; For some commands and buffer sources it is useful to configure the
+      ;; :preview-key on a per-command basis using the `consult-customize' macro.
+      (consult-customize
+       consult-theme :preview-key '(:debounce 0.2 any)
+       consult-ripgrep consult-git-grep consult-grep
+       consult-bookmark consult-recent-file consult-xref
+       consult--source-bookmark consult--source-file-register
+       consult--source-recent-file consult--source-project-recent-file
+       ;; :preview-key "M-."
+       :preview-key '(:debounce 0.4 any))
+
+      ;; Optionally configure the narrowing key.
+      ;; Both < and C-+ work reasonably well.
+      (setq consult-narrow-key "<") ;; "C-+"
+
+      ;; Optionally make narrowing help available in the minibuffer.
+      ;; You may want to use `embark-prefix-help-command' or which-key instead.
+      ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+      ;; By default `consult-project-function' uses `project-root' from project.el.
+      ;; Optionally configure a different project root function.
+      ;;;; 1. project.el (the default)
+      ;; (setq consult-project-function #'consult--default-project--function)
+      ;;;; 2. vc.el (vc-root-dir)
+      ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+      ;;;; 3. locate-dominating-file
+      ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+      ;;;; 4. projectile.el (projectile-project-root)
+      ;; (autoload 'projectile-project-root "projectile")
+      ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
+      ;;;; 5. No project support
+      ;; (setq consult-project-function nil)
+    )    
+  #+end_src
+  
+* directories, navigation, searching, movement
+** dired
+
+   dired can do lots of things. I'm pretty basic in my use. I do like
+   to have the file listings use human friendly numbers though.
+
+   #+BEGIN_SRC emacs-lisp
+     (require 'dired)
+     (setq dired-listing-switches "-alh")
+   #+END_SRC
+   
+** Mouse Avoidance
+
+   I don't want that pesky mouse hanging around in the middle of the
+   screen while I'm typing.
+
+   #+BEGIN_SRC emacs-lisp
+     (mouse-avoidance-mode 'banish)
+   #+END_SRC
+
+** window and buffer tweaking
+
+*** buffer movement
+
+    Sometimes the problem isn't that you want to move the cursor to a
+    particular window, but you want to move a buffer. buffer-move lets
+    you do that.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package buffer-move
+        :ensure t
+        :init
+        (global-set-key (kbd "<s-up>")     'buf-move-up)
+        (global-set-key (kbd "<s-down>")   'buf-move-down)
+        (global-set-key (kbd "<s-left>")   'buf-move-left)
+        (global-set-key (kbd "<s-right>")  'buf-move-right))
+    #+END_SRC
+
+** git
+
+*** magit
+
+    magit is a *fantastic* mode for dealing with git.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package magit
+	:ensure t)
+    #+END_SRC
+
+    I use magit-status a lot. So let's bind it to C-x g.
+
+    #+BEGIN_SRC emacs-lisp
+      (global-set-key (kbd "C-x g") 'magit-status)
+    #+END_SRC
+
+*** git-gutter-mode+
+
+    It is really nice having +/= in the gutter. I like it more than
+    having line numbers and thus I've dumped linum-mode.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package git-gutter-fringe+
+	:ensure t
+	:init
+	(global-git-gutter+-mode t))
+    #+END_SRC
+
+    It is also quite nice to be able to navigate a file by he git
+    hunks. It makes it a bit easier to see what has changed since the
+    last time in the context of the whole file.
+
+    #+BEGIN_SRC emacs-lisp
+      (global-set-key (kbd "s-n") 'git-gutter+-next-hunk)
+      (global-set-key (kbd "s-p") 'git-gutter+-previous-hunk)
+    #+END_SRC
+
+    We can diminish the size of GitGutter in the mode-line
+
+    #+BEGIN_SRC emacs-lisp
+      (diminish 'git-gutter+-mode)
+    #+END_SRC
+
+*** gitlink
+
+    #+begin_src emacs-lisp
+      (use-package git-link
+	:ensure t
+	:init
+	(global-set-key (kbd "C-c g l") 'git-link)
+	(setq git-link-open-in-browser t))
+    #+end_src
+    
+*** Git timemachine
+
+    Git timemachine can be used to rewind and fast forward through
+    time for any file under Git version control.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package git-timemachine
+	:ensure t)
+    #+END_SRC
+
+*** shrink and enlarge windows
+
+    On large screens where there are lots of windows in a frame we'll
+    often want to shrink or grow individual windows. It would be handy
+    to have easier keys for this.
+
+    #+BEGIN_SRC emacs-lisp
+      (global-set-key (kbd "s-=") 'shrink-window)
+      (global-set-key (kbd "s-+") 'enlarge-window)
+    #+END_SRC    
+
+** backup directories
+
+   I'm fed up of having to put *~ into my .gitignore everywhere and
+   I shouldn't really leave emacs only things in there anyway. Let's
+   just move all the backup files to one directory.
+
+   #+BEGIN_SRC emacs-lisp
+     (setq
+      backup-by-copying t      ; don't clobber symlinks
+      backup-directory-alist
+      '(("." . "~/.saves"))    ; don't litter my fs tree
+      auto-save-file-name-transforms
+      '((".*" "~/.saves"))
+      delete-old-versions t
+      kept-new-versions 6
+      kept-old-versions 2
+      version-control t)       ; use versioned backups
+   #+END_SRC
+    
