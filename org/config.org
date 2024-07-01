@@ -25,6 +25,17 @@
          (message (format "No %s file. So not loading one." file))))
    #+END_SRC
 
+** Fix bracket and quote mismatches in src blocks
+
+   #+BEGIN_SRC emacs-lisp
+     (defun org-mode-gt-lt-fix ()
+       "Remove gt and lt from syntax entry to prevent unbalanced parens"
+       (modify-syntax-entry ?< ".")
+       (modify-syntax-entry ?> "."))
+     (add-hook 'org-mode-hook 'org-mode-gt-lt-fix)
+     (org-mode-gt-lt-fix)
+   #+END_SRC
+
 * Local Config
 
 ** custom.el
@@ -157,52 +168,6 @@
     (display-time-mode 1)
    #+END_SRC
 
-*** Fix bracket and quote mismatches in org-mode src blocks
-
-    #+BEGIN_SRC emacs-lisp
-
-      (defun org-mode-gt-lt-syntax-fix (start end)
-        "Change syntax of characters ?< and ?> to symbol within source code blocks."
-        (let ((case-fold-search t))
-          (when (eq major-mode 'org-mode)
-            (save-excursion
-              (goto-char start)
-              (while (re-search-forward "<\\|>" end t)
-                (when (save-excursion
-                        (and
-                         (re-search-backward "[[:space:]]*#\\+\\(begin\\|end\\)_src\\_>" nil t)
-                         (string-equal (downcase (match-string 1)) "begin")))
-                  ;; This is a < or > in an org-src block
-                  (put-text-property (point) (1- (point))
-                                     'syntax-table (string-to-syntax "_"))))))))
-
-      (defun org-setup-gt-lt-syntax-fix ()
-        "Setup for characters ?< and ?> in source code blocks.
-         Add this function to `org-mode-hook'."
-        (make-local-variable 'syntax-propertize-function)
-        (setq syntax-propertize-function 'org-mode-gt-lt-syntax-fix)
-        (syntax-propertize (point-max)))
-
-      (add-hook 'org-mode-hook #'org-setup-gt-lt-syntax-fix)
-    #+END_SRC
-
-   
-
-** Set fundamental mode for large files
-
-   Performance for loading large files with font lock etc. on is poor
-   so make buffer fundamental and read only for large files.
-
-   #+BEGIN_SRC emacs-lisp
-     (defun my-find-file-check-make-large-file-read-only-hook ()
-       "If a file is over a given size, make the buffer read only."
-       (when (> (buffer-size) (* 1024 1024))
-         (setq buffer-read-only t)
-         (buffer-disable-undo)
-         (fundamental-mode))
-     (add-hook 'find-file-hook 'my-find-file-check-make-large-file-read-only-hook)
-   #+END_SRC
-g
 ** Key chord mode
 
    #+BEGIN_SRC emacs-lisp
@@ -398,18 +363,17 @@ g
   Use consult for search and navigation commands.
 
   #+begin_src emacs-lisp
-    ;; Example configuration for Consult
     (use-package consult
       :ensure t
-      ;; Replace bindings. Lazily loaded due by `use-package'.
-      :bind (;; C-c bindings in `mode-specific-map'
+      ;; Replace bindings. Lazily loaded due by use-package.
+      :bind (;; C-c bindings in mode-specific-map
              ("C-c M-x" . consult-mode-command)
              ("C-c h" . consult-history)
              ("C-c k" . consult-kmacro)
              ("C-c m" . consult-man)
              ("C-c i" . consult-info)
              ([remap Info-search] . consult-info)
-             ;; C-x bindings in `ctl-x-map'
+             ;; C-x bindings in ctl-x-map
              ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
              ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
              ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
@@ -423,7 +387,7 @@ g
              ("C-M-#" . consult-register)
              ;; Other custom bindings
              ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-             ;; M-g bindings in `goto-map'
+             ;; M-g bindings in goto-map
              ("M-g e" . consult-compile-error)
              ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
              ("M-g g" . consult-goto-line)             ;; orig. goto-line
@@ -433,7 +397,7 @@ g
              ("M-g k" . consult-global-mark)
              ("M-g i" . consult-imenu)
              ("M-g I" . consult-imenu-multi)
-             ;; M-s bindings in `search-map'
+             ;; M-s bindings in search-map
              ("M-s d" . consult-find)                  ;; Alternative: consult-fd
              ("M-s c" . consult-locate)
              ("M-s g" . consult-grep)
@@ -463,8 +427,8 @@ g
       :init
 
       ;; Optionally configure the register formatting. This improves the register
-      ;; preview for `consult-register', `consult-register-load',
-      ;; `consult-register-store' and the Emacs built-ins.
+      ;; preview for consult-register, consult-register-load,
+      ;; consult-register-store and the Emacs built-ins.
       (setq register-preview-delay 0.5
             register-preview-function #'consult-register-format)
 
@@ -475,7 +439,6 @@ g
       ;; Use Consult to select xref locations with preview
       (setq xref-show-xrefs-function #'consult-xref
             xref-show-definitions-function #'consult-xref)
-
       ;; Configure other variables and modes in the :config section,
       ;; after lazily loading the package.
       :config
@@ -486,7 +449,7 @@ g
       ;; (setq consult-preview-key "M-.")
       ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
       ;; For some commands and buffer sources it is useful to configure the
-      ;; :preview-key on a per-command basis using the `consult-customize' macro.
+      ;; :preview-key on a per-command basis using the consult-customize macro.
       (consult-customize
        consult-theme :preview-key '(:debounce 0.2 any)
        consult-ripgrep consult-git-grep consult-grep
@@ -497,14 +460,14 @@ g
        :preview-key '(:debounce 0.4 any))
 
       ;; Optionally configure the narrowing key.
-      ;; Both < and C-+ work reasonably well.
-      (setq consult-narrow-key "<") ;; "C-+"
+      ;; Both "<" and C-+ work reasonably well.
+      (setq consult-narrow-key "<")
 
       ;; Optionally make narrowing help available in the minibuffer.
-      ;; You may want to use `embark-prefix-help-command' or which-key instead.
+      ;; You may want to use embark-prefix-help-command or which-key instead.
       ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
 
-      ;; By default `consult-project-function' uses `project-root' from project.el.
+      ;; By default consult-project-function uses project-root from project.el.
       ;; Optionally configure a different project root function.
       ;;;; 1. project.el (the default)
       ;; (setq consult-project-function #'consult--default-project--function)
@@ -517,7 +480,8 @@ g
       (setq consult-project-function (lambda (_) (projectile-project-root)))
       ;;;; 5. No project support
       ;; (setq consult-project-function nil)
-    )    
+
+    )
   #+end_src
 
 ** Marginalia
@@ -528,9 +492,9 @@ g
      ;; Enable rich annotations using the Marginalia package
      (use-package marginalia
        :ensure t
-       ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
+       ;; Bind marginalia-cycle locally in the minibuffer.  To make the binding
        ;; available in the *Completions* buffer, add it to the
-       ;; `completion-list-mode-map'.
+       ;; completion-list-mode-map.
        :bind (:map minibuffer-local-map
               ("M-A" . marginalia-cycle))
 
@@ -877,7 +841,7 @@ g
 
 *** Hide emphasis markers
 
-    This hides the markup markers for bold, italic, etc.
+    This hides the markup markers for *bold*, /italic/, etc.
 
     #+BEGIN_SRC emacs-lisp
       (setq org-hide-emphasis-markers t)
@@ -958,7 +922,7 @@ g
      (use-package org-auto-tangle
        :ensure t
        :hook
-       (org-mode-hook . org-auto-tangle-mode))
+       (org-mode . org-auto-tangle-mode))
    #+END_SRC
 
 *** HTTP org babel
