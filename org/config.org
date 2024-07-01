@@ -157,21 +157,46 @@
     (display-time-mode 1)
    #+END_SRC
 
+*** Fix bracket and quote mismatches in org-mode src blocks
+
+    #+BEGIN_SRC emacs-lisp
+
+      (defun org-mode-gt-lt-syntax-fix (start end)
+        "Change syntax of characters ?< and ?> to symbol within source code blocks."
+        (let ((case-fold-search t))
+          (when (eq major-mode 'org-mode)
+            (save-excursion
+              (goto-char start)
+              (while (re-search-forward "<\\|>" end t)
+                (when (save-excursion
+                        (and
+                         (re-search-backward "[[:space:]]*#\\+\\(begin\\|end\\)_src\\_>" nil t)
+                         (string-equal (downcase (match-string 1)) "begin")))
+                  ;; This is a < or > in an org-src block
+                  (put-text-property (point) (1- (point))
+                                     'syntax-table (string-to-syntax "_"))))))))
+
+      (defun org-setup-gt-lt-syntax-fix ()
+        "Setup for characters ?< and ?> in source code blocks.
+         Add this function to `org-mode-hook'."
+        (make-local-variable 'syntax-propertize-function)
+        (setq syntax-propertize-function 'org-mode-gt-lt-syntax-fix)
+        (syntax-propertize (point-max)))
+
+      (add-hook 'org-mode-hook #'org-setup-gt-lt-syntax-fix)
+    #+END_SRC
+
+   
+
 ** Set fundamental mode for large files
 
    Performance for loading large files with font lock etc. on is poor
    so make buffer fundamental and read only for large files.
 
    #+BEGIN_SRC emacs-lisp
-     (defun my-find-file-check-make-large-file-read-only-hook ()
-       "If a file is over a given size, make the buffer read only."
-       (when (> (buffer-size) (* 1024 1024))
-         (setq buffer-read-only t)
-         (buffer-disable-undo)
-         (fundamental-mode)))
      (add-hook 'find-file-hook 'my-find-file-check-make-large-file-read-only-hook)
    #+END_SRC
-
+g
 ** Key chord mode
 
    #+BEGIN_SRC emacs-lisp
@@ -209,7 +234,7 @@
    cool.
 
    #+BEGIN_SRC emacs-lisp
-     (.use-package multiple-cursors
+     (use-package multiple-cursors
        :ensure t
        :config
        (multiple-cursors-mode 1)
@@ -836,35 +861,6 @@
   
 ** Org mode customisation
 
-*** Fix bracket and quote mismatches in src blocks
-
-    #+BEGIN_SRC emacs-lisp
-
-      (defun org-mode-<>-syntax-fix (start end)
-        "Change syntax of characters ?< and ?> to symbol within source code blocks."
-        (let ((case-fold-search t))
-          (when (eq major-mode 'org-mode)
-            (save-excursion
-              (goto-char start)
-              (while (re-search-forward "<\\|>" end t)
-                (when (save-excursion
-                        (and
-                         (re-search-backward "[[:space:]]*#\\+\\(begin\\|end\\)_src\\_>" nil t)
-                         (string-equal (downcase (match-string 1)) "begin")))
-                  ;; This is a < or > in an org-src block
-                  (put-text-property (point) (1- (point))
-                                     'syntax-table (string-to-syntax "_"))))))))
-
-      (defun org-setup-<>-syntax-fix ()
-        "Setup for characters ?< and ?> in source code blocks.
-      Add this function to `org-mode-hook'."
-        (make-local-variable 'syntax-propertize-function)
-        (setq syntax-propertize-function 'org-mode-<>-syntax-fix)
-        (syntax-propertize (point-max)))
-
-      (add-hook 'org-mode-hook #'org-setup-<>-syntax-fix)
-    #+END_SRC
-
 *** Adapt indentation
 
     Adapt indentation to outline node level.
@@ -924,6 +920,73 @@
         :after (magit org))
     #+END_SRC
 
+*** ox-reveal
+
+    [[https://github.com/hakimel/reveal.js/][reveal.js]] is a great way of making pretty presentations,
+    especially if you have a fair bit of code. Kris Jenkins suggested
+    that [[https://github.com/yjwen/org-reveal][ox-reveal]] would be a great way of generating the slides for
+    reveal.js.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package ox-reveal
+        :ensure t)
+    #+END_SRC
+
+*** Org bullets
+
+    Make org mode bullets look a bit more like bullets and less like
+    asterisks.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package org-bullets
+        :ensure t)
+      (add-hook 'org-mode-hook 'org-bullets-mode)
+    #+END_SRC
+
+*** Org auto tangle
+
+   Automatically tangle org files to create any source file from the
+   org file. Need to add org header ##+auto_tangle: t' to activate this.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package org-auto-tangle
+       :ensure t
+       :hook
+       (org-mode-hook . org-auto-tangle-mode))
+   #+END_SRC
+
+*** HTTP org babel
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package ob-http
+       :ensure t)
+   #+END_SRC
+   
+*** Babel mode language load
+
+    #+BEGIN_SRC emacs-lisp
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((R . t)
+         (emacs-lisp . t)
+         (shell . t)
+         (clojure . t)
+         (http . t)
+         (java . t)
+         (sql . t)
+         ))
+      (setq org-babel-clojure-backend 'cider)
+    #+END_SRC
+   
+*** Activate Appointment Mode
+
+    And now that we have our ical stuff in our diary we'll want
+    notifications inside emacs too as we don't have gmail and google
+    calendar open all the time.
+
+    #+BEGIN_SRC emacs-lisp
+      (appt-activate 1)
+    #+END_SRC
 
 ** Org faces
 
@@ -934,6 +997,18 @@
    #+END_SRC
 
 * Programming Modes
+** restclient
+
+   Added in rest client to allow for manual testing of restful client.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package restclient
+       :ensure t)
+     (use-package restclient-jq
+       :ensure t
+       :hook (restclient . restclient-jq))
+
+   #+END_SRC
 
 * Data Modes
 
