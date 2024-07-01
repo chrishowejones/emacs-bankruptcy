@@ -48,6 +48,15 @@
 ;;   (package-install 'org))
 (require 'org)
 
+;; Add this outside org mode as it unbalances parens
+(defun my-find-file-check-make-large-file-read-only-hook ()
+  "If a file is over a given size, make the buffer read only."
+  (when (> (buffer-size) (* 1024 1024))
+    (setq buffer-read-only t)
+    (buffer-disable-undo)
+    (fundamental-mode))
+  )
+
 
 (org-babel-load-file (concat user-emacs-directory "org/config.org"))
 (provide 'init)
