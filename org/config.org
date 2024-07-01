@@ -196,6 +196,29 @@
      (window-number-meta-mode t)
    #+END_SRC   
    
+** Use hide show minor mode everywhere
+
+   #+BEGIN_SRC emacs-lisp
+     (add-hook 'prog-mode-hook 'hs-minor-mode)
+   #+END_SRC
+   
+* Multiple Cursors
+
+   This is a replacement for the iedit that I used to have. Neale
+   Swinnerton was the one who showed this to me and it looked really
+   cool.
+
+   #+BEGIN_SRC emacs-lisp
+     (.use-package multiple-cursors
+       :ensure t
+       :config
+       (multiple-cursors-mode 1)
+       (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+       (global-set-key (kbd "C->") 'mc/mark-next-like-this)
+       (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+       (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
+   #+END_SRC
+   
 * Macintosh Specific Setup
 	   
 ** $PATH is broken
@@ -214,9 +237,9 @@
    #+BEGIN_SRC emacs-lisp
      (when (memq window-system '(mac ns))
        (progn
-	 (use-package exec-path-from-shell
-	   :ensure t)
-	 (exec-path-from-shell-initialize)))
+         (use-package exec-path-from-shell
+           :ensure t)
+         (exec-path-from-shell-initialize)))
    #+END_SRC   
    
 * Make it Pretty
@@ -489,7 +512,63 @@
        (marginalia-mode))
    #+end_src
   
+** Treemacs
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package treemacs
+       :ensure t)
+     (use-package treemacs-magit
+       :after treemacs magit
+       :ensure t)
+     (use-package treemacs-projectile
+       :after treemacs projectile
+       :ensure t)
+
+     (use-package treemacs-icons-dired
+       :after treemacs dired
+       :ensure t
+       :config (treemacs-icons-dired-mode))
+   #+END_SRC
+
 * directories, navigation, searching, movement
+** paredit-mode
+
+     paredit-mode is a strange one. When you first use it, you will
+     hate it. You'll hate the way it won't let you do the things
+     you *think* you want to do. Once you get used to it though you
+     wonder how you ever did any programming without it.
+
+     #+BEGIN_SRC emacs-lisp
+       (use-package paredit
+         :ensure t
+         :config
+         (diminish 'paredit-mode "()")
+         :hook
+         (prog-mode-hook . paredit-mode))
+     #+END_SRC
+     
+** paredit spaces for non s-expr langs
+
+    Need to stop insertion of spaces between symbols and parens for
+    non s-expr langs
+
+    #+BEGIN_SRC emacs-lisp
+      (defun my-paredit-nonlisp ()
+        "Turn on paredit mode for non-lisps."
+        (interactive)
+        (set (make-local-variable 'paredit-space-for-delimiter-predicates)
+             '((lambda (endp delimiter) nil)))
+        (electric-pair-mode t)
+        (paredit-mode t))
+    #+END_SRC
+
+    I *always* want my parens to match (except in text modes and some
+    non-lisp programming modes).
+
+     #+BEGIN_SRC emacs-lisp
+       (add-hook 'text-mode-hook 'my-paredit-nonlisp)
+     #+END_SRC
+
 ** dired
 
    dired can do lots of things. I'm pretty basic in my use. I do like
@@ -591,6 +670,27 @@
 	:ensure t)
     #+END_SRC
 
+*** github-browse-file
+
+    When working with others I often want to point out a line I'm
+    looking at in a file we already have in github. I'd like to be
+    able to get the link rather than doing some sort of
+    paste/gist/refheap.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package github-browse-file
+        :ensure t)
+    #+END_SRC
+
+*** git-messenger
+
+    Get the commit information for the current line. A bit like a mini
+    git blame.
+
+    #+BEGIN_SRC emacs-lisp
+      (maybe-install-and-require 'git-messenger)
+    #+END_SRC
+
 *** shrink and enlarge windows
 
     On large screens where there are lots of windows in a frame we'll
@@ -689,7 +789,54 @@
        :defer t)
    #+END_SRC
    
+** Jump to top or bottom of window
+
+   Set up move-to-window-line 0 and move-to-window-line -
+
+   #+BEGIN_SRC emacs-lisp
+     (defun top-of-window ()
+       (interactive)
+       (move-to-window-line 0))
+     (global-set-key (kbd "C-s-h") 'top-of-window)
+     (defun bottom-of-window ()
+       (interactive)
+       (move-to-window-line -1))
+     (global-set-key (kbd "C-s-l") 'bottom-of-window)
+   #+END_SRC
+
+** Crux
+
+   Useful editing tools.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package crux
+       :ensure t
+       :init
+       (global-set-key (kbd "C-x C-u") 'crux-upcase-region)
+       (global-set-key (kbd "C-x C-l") 'crux-downcase-region)
+       (global-set-key (kbd "s-r") 'crux-recentf-find-file)
+       (global-set-key (kbd "C-c M-k") 'crux-kill-other-buffers)
+       (global-set-key (kbd "C-c P") 'crux-kill-buffer-truename)
+       (global-set-key (kbd "C-k") 'crux-smart-kill-line))
+   #+END_SRC
+     
 * Text Modes
+
+** Markdown mode
+
+  Markdown mode used for viewing markdown formatted text.
+
+  #+begin_src emacs-lisp
+    (use-package markdown-mode
+      :ensure t
+      :mode ("README\\.md\\'" . gfm-mode)
+      :init (setq markdown-command "multimarkdown"))
+  #+end_src
+
+  
+** Org mode customisation
+
+*** 
 * Programming Modes
 
 * Data Modes
