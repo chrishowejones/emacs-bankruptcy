@@ -916,7 +916,7 @@
 
     Because sometimes you want to link to that particular commit.
 
-    I added this functionality with this commit: 
+    I added this functionality with this commit: [[orgit-rev:~/emacs-bankruptcy/::b14b9c37e7a9e43eba34aad4c9a3e31b4851d377][b14b9c3]]
 
     #+BEGIN_SRC emacs-lisp
       (use-package orgit
