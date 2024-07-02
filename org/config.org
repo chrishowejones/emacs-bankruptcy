@@ -192,6 +192,17 @@
      (window-number-meta-mode t)
    #+END_SRC   
    
+** shrink and enlarge windows
+
+   On large screens where there are lots of windows in a frame we'll
+   often want to shrink or grow individual windows. It would be handy
+   to have easier keys for this.
+
+   #+BEGIN_SRC emacs-lisp
+     (global-set-key (kbd "s-=") 'shrink-window)
+     (global-set-key (kbd "s-+") 'enlarge-window)
+   #+END_SRC    
+ 
 ** Use hide show minor mode everywhere
 
    #+BEGIN_SRC emacs-lisp
@@ -686,16 +697,29 @@
       (maybe-install-and-require 'git-messenger)
     #+END_SRC
 
-*** shrink and enlarge windows
+*** Github Flavouring
 
-    On large screens where there are lots of windows in a frame we'll
-    often want to shrink or grow individual windows. It would be handy
-    to have easier keys for this.
+    I pretty much *always* want to do [[http://github.github.com/github-flavored-markdown/][github flavoured markdown]], so
+    let's just change that auto-mode-alist.
 
     #+BEGIN_SRC emacs-lisp
-      (global-set-key (kbd "s-=") 'shrink-window)
-      (global-set-key (kbd "s-+") 'enlarge-window)
-    #+END_SRC    
+      (add-to-list 'auto-mode-alist '(".md$" . gfm-mode))
+    #+END_SRC
+
+**** Github Flavoured Preview
+
+     We also need to change the preview as the standard preview
+     doesn't render github flavoured markdown correctly. I've
+     installed markdown Preview+ as a Chrome Extension and associated
+     .md files with Chrome on Mac OS X.
+
+     This is all a bit broken really, but will work for now. I'm sorry
+     that it is like this and I'm sure some day I'll fix it. This also
+     means that you use markdown-open rather than markdown-preview.
+
+     #+BEGIN_SRC emacs-lisp
+       (setq markdown-open-command "open")
+     #+END_SRC
 
 ** backup directories
 
@@ -814,7 +838,7 @@
        (global-set-key (kbd "C-c P") 'crux-kill-buffer-truename)
        (global-set-key (kbd "C-k") 'crux-smart-kill-line))
    #+END_SRC
-     
+   
 * Text Modes
 
 ** Markdown mode
@@ -828,7 +852,28 @@
       :init (setq markdown-command "multimarkdown"))
   #+end_src
 
+** html, yaml, xml
+*** Yaml
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package yaml-mode
+        :ensure t)
+    #+END_SRC
   
+*** css
+
+    Think I need to give this some more sugar sometime....
+    
+**** rainbow mode
+
+     And I want to see the colours I'm using.
+
+     #+BEGIN_SRC emacs-lisp
+       (add-hook 'css-mode-hook 'rainbow-mode)
+     #+END_SRC
+
+
+
 ** Org mode customisation
 
 *** Adapt indentation
@@ -987,6 +1032,28 @@
 * Notification Systems
 
 * Utilities and General Keybindings
+** cleanup buffer
+
+   Borrowed from Magnars gist https://github.com/magnars/.emacs.d/blob/master/defuns/buffer-defuns.el
+
+   #+begin_src emacs-lisp
+     (defun untabify-buffer ()
+            (interactive)
+            (untabify (point-min) (point-max)))
+
+     (defun indent-buffer ()
+       (interactive)
+       (indent-region (point-min) (point-max)))
+
+     (defun cleanup-buffer ()
+       "Perform a bunch of operations on the whitespace content of a buffer.
+     Including indent-buffer, which should not be called automatically on save."
+       (interactive)
+       (untabify-buffer)
+       (delete-trailing-whitespace)
+       (indent-buffer))
+     (global-set-key (kbd "C-c n") 'cleanup-buffer)
+   #+end_src
 
 * Misc
 
