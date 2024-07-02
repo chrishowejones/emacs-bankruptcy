@@ -96,7 +96,7 @@
      (use-package diminish
        :ensure t)
    #+END_SRC
-   
+
 ** Tabs are Evil
 
    I mean, not like evil-mode is good for vi users who want to use
@@ -115,7 +115,7 @@
    cool.
 
    #+BEGIN_SRC emacs-lisp
-     (use-package multiple-cursors	
+     (use-package multiple-cursors
        :ensure t
        :config
        (multiple-cursors-mode 1)
@@ -190,8 +190,8 @@
        :ensure t)
      (window-number-mode t)
      (window-number-meta-mode t)
-   #+END_SRC   
-   
+   #+END_SRC
+
 ** shrink and enlarge windows
 
    On large screens where there are lots of windows in a frame we'll
@@ -201,14 +201,25 @@
    #+BEGIN_SRC emacs-lisp
      (global-set-key (kbd "s-=") 'shrink-window)
      (global-set-key (kbd "s-+") 'enlarge-window)
-   #+END_SRC    
- 
+   #+END_SRC
+
 ** Use hide show minor mode everywhere
 
    #+BEGIN_SRC emacs-lisp
      (add-hook 'prog-mode-hook 'hs-minor-mode)
    #+END_SRC
-   
+
+** Reuse frames on display buffer
+
+   Reuse frames on display buffer.
+
+   #+begin_src emacs-lisp
+     (setopt
+      display-buffer-base-action
+      '((display-buffer-reuse-window)
+        (reusable-frames . 0)))
+   #+end_src
+
 * Multiple Cursors
 
    This is a replacement for the iedit that I used to have. Neale
@@ -225,9 +236,9 @@
        (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
        (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
    #+END_SRC
-   
+
 * Macintosh Specific Setup
-	   
+
 ** $PATH is broken
 
    If you don't run emacs in a terminal on Mac OS X then it can be
@@ -247,8 +258,8 @@
          (use-package exec-path-from-shell
            :ensure t)
          (exec-path-from-shell-initialize)))
-   #+END_SRC   
-   
+   #+END_SRC
+
 * Make it Pretty
 
 ** color themes
@@ -264,7 +275,7 @@
     #+BEGIN_SRC emacs-lisp
       (setq custom-theme-directory (concat user-emacs-directory "themes"))
     #+END_SRC
-    
+
 *** VSCode dark theme
 
     #+BEGIN_SRC emacs-lisp
@@ -278,7 +289,7 @@
     #+BEGIN_SRC emacs-lisp
       (set-face-attribute 'default nil :height 100)
     #+END_SRC
-    
+
 
 ** Default font scale
 
@@ -302,6 +313,7 @@
      (setq display-line-numbers-type 'absolute)
      ;; (global-display-line-numbers-mode)
    #+END_SRC
+
 ** All the icons
 
    #+BEGIN_SRC emacs-lisp
@@ -310,6 +322,70 @@
    #+END_SRC
 
 * Tool Configuration
+** Dashboard
+
+   #+BEGIN_SRC emacs-lisp
+     (maybe-install-and-require 'dashboard)
+     (dashboard-setup-startup-hook)
+     (setq dashboard-items '((recents  . 10)
+                             (bookmarks . 5)
+                             (projects . 5)
+                             (agenda . 5)
+                             (registers . 5)))
+     (setq dashboard-projects-switch-function 'projectile-persp-switch-project)
+     (setq dashboard-week-agenda nil)
+     (setq dashboard-filter-agenda-entry 'dashboard-filter-agenda-by-time)
+     (setq dashboard-agenda-sort-strategy '(time-up))
+     (setq dashboard-set-heading-icons t)
+     (setq dashboard-set-file-icons t)
+     (setq dashboard-agenda-prefix-format " %-12:c%?-12t% s")
+     (setq dashboard-set-navigator t)
+     ;; Format: "(icon title help action face prefix suffix)"
+     (setq dashboard-navigator-buttons
+      `(;; line1
+        ((,(all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0)
+         "GitHub Homepage"
+         "Browse GH Homepage"
+         (lambda (&rest _) (browse-url "https://github.com/chrishowejones")))
+        ("?" "" "?/h" #'show-help nil "<" ">"))
+         ;; line 2
+        ((,(all-the-icons-faicon "linkedin" :height 1.1 :v-adjust 0.0)
+          "Linkedin"
+          ""
+          (lambda (&rest _) (browse-url "https://www.linkedin.com/in/chrishowejones/"))))))
+     (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
+     ;; Remap Open Dashboard
+     (defun new-dashboard ()
+       "Jump to the dashboard buffer, if doesn't exists create one."
+       (interactive)
+       (switch-to-buffer dashboard-buffer-name)
+       (dashboard-mode)
+       (dashboard-insert-startupify-lists)
+       (dashboard-refresh-buffer))
+     (global-set-key (kbd "<f1>") 'new-dashboard)
+   #+END_SRC
+  
+*** Startup Screen
+
+    I'd also like to ski the startup screen and go straight to
+    the *dashboard* buffer.
+
+    #+BEGIN_SRC emacs-lisp
+      (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+      (setq inhibit-startup-screen t)
+    #+END_SRC
+
+
+** ediff
+
+   ediff is my favourite way of comparing files, directories, versions
+   and buffers in emacs. It does annoy me the way it brings up a new
+   frame though. I'd much rather keep everything in the same frame
+   even when I'm on a windowing system.
+
+   #+BEGIN_SRC emacs-lisp
+     (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+   #+END_SRC
 
 ** company
 
@@ -351,7 +427,7 @@
        ;; for the consult-grep commands.
        (setq vertico-multiform-categories
              '((file grid)
-               (consult-grep buffer))))       
+               (consult-grep buffer))))
    #+end_src
 
 ** Orderless
@@ -369,131 +445,131 @@
           completion-ignore-case t)
   #+end_src
 
-** Consult
+*** Consult
 
-  Use consult for search and navigation commands.
+   Use consult for search and navigation commands.
 
-  #+begin_src emacs-lisp
-    (use-package consult
-      :ensure t
-      ;; Replace bindings. Lazily loaded due by use-package.
-      :bind (;; C-c bindings in mode-specific-map
-             ("C-c M-x" . consult-mode-command)
-             ("C-c h" . consult-history)
-             ("C-c k" . consult-kmacro)
-             ("C-c m" . consult-man)
-             ("C-c i" . consult-info)
-             ([remap Info-search] . consult-info)
-             ;; C-x bindings in ctl-x-map
-             ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-             ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-             ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-             ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-             ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
-             ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-             ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-             ;; Custom M-# bindings for fast register access
-             ("M-#" . consult-register-load)
-             ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-             ("C-M-#" . consult-register)
-             ;; Other custom bindings
-             ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-             ;; M-g bindings in goto-map
-             ("M-g e" . consult-compile-error)
-             ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-             ("M-g g" . consult-goto-line)             ;; orig. goto-line
-             ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-             ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-             ("M-g m" . consult-mark)
-             ("M-g k" . consult-global-mark)
-             ("M-g i" . consult-imenu)
-             ("M-g I" . consult-imenu-multi)
-             ;; M-s bindings in search-map
-             ("M-s d" . consult-find)                  ;; Alternative: consult-fd
-             ("M-s c" . consult-locate)
-             ("M-s g" . consult-grep)
-             ("M-s G" . consult-git-grep)
-             ("M-s r" . consult-ripgrep)
-             ("C-s"   . consult-line)
-             ("M-s L" . consult-line-multi)
-             ("M-s k" . consult-keep-lines)
-             ("M-s u" . consult-focus-lines)
-             ;; Isearch integration
-             ("M-s e" . consult-isearch-history)
-             :map isearch-mode-map
-             ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-             ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-             ;; ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-             ;; ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
-             ;; Minibuffer history
-             :map minibuffer-local-map
-             ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-             ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+   #+begin_src emacs-lisp
+     (use-package consult
+       :ensure t
+       ;; Replace bindings. Lazily loaded due by use-package.
+       :bind (;; C-c bindings in mode-specific-map
+              ("C-c M-x" . consult-mode-command)
+              ("C-c h" . consult-history)
+              ("C-c k" . consult-kmacro)
+              ("C-c m" . consult-man)
+              ("C-c i" . consult-info)
+              ([remap Info-search] . consult-info)
+              ;; C-x bindings in ctl-x-map
+              ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+              ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+              ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+              ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+              ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+              ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+              ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+              ;; Custom M-# bindings for fast register access
+              ("M-#" . consult-register-load)
+              ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+              ("C-M-#" . consult-register)
+              ;; Other custom bindings
+              ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+              ;; M-g bindings in goto-map
+              ("M-g e" . consult-compile-error)
+              ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+              ("M-g g" . consult-goto-line)             ;; orig. goto-line
+              ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+              ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+              ("M-g m" . consult-mark)
+              ("M-g k" . consult-global-mark)
+              ("M-g i" . consult-imenu)
+              ("M-g I" . consult-imenu-multi)
+              ;; M-s bindings in search-map
+              ("C-c s d" . consult-find)                  ;; Alternative: consult-fd
+              ("C-c s c" . consult-locate)
+              ("C-c s g" . consult-grep)
+              ("C-c s G" . consult-git-grep)
+              ("C-c s r" . consult-ripgrep)
+              ("C-s"   . consult-line)
+              ("C-c s L" . consult-line-multi)
+              ("C-c s k" . consult-keep-lines)
+              ("C-c s u" . consult-focus-lines)
+              ;; Isearch integration
+              ("M-s e" . consult-isearch-history)
+              :map isearch-mode-map
+              ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+              ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+              ;; ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+              ;; ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+              ;; Minibuffer history
+              :map minibuffer-local-map
+              ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+              ("M-r" . consult-history))                ;; orig. previous-matching-history-element
 
-      ;; Enable automatic preview at point in the *Completions* buffer. This is
-      ;; relevant when you use the default completion UI.
-      :hook (completion-list-mode . consult-preview-at-point-mode)
+       ;; Enable automatic preview at point in the *Completions* buffer. This is
+       ;; relevant when you use the default completion UI.
+       :hook (completion-list-mode . consult-preview-at-point-mode)
 
-      ;; The :init configuration is always executed (Not lazy)
-      :init
+       ;; The :init configuration is always executed (Not lazy)
+       :init
 
-      ;; Optionally configure the register formatting. This improves the register
-      ;; preview for consult-register, consult-register-load,
-      ;; consult-register-store and the Emacs built-ins.
-      (setq register-preview-delay 0.5
-            register-preview-function #'consult-register-format)
+       ;; Optionally configure the register formatting. This improves the register
+       ;; preview for consult-register, consult-register-load,
+       ;; consult-register-store and the Emacs built-ins.
+       (setq register-preview-delay 0.5
+             register-preview-function #'consult-register-format)
 
-      ;; Optionally tweak the register preview window.
-      ;; This adds thin lines, sorting and hides the mode line of the window.
-      (advice-add #'register-preview :override #'consult-register-window)
+       ;; Optionally tweak the register preview window.
+       ;; This adds thin lines, sorting and hides the mode line of the window.
+       (advice-add #'register-preview :override #'consult-register-window)
 
-      ;; Use Consult to select xref locations with preview
-      (setq xref-show-xrefs-function #'consult-xref
-            xref-show-definitions-function #'consult-xref)
-      ;; Configure other variables and modes in the :config section,
-      ;; after lazily loading the package.
-      :config
+       ;; Use Consult to select xref locations with preview
+       (setq xref-show-xrefs-function #'consult-xref
+             xref-show-definitions-function #'consult-xref)
+       ;; Configure other variables and modes in the :config section,
+       ;; after lazily loading the package.
+       :config
 
-      ;; Optionally configure preview. The default value
-      ;; is 'any, such that any key triggers the preview.
-      ;; (setq consult-preview-key 'any)
-      ;; (setq consult-preview-key "M-.")
-      ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-      ;; For some commands and buffer sources it is useful to configure the
-      ;; :preview-key on a per-command basis using the consult-customize macro.
-      (consult-customize
-       consult-theme :preview-key '(:debounce 0.2 any)
-       consult-ripgrep consult-git-grep consult-grep
-       consult-bookmark consult-recent-file consult-xref
-       consult--source-bookmark consult--source-file-register
-       consult--source-recent-file consult--source-project-recent-file
-       ;; :preview-key "M-."
-       :preview-key '(:debounce 0.4 any))
+       ;; Optionally configure preview. The default value
+       ;; is 'any, such that any key triggers the preview.
+       ;; (setq consult-preview-key 'any)
+       ;; (setq consult-preview-key "M-.")
+       ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+       ;; For some commands and buffer sources it is useful to configure the
+       ;; :preview-key on a per-command basis using the consult-customize macro.
+       (consult-customize
+        consult-theme :preview-key '(:debounce 0.2 any)
+        consult-ripgrep consult-git-grep consult-grep
+        consult-bookmark consult-recent-file consult-xref
+        consult--source-bookmark consult--source-file-register
+        consult--source-recent-file consult--source-project-recent-file
+        ;; :preview-key "M-."
+        :preview-key '(:debounce 0.4 any))
 
-      ;; Optionally configure the narrowing key.
-      ;; Both "<" and C-+ work reasonably well.
-      (setq consult-narrow-key "<")
+       ;; Optionally configure the narrowing key.
+       ;; Both "<" and C-+ work reasonably well.
+       (setq consult-narrow-key "<")
 
-      ;; Optionally make narrowing help available in the minibuffer.
-      ;; You may want to use embark-prefix-help-command or which-key instead.
-      ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+       ;; Optionally make narrowing help available in the minibuffer.
+       ;; You may want to use embark-prefix-help-command or which-key instead.
+       ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
 
-      ;; By default consult-project-function uses project-root from project.el.
-      ;; Optionally configure a different project root function.
-      ;;;; 1. project.el (the default)
-      ;; (setq consult-project-function #'consult--default-project--function)
-      ;;;; 2. vc.el (vc-root-dir)
-      ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-      ;;;; 3. locate-dominating-file
-      ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
-      ;; 4. projectile.el (projectile-project-root)
-      (autoload 'projectile-project-root "projectile")
-      (setq consult-project-function (lambda (_) (projectile-project-root)))
-      ;;;; 5. No project support
-      ;; (setq consult-project-function nil)
+       ;; By default consult-project-function uses project-root from project.el.
+       ;; Optionally configure a different project root function.
+       ;;;; 1. project.el (the default)
+       ;; (setq consult-project-function #'consult--default-project--function)
+       ;;;; 2. vc.el (vc-root-dir)
+       ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+       ;;;; 3. locate-dominating-file
+       ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+       ;; 4. projectile.el (projectile-project-root)
+       (autoload 'projectile-project-root "projectile")
+       (setq consult-project-function (lambda (_) (projectile-project-root)))
+       ;;;; 5. No project support
+       ;; (setq consult-project-function nil)
 
-    )
-  #+end_src
+     )
+   #+end_src
 
 ** Marginalia
 
@@ -517,7 +593,7 @@
        ;; package.
        (marginalia-mode))
    #+end_src
-  
+
 ** Treemacs
 
    #+BEGIN_SRC emacs-lisp
@@ -552,7 +628,7 @@
          :hook
          (prog-mode-hook . paredit-mode))
      #+END_SRC
-     
+
 ** paredit spaces for non s-expr langs
 
     Need to stop insertion of spaces between symbols and parens for
@@ -584,7 +660,7 @@
      (require 'dired)
      (setq dired-listing-switches "-alh")
    #+END_SRC
-   
+
 ** Mouse Avoidance
 
    I don't want that pesky mouse hanging around in the middle of the
@@ -665,7 +741,7 @@
 	(global-set-key (kbd "C-c g l") 'git-link)
 	(setq git-link-open-in-browser t))
     #+end_src
-    
+
 *** Git timemachine
 
     Git timemachine can be used to rewind and fast forward through
@@ -739,7 +815,7 @@
       kept-old-versions 2
       version-control t)       ; use versioned backups
    #+END_SRC
-    
+
 ** Which key
 
    Use which key to show available key presses in minibuffer.
@@ -807,7 +883,7 @@
      (use-package persp-projectile
        :defer t)
    #+END_SRC
-   
+
 ** Jump to top or bottom of window
 
    Set up move-to-window-line 0 and move-to-window-line -
@@ -838,7 +914,7 @@
        (global-set-key (kbd "C-c P") 'crux-kill-buffer-truename)
        (global-set-key (kbd "C-k") 'crux-smart-kill-line))
    #+END_SRC
-   
+
 * Text Modes
 
 ** Markdown mode
@@ -859,11 +935,11 @@
       (use-package yaml-mode
         :ensure t)
     #+END_SRC
-  
+
 *** css
 
     Think I need to give this some more sugar sometime....
-    
+
 **** rainbow mode
 
      And I want to see the colours I'm using.
@@ -891,7 +967,7 @@
     #+BEGIN_SRC emacs-lisp
       (setq org-hide-emphasis-markers t)
     #+END_SRC
-    
+
 *** Scale heading fonts
 
     #+BEGIN_SRC emacs-lisp
@@ -976,7 +1052,7 @@
      (use-package ob-http
        :ensure t)
    #+END_SRC
-   
+
 *** Babel mode language load
 
     #+BEGIN_SRC emacs-lisp
@@ -992,7 +1068,7 @@
          ))
       (setq org-babel-clojure-backend 'cider)
     #+END_SRC
-   
+
 *** Activate Appointment Mode
 
     And now that we have our ical stuff in our diary we'll want
@@ -1056,5 +1132,3 @@
    #+end_src
 
 * Misc
-
-
