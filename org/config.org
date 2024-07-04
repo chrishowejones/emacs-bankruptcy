@@ -139,7 +139,7 @@
    loccur mode hides all lines except those containing matches
 
    #+BEGIN_SRC emacs-lisp
-      (maybe-install-and-require 'loccur)
+      (use-package loccur :ensure t)
       (global-set-key (kbd "C-M-o") 'loccur-current)
       (global-set-key (kbd "C-M-S-o") 'loccur)
    #+END_SRC
@@ -220,22 +220,30 @@
         (reusable-frames . 0)))
    #+end_src
 
+** Set regex syntax to string
+
+   Set the regex syntax to string to prevent double escaping of regex expressions.
+   
+   #+begin_src emacs-lisp
+     (setq reb-re-syntax 'string)
+   #+end_src
+
 * Multiple Cursors
 
-   This is a replacement for the iedit that I used to have. Neale
-   Swinnerton was the one who showed this to me and it looked really
-   cool.
+  This is a replacement for the iedit that I used to have. Neale
+  Swinnerton was the one who showed this to me and it looked really
+  cool.
 
-   #+BEGIN_SRC emacs-lisp
-     (use-package multiple-cursors
-       :ensure t
-       :config
-       (multiple-cursors-mode 1)
-       (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
-       (global-set-key (kbd "C->") 'mc/mark-next-like-this)
-       (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-       (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
-   #+END_SRC
+  #+BEGIN_SRC emacs-lisp
+    (use-package multiple-cursors
+      :ensure t
+      :config
+      (multiple-cursors-mode 1)
+      (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+      (global-set-key (kbd "C->") 'mc/mark-next-like-this)
+      (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+      (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
+  #+END_SRC
 
 * Macintosh Specific Setup
 
@@ -280,25 +288,25 @@
 
     #+BEGIN_SRC emacs-lisp
       (use-package vscode-dark-plus-theme
-           :ensure t)
+        :ensure t)
       (enable-theme 'vscode-dark-plus)
     #+END_SRC
 
 ** Default font height
 
-    #+BEGIN_SRC emacs-lisp
-      (set-face-attribute 'default nil :height 100)
-    #+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (set-face-attribute 'default nil :height 140)
+   #+END_SRC
 
 
 ** Default font scale
 
-    #+BEGIN_SRC emacs-lisp
-      (use-package default-text-scale
-	:ensure t
-	:config
-	(setq default-text-scale-mode t))
-    #+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (use-package default-text-scale
+       :ensure t
+       :config
+       (setq default-text-scale-mode t))
+   #+END_SRC
 ** bars, menus and numbers
 
    I like no scroll bars, no toolbars and line and column numbers in
@@ -325,7 +333,7 @@
 ** Dashboard
 
    #+BEGIN_SRC emacs-lisp
-     (maybe-install-and-require 'dashboard)
+     (use-package dashboard :ensure t)
      (dashboard-setup-startup-hook)
      (setq dashboard-items '((recents  . 10)
                              (bookmarks . 5)
@@ -342,17 +350,17 @@
      (setq dashboard-set-navigator t)
      ;; Format: "(icon title help action face prefix suffix)"
      (setq dashboard-navigator-buttons
-      `(;; line1
-        ((,(all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0)
-         "GitHub Homepage"
-         "Browse GH Homepage"
-         (lambda (&rest _) (browse-url "https://github.com/chrishowejones")))
-        ("?" "" "?/h" #'show-help nil "<" ">"))
-         ;; line 2
-        ((,(all-the-icons-faicon "linkedin" :height 1.1 :v-adjust 0.0)
-          "Linkedin"
-          ""
-          (lambda (&rest _) (browse-url "https://www.linkedin.com/in/chrishowejones/"))))))
+           `(;; line1
+             ((,(all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0)
+               "GitHub Homepage"
+               "Browse GH Homepage"
+               (lambda (&rest _) (browse-url "https://github.com/chrishowejones")))
+              ("?" "" "?/h" #'show-help nil "<" ">"))
+             ;; line 2
+             ((,(all-the-icons-faicon "linkedin" :height 1.1 :v-adjust 0.0)
+               "Linkedin"
+               ""
+               (lambda (&rest _) (browse-url "https://www.linkedin.com/in/chrishowejones/"))))))
      (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
      ;; Remap Open Dashboard
      (defun new-dashboard ()
@@ -374,7 +382,6 @@
       (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
       (setq inhibit-startup-screen t)
     #+END_SRC
-
 
 ** ediff
 
@@ -432,20 +439,21 @@
 
 ** Orderless
 
-  Use orderless for completion pattern matching of chars separated by
-  spaces that match in any order.
+   Use orderless for completion pattern matching of chars separated by
+   spaces that match in any order.
 
-  #+begin_src emacs-lisp
-    (use-package orderless
-      :ensure t
-      :custom
-      (completion-styles '(orderless basic)))
-    (setq read-file-name-completion-ignore-case t
-          read-buffer-completion-ignore-case t
-          completion-ignore-case t)
-  #+end_src
+   #+begin_src emacs-lisp
+     (use-package orderless
+       :ensure t
+       :custom
+       (completion-styles '(orderless basic))
+       (completion-category-overrides '((buffer (styles orderless-prefix basic partial-completion)))))
+     (setq read-file-name-completion-ignore-case t
+           read-buffer-completion-ignore-case t
+           completion-ignore-case t)
+   #+end_src
 
-*** Consult
+** Consult
 
    Use consult for search and navigation commands.
 
@@ -477,7 +485,6 @@
               ;; M-g bindings in goto-map
               ("M-g e" . consult-compile-error)
               ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-              ("M-g g" . consult-goto-line)             ;; orig. goto-line
               ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
               ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
               ("M-g m" . consult-mark)
@@ -568,8 +575,23 @@
        ;;;; 5. No project support
        ;; (setq consult-project-function nil)
 
-     )
+       )
    #+end_src
+
+** avy-mode
+
+   This is supposed to be a replacement for ace-jump-mode so thought
+   I'd give it a whirl.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package avy :ensure t)
+     (avy-setup-default)
+     (global-set-key (kbd "C-c j") 'avy-goto-word-or-subword-1)
+     (global-set-key (kbd "M-g g") 'avy-goto-line)
+     (global-set-key (kbd "C-c k") 'avy-kill-region)
+     (global-set-key (kbd "C-c w") 'avy-goto-char-timer)
+     (global-set-key (kbd "C-c c") 'avy-goto-char)
+   #+END_SRC
 
 ** Marginalia
 
@@ -583,7 +605,7 @@
        ;; available in the *Completions* buffer, add it to the
        ;; completion-list-mode-map.
        :bind (:map minibuffer-local-map
-              ("M-A" . marginalia-cycle))
+                   ("M-A" . marginalia-cycle))
 
        ;; The :init section is always executed.
        :init
@@ -615,41 +637,41 @@
 * directories, navigation, searching, movement
 ** paredit-mode
 
-     paredit-mode is a strange one. When you first use it, you will
-     hate it. You'll hate the way it won't let you do the things
-     you *think* you want to do. Once you get used to it though you
-     wonder how you ever did any programming without it.
+   paredit-mode is a strange one. When you first use it, you will
+   hate it. You'll hate the way it won't let you do the things
+   you *think* you want to do. Once you get used to it though you
+   wonder how you ever did any programming without it.
 
-     #+BEGIN_SRC emacs-lisp
-       (use-package paredit
-         :ensure t
-         :config
-         (diminish 'paredit-mode "()")
-         :hook
-         (prog-mode-hook . paredit-mode))
-     #+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (use-package paredit
+       :ensure t
+       :config
+       (diminish 'paredit-mode "()")
+       :hook
+       (prog-mode-hook . paredit-mode))
+   #+END_SRC
 
 ** paredit spaces for non s-expr langs
 
-    Need to stop insertion of spaces between symbols and parens for
-    non s-expr langs
+   Need to stop insertion of spaces between symbols and parens for
+   non s-expr langs
 
-    #+BEGIN_SRC emacs-lisp
-      (defun my-paredit-nonlisp ()
-        "Turn on paredit mode for non-lisps."
-        (interactive)
-        (set (make-local-variable 'paredit-space-for-delimiter-predicates)
-             '((lambda (endp delimiter) nil)))
-        (electric-pair-mode t)
-        (paredit-mode t))
-    #+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (defun my-paredit-nonlisp ()
+       "Turn on paredit mode for non-lisps."
+       (interactive)
+       (set (make-local-variable 'paredit-space-for-delimiter-predicates)
+            '((lambda (endp delimiter) nil)))
+       (electric-pair-mode t)
+       (paredit-mode t))
+   #+END_SRC
 
-    I *always* want my parens to match (except in text modes and some
-    non-lisp programming modes).
+   I *always* want my parens to match (except in text modes and some
+   non-lisp programming modes).
 
-     #+BEGIN_SRC emacs-lisp
-       (add-hook 'text-mode-hook 'my-paredit-nonlisp)
-     #+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (add-hook 'text-mode-hook 'my-paredit-nonlisp)
+   #+END_SRC
 
 ** dired
 
@@ -696,7 +718,7 @@
 
     #+BEGIN_SRC emacs-lisp
       (use-package magit
-	:ensure t)
+        :ensure t)
     #+END_SRC
 
     I use magit-status a lot. So let's bind it to C-x g.
@@ -712,9 +734,9 @@
 
     #+BEGIN_SRC emacs-lisp
       (use-package git-gutter-fringe+
-	:ensure t
-	:config
-	(global-git-gutter+-mode t))
+        :ensure t
+        :config
+        (global-git-gutter+-mode t))
     #+END_SRC
 
     It is also quite nice to be able to navigate a file by he git
@@ -736,10 +758,10 @@
 
     #+begin_src emacs-lisp
       (use-package git-link
-	:ensure t
-	:config
-	(global-set-key (kbd "C-c g l") 'git-link)
-	(setq git-link-open-in-browser t))
+        :ensure t
+        :config
+        (global-set-key (kbd "C-c g l") 'git-link)
+        (setq git-link-open-in-browser t))
     #+end_src
 
 *** Git timemachine
@@ -749,7 +771,7 @@
 
     #+BEGIN_SRC emacs-lisp
       (use-package git-timemachine
-	:ensure t)
+        :ensure t)
     #+END_SRC
 
 *** github-browse-file
@@ -770,7 +792,8 @@
     git blame.
 
     #+BEGIN_SRC emacs-lisp
-      (maybe-install-and-require 'git-messenger)
+      (use-package git-messenger 
+	:ensure t)
     #+END_SRC
 
 *** Github Flavouring
@@ -854,11 +877,11 @@
    it's a Java project.
 
    #+BEGIN_SRC emacs-lisp
-    (projectile-register-project-type 'gradlew '("gradlew")
-                                  :project-file "gradlew"
-				  :compile "./gradlew build"
-				  :test "./gradlew clean test"
-				  :test-suffix "Test")
+     (projectile-register-project-type 'gradlew '("gradlew")
+                                       :project-file "gradlew"
+                                       :compile "./gradlew build"
+                                       :test "./gradlew clean test"
+                                       :test-suffix "Test")
    #+END_SRC
 
 *** projectile indexing
@@ -919,14 +942,14 @@
 
 ** Markdown mode
 
-  Markdown mode used for viewing markdown formatted text.
+   Markdown mode used for viewing markdown formatted text.
 
-  #+begin_src emacs-lisp
-    (use-package markdown-mode
-      :ensure t
-      :mode ("README\\.md\\'" . gfm-mode)
-      :init (setq markdown-command "multimarkdown"))
-  #+end_src
+   #+begin_src emacs-lisp
+     (use-package markdown-mode
+       :ensure t
+       :mode ("README\\.md\\'" . gfm-mode)
+       :init (setq markdown-command "multimarkdown"))
+   #+end_src
 
 ** html, yaml, xml
 *** Yaml
@@ -971,15 +994,15 @@
 *** Scale heading fonts
 
     #+BEGIN_SRC emacs-lisp
-        (dolist (face '((org-level-1 . 1.2)
-                  (org-level-2 . 1.1)
-                  (org-level-3 . 1.05)
-                  (org-level-4 . 1.0)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)
-                  (org-level-8 . 1.1)))
-          (set-face-attribute (car face) nil :weight 'regular :height(cdr face)))
+      (dolist (face '((org-level-1 . 1.2)
+                      (org-level-2 . 1.1)
+                      (org-level-3 . 1.05)
+                      (org-level-4 . 1.0)
+                      (org-level-5 . 1.1)
+                      (org-level-6 . 1.1)
+                      (org-level-7 . 1.1)
+                      (org-level-8 . 1.1)))
+        (set-face-attribute (car face) nil :weight 'regular :height(cdr face)))
     #+END_SRC
 
 *** fontify
@@ -1031,27 +1054,35 @@
     #+BEGIN_SRC emacs-lisp
       (use-package org-bullets
         :ensure t)
-      (add-hook 'org-mode-hook 'org-bullets-mode)
+      (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+    #+END_SRC
+    
+*** Load markdown backend ox-md
+
+    Load the md backend for org-mode so that I can export to markdown.
+
+    #+BEGIN_SRC emacs-lisp
+      (require 'ox-md)
     #+END_SRC
 
 *** Org auto tangle
 
-   Automatically tangle org files to create any source file from the
-   org file. Need to add org header ##+auto_tangle: t' to activate this.
+    Automatically tangle org files to create any source file from the
+    org file. Need to add org header ##+auto_tangle: t' to activate this.
 
-   #+BEGIN_SRC emacs-lisp
-     (use-package org-auto-tangle
-       :ensure t
-       :hook
-       (org-mode . org-auto-tangle-mode))
-   #+END_SRC
+    #+BEGIN_SRC emacs-lisp
+      (use-package org-auto-tangle
+        :ensure t
+        :hook
+        (org-mode . org-auto-tangle-mode))
+    #+END_SRC
 
 *** HTTP org babel
 
-   #+BEGIN_SRC emacs-lisp
-     (use-package ob-http
-       :ensure t)
-   #+END_SRC
+    #+BEGIN_SRC emacs-lisp
+      (use-package ob-http
+        :ensure t)
+    #+END_SRC
 
 *** Babel mode language load
 
@@ -1079,6 +1110,363 @@
       (appt-activate 1)
     #+END_SRC
 
+*** Scheduling, Project Management, Time Keeping
+
+**** todo keywords
+
+     I seem to have come to some conclusions about which todo keywords
+     actually work for me. The config below doesn't quite work yet
+     though, so I'm still using per file keywords.
+
+     #+BEGIN_SRC emacs-lisp
+       (setq org-todo-keywords
+             '((sequence "TODO(t)" "DOING(g!)" "|" "DONE(d!)")
+               (sequence "WAITING(w@/!)" "BLOCKED(b@/!)" "REVIEW(r@/!)" "PLAN(p@/!)" "BACKLOG(l!)" "DOING(g!)" "|" "COMPLETED(m!)" "CANCELLED(n@/!)")
+                                               ;(sequence "PROJECT(p!)" "|" "COMPLETE(m!)")
+               (sequence "|"  "CANCELLED(n@/!)" "PHONE" "MEETING" "DECISION" "NOTE" "EMAIL")))
+     #+END_SRC
+
+**** Log when things are done
+
+     I quite like to see in the agenda log when I've done things and
+     I'd like to be prompted for a note as well.
+
+     #+BEGIN_SRC emacs-lisp
+       (setq org-agenda-start-with-log-mode t)
+       (setq org-log-done 'note)
+     #+END_SRC
+
+**** Agenda
+
+     
+***** org-mode and Google Calendar with org-gcal
+
+      Instead of importing google calendar events using a shell script
+      and diary mode can we get gcal events into org-mode?
+
+      org-gcal-file-alist, org-gcal-client-id and
+      org-gcal-client-secret are all set in [[../local/mellon.el.gpg][mellon.el.gpg]].
+
+      #+BEGIN_SRC emacs-lisp
+        (use-package org-gcal
+          :ensure t)
+      #+END_SRC
+
+***** Agenda Windows
+
+      I'm not quite sure what possessed the org-mode people to
+      presume that they knew best about how my windows should be
+      arranged when I look at an agenda. There is a solution to that
+      though. Just use the current window, like every other command
+      that opens something up. Re-arrange frame indeed.
+
+      #+BEGIN_SRC emacs-lisp
+        (setq org-agenda-window-setup 'current-window)
+      #+END_SRC
+
+***** Agenda Files
+
+      There are things for me and mine. Things I do for money. Things
+      I do for the community I'm in. Let me know if you think my
+      worldview is too small.
+
+      And somethings we need in the agenda even though we don't know
+      where to file it yet which is why refile is in here.
+
+      #+BEGIN_SRC emacs-lisp
+        (setq org-agenda-files '("~/org/notes.org" "~/org/personal.org" "~/org/gmail-schedule.org"))
+      #+END_SRC
+
+***** Agenda Sorting
+
+      I want to sort my tasks in the agenda by the deadline, then
+      schedule and then priority.
+
+      Todo items I want to sort by deadline, schedule and then
+      priority, but I usually filter out the things with deadline and
+      schedule time in most agenda views.
+
+      Tags and search are the same as the default values.
+
+      #+BEGIN_SRC emacs-lisp
+        (setq org-agenda-sorting-strategy
+              '((agenda time-up
+                        timestamp-up
+                        priority-down
+                        habit-down
+                        category-keep)
+                (todo priority-down
+                      category-keep
+                      todo-state-up
+                      tag-up
+                      effort-down)
+                (tags priority-down
+                      category-keep)
+                (search category-keep)))
+      #+END_SRC
+
+***** Custom Agendas
+
+      The real power of org-agenda starts to kick in when you create
+      your own custom agenda commands that get the things *you* want
+      out of your org files.
+
+****** What am I doing in the Week Countdown?
+
+       My default view, as I mostly use org for keeping my working
+       days in line is around the Current Week Countdown.
+
+       This is a composite agenda view that shows the agenda by date
+       at the top and the todo list below that.
+
+       The agenda spans one week and starts on a Monday (weekday
+       1).
+
+       It filters the todo list is a pretty bad way as I was having
+       quite a bit of trouble with some of the regular expressions. I
+       do have it so that it finds the DOING, WAITING and BLOCKED
+       tasks and skips the DONE ones so that my view isn't too
+       cluttered as I try to find the next task.
+
+       It is also skips todo items that have a deadline or are
+       scheduled as I have them already in the agenda at the top. It
+       also overrides the text that describes the todo list. By
+       default it is the regular expression we are using to filter the
+       todo list.
+
+       I also remove items that are scheduled or with deadlines from
+       the weekly agenda when they are done. This is so I can keep the
+       clutter down in this view and decide on what I want my next
+       step to be.
+
+       The todo items are also filtered to only show things that have
+       the Owner property set to my name.
+
+       #+BEGIN_SRC emacs-lisp
+         (setq org-agenda-custom-commands
+               '(("Cm" "My Week Countdown"
+                  ((agenda "My Week Countdown"
+                           ((org-agenda-span 'week)
+                            (org-agenda-start-on-weekday 1)
+                            (org-agenda-skip-deadline-if-done t)
+                            (org-agenda-skip-scheduled-if-done t)))
+                   (tags-todo "TODO={^[DCWBT].+[^E]$}+Owner=\"Chris\""
+                              ((org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
+                               (org-agenda-overriding-header "My tasks for the Current Week Countdown: ")))))
+                 ("Cw" "Workflow Status"
+                  ((todo "WAITING"
+                         ((org-agenda-overriding-header "Waiting on External")
+                          (org-agenda-files org-agenda-files)))
+                   (todo "REVIEW"
+                         ((org-agenda-overriding-header "In Review")
+                          (org-agenda-files org-agenda-files)))
+                   (todo "PLAN"
+                         ((org-agenda-overriding-header "In Planning")
+                          (org-agenda-todo-list-sublevels nil)
+                          (org-agenda-files org-agenda-files)))
+                   (todo "BACKLOG"
+                         ((org-agenda-overriding-header "Backlog")
+                          (org-agenda-todo-list-sublevels nil)
+                          (org-agenda-files org-agenda-files)))
+                   (todo "DOING"
+                         ((org-agenda-overriding-header "Active")
+                          (org-agenda-files org-agenda-files)))
+                   (todo "COMPLETED"
+                         ((org-agenda-overriding-header "Completed")
+                          (org-agenda-files org-agenda-files)))
+                   (todo "CANCELLED"
+                         ((org-agenda-overriding-header "Cancelled")
+                          (org-agenda-files org-agenda-files)))))
+                 ))
+       #+END_SRC
+
+****** My Window
+
+       I need to know what I was doing on the last working day and I'd
+       like to know what is coming up in the next 7 days.
+
+       #+BEGIN_SRC emacs-lisp
+         (add-to-list
+          'org-agenda-custom-commands
+          '("Cn" "My Window"
+            ((agenda "My Window"
+                     ((org-agenda-span 10)
+                      (org-agenda-start-day "-3d")
+                      (org-agenda-skip-deadline-if-done t)
+                      (org-agenda-skip-scheduled-if-done t)))
+             (tags-todo "TODO={^[DCWBT].+[^E]$}+Owner=\"Chris\""
+                        ((org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
+                         (org-agenda-overriding-header "My window."))))))
+       #+END_SRC
+
+****** org-agenda hotkey
+
+       #+BEGIN_SRC emacs-lisp
+         (global-set-key (kbd "C-c a") 'org-agenda)
+       #+END_SRC
+
+**** Time Tracking and Estimates
+
+     org-mode is huge. It does so much, but my reason for using it
+     was so that I could track effort vs estimates. It makes me
+     happier than a burn down chart, but probably just because I'm
+     writing elisp to do it rather than excel or google docs. This
+     hack works on my mind, but YMMV.
+
+***** clocking in, out and persistence
+
+      It is true, emacs crashes, I forget to clock out, there is just
+      life, ok? So, when we clock in to a new task we'll be prompted
+      to complete the time for the old task. Just to keep things
+      straight.
+
+      There is more about measuring idle time in the org-mode docs
+      [[http://orgmode.org/manual/Resolving-idle-time.html][here]].
+
+      #+BEGIN_SRC emacs-lisp
+        (setq org-clock-persist 'history)
+        (org-clock-persistence-insinuate)
+      #+END_SRC
+
+***** Tracking effort vs estimates with clocksum
+
+      I think of days as being working days rather than groups of 24
+      hours (I'm damaged, what can I say). So I want to see sums of
+      times always in hours rather than as days. Otherwise I just get
+      confused and wonder why spending three eight hour days working on
+      something gets summed up as just one day.
+
+      I found out about this bit of configuration on [[http://stackoverflow.com/questions/17929979/emacs-org-mode-how-to-stop-total-in-column-view-showing-number-of-days][Stack Overflow]].
+
+      This is really handy when looking at things in column mode in
+      org. I use column mode as an alternative to burn down charts to
+      track effort vs estimates.
+
+      #+BEGIN_SRC emacs-lisp
+        (setq org-time-clocksum-format
+              '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
+      #+END_SRC
+
+**** Put those logs in a drawer
+
+     It may be big and heavy and wood, but mostly I don't want to see
+     log messages for state change.
+
+     #+BEGIN_SRC emacs-lisp
+       (setq org-log-into-drawer t)
+     #+END_SRC
+
+     We also want to put the clocking in and out into the drawer.
+
+     #+BEGIN_SRC emacs-lisp
+       (setq org-clock-into-drawer t)
+     #+END_SRC
+
+**** You can depend on...
+
+     The sub tasks that are underneath the main task.
+
+     #+BEGIN_SRC emacs-lisp
+       (setq org-enforce-todo-dependencies t)
+     #+END_SRC
+
+*** Capturing, Templates and Refiling
+
+**** Default Notes File
+
+     I don't want to think about things when I'm just capturing
+     them. I can refile them later.
+
+     #+BEGIN_SRC emacs-lisp
+       (setq org-default-notes-file (concat org-directory "/notes.org"))
+     #+END_SRC
+
+**** Capture Hot Key
+
+     Let's capture things with a quick Vulcan Nerve Pinch on
+     C-c o.
+
+     #+BEGIN_SRC emacs-lisp
+       (global-set-key (kbd "C-c o") 'org-capture)
+     #+END_SRC
+
+**** Capture Templates
+
+     To do, respond, notes, journals, meetings and phone calls. These
+     are the things we want to keep track of and clock in and out of
+     let's see how we get on with them.
+
+     We also have a way of tracking things we are doing RFN as well
+     as capturing things for the future.
+
+     #+BEGIN_SRC emacs-lisp
+       (setq org-capture-templates
+             '(("c" "Contacts" entry (file "~/org/contacts.org")
+                "* %(org-contacts-template-name)\n:PROPERTIES:\n:EMAIL: %(org-contacts-template-email)\n:PHONE:\n:ALIAS:\n:NICKNAME:\n:IGNORE:\n:ICON:\n:NOTE:\n:ADDRESS:\n:BIRTHDAY:\n:LAST_READ_MAIL:\n:END:" :empty-lines-after 1)
+               ("t" "Doing RIGHT NOW" entry (file+datetree org-default-notes-file)
+                "* DOING %?\n%n\n%U\n%a\n" :clock-in t :clock-resume t :empty-lines-after 1)
+               ("f" "Do in the Future" entry (file+datetree org-default-notes-file)
+                "* TODO %?\n%^{Owner}p\n%U\n%a\n" :empty-lines-after 1)
+               ("r" "respond" entry (file+datetree org-default-notes-file)
+                "* TODO Respond to %:from on %:subject\nSCHEDULED: %t\n%^{Owner}p\n%U\n%a\n"
+                :clock-in t :clock-resume t :empty-lines-after 1)
+               ("n" "note" entry (file+datetree org-default-notes-file)
+                "* %? :NOTE:\n%U\n%a\n" :clock-resume t :empty-lines-after 1)
+               ("j" "Journal" entry (file+datetree org-default-notes-file)
+                "* %?\n%U\n" :clock-in t :clock-resume t :empty-lines-after 1 :empty-lines-after 1)
+               ("m" "Meeting" entry (file+datetree org-default-notes-file)
+                "* MEETING with %? :MEETING:\n%^{Owner}p\n%U" :clock-in t :clock-resume t :empty-lines-after 1)
+               ("p" "Phone call" entry (file+datetree org-default-notes-file)
+                "* PHONE %? :PHONE:\n%^{Owner}p\n%U" :clock-in t :clock-resume t :empty-lines-after 1)))
+     #+END_SRC
+
+**** Refiling rules
+
+     We want to be able to refile things in to an archive file
+     and in files that we create our agenda from.
+
+     #+BEGIN_SRC emacs-lisp
+       (setq org-refile-targets
+             '((nil :maxlevel . 9)
+               (org-agenda-files :maxlevel . 9)
+               ("~/org/refile.org" :maxlevel . 9)))
+       (advice-add 'org-refile :after 'org-save-all-org-buffers)
+     #+END_SRC
+ 
+*** org and the pomodoro technique
+
+    When I need to just grind through something or find a way to keep
+    myself focused when I'm having trouble I like to use the
+    [[http://www.pomodorotechnique.com/][pomodoro technique]]. Luckily there is org-pomodoro that let's us
+    put these two great things together.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package org-pomodoro 
+	:ensure t)
+      (add-hook 'org-mode-hook
+                (lambda () (local-set-key (kbd "M-s-p") 'org-pomodoro)))
+    #+END_SRC
+
+**** A hotkey in Org Agenda
+
+     I can clock in and out in Org Agendas, I'd like to be able to
+     start Pomodoros as well.
+
+     #+BEGIN_SRC emacs-lisp
+       (add-hook 'org-agenda-mode-hook
+                 (lambda () (local-set-key (kbd "P") 'org-pomodoro)))
+     #+END_SRC
+
+*** redtick for pomodoro
+
+    Bruce recommended redtick for pomodoro's outside of org mode so
+    going to give it a go.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package redtick :ensure t)
+    #+END_SRC
+
+
 ** Org faces
 
    Require org-faces.
@@ -1100,6 +1488,165 @@
        :hook (restclient . restclient-jq))
 
    #+END_SRC
+
+** prog-mode
+
+   prog-mode and the prog-mode-hook are at the basis of most of the
+   programming modes in emacs. If we want something set up for
+   everything we should do it here.
+
+*** Parentheses
+**** Show Them
+
+     We really want to see those parentheses.
+
+     #+BEGIN_SRC emacs-lisp
+       (show-paren-mode +1)
+     #+END_SRC
+
+*** rainbow-delimiters
+
+    Make those delimiters glow with wacky colors so we can see what is
+    going on.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package rainbow-delimiters 
+	:ensure t)
+      (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+    #+END_SRC
+
+*** flycheck
+
+    Flycheck should give on the fly syntax checking.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package flycheck :ensure t)
+
+    #+END_SRC
+
+*** rainbow mode
+
+    If we have a color literal it is really nice to have an idea of
+    what it is going to look like. This is *really* useful in things
+    like editing CSS files with hex color codes.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package rainbow-mode 
+	:ensure t)
+      (add-hook 'prog-mode-hook 'rainbow-mode)
+      (diminish 'rainbow-mode)
+    #+END_SRC
+***
+*** highlight-symbol
+
+    I like to see all of the places I'm using the same symbol. This is
+    a great visual cue for those times where you've mistyped a variable
+    for function name. It isn't quite flymake, but it is handy. It is
+    good to see where something is used as well.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package highlight-symbol 
+	:ensure t)
+      (add-hook 'prog-mode-hook 'highlight-symbol-mode)
+      (setq highlight-symbol-on-navigation-p t)
+      (global-set-key [f3] 'highlight-symbol-next)
+      (global-set-key [(shift f3)] 'highlight-symbol-prev)
+    #+END_SRC
+
+
+*** yasnippet
+
+    Yasnippets to add snippets and snippets completion.
+    
+    #+BEGIN_SRC emacs-lisp
+      (use-package yasnippet :ensure t)
+      (key-chord-define-global "yy" 'yas-expand-from-trigger-key)
+      (define-key yas-minor-mode-map (kbd "C-c C-y") 'yas-visit-snippet-file)
+      (define-key yas-minor-mode-map (kbd "C-c y") 'company-yasnippet)
+    #+END_SRC
+
+**** yasnippet-snippets
+
+     Set up yasnippet-snippets from Andrea (awesome guy that he is he's saved me loads of time here).
+
+     #+BEGIN_SRC emacs-lisp
+       (use-package yasnippet-snippets 
+	:ensure t)
+     #+END_SRC
+
+**** Turn it on globally
+
+     And we want to add yasnippets to all modes where we have snippets.
+
+     #+BEGIN_SRC emacs-lisp
+       (yas-global-mode 1)
+     #+END_SRC
+
+**** Diminish it
+
+     I don't need to see it everywhere though.
+
+     #+BEGIN_SRC emacs-lisp
+       (diminish 'yas-minor-mode)
+     #+END_SRC
+
+**** Java snippets
+
+     #+BEGIN_SRC emacs-lisp
+       (use-package java-snippets 
+	:ensure t)
+     #+END_SRC
+
+
+**** react snippets
+
+     #+begin_src emacs-lisp
+      (use-package js-react-redux-yasnippets 
+	:ensure t)
+     #+end_src
+
+*** smartscan
+
+    A suggestion from [[http://www.masteringemacs.org/articles/2011/01/14/effective-editing-movement/][Effective Editing]] in [[http://www.masteringemacs.org/][Mastering Emacs]]. This
+    allows you to go to the next identifier like the one you are
+    currently on by using M-n and M-p.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package smartscan :ensure t)
+      (add-hook 'prog-mode-hook
+                '(lambda () (smartscan-mode 1)))
+    #+END_SRC
+
+*** Set line numbers mode in prog modes
+
+    Set line numbers on in all programming modes.
+
+    #+BEGIN_SRC emacs-lisp
+      (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+    #+END_SRC
+
+
+*** Set font for prog modes
+
+    Set the font for all prog modes.
+
+    #+BEGIN_SRC emacs-lisp
+      (defun my-buffer-face-mode-variable ()
+          "Set font to a variable width (proportional) fonts in current buffer"
+          (interactive)
+          (setq buffer-face-mode-face '(:family "IosevkaAile"))
+          (buffer-face-mode))
+
+       ;; Use monospaced font faces in current buffer
+      (defun my-buffer-face-mode-fixed ()
+        "Sets a fixed width (monospace) font in current buffer"
+        (interactive)
+        (setq buffer-face-mode-face
+              '(:family "JetBrains Mono"))
+        (buffer-face-mode))
+
+        (add-hook 'prog-mode-hook 'my-buffer-face-mode-fixed)
+    #+END_SRC
 
 * Data Modes
 
