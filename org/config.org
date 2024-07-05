@@ -447,7 +447,7 @@
        :ensure t
        :custom
        (completion-styles '(orderless basic))
-       (completion-category-overrides '((buffer (styles orderless-prefix basic partial-completion)))))
+       (completion-category-overrides '(buffer styles orderless-prefix basic partial-completion)))
      (setq read-file-name-completion-ignore-case t
            read-buffer-completion-ignore-case t
            completion-ignore-case t)
@@ -461,12 +461,11 @@
      (use-package consult
        :ensure t
        ;; Replace bindings. Lazily loaded due by use-package.
-       :bind (;; C-c bindings in mode-specific-map
+       :bind ;; C-c bindings in mode-specific-map
               ("C-c M-x" . consult-mode-command)
               ("C-c h" . consult-history)
               ("C-c k" . consult-kmacro)
               ("C-c m" . consult-man)
-              ("C-c i" . consult-info)
               ([remap Info-search] . consult-info)
               ;; C-x bindings in ctl-x-map
               ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
@@ -481,6 +480,7 @@
               ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
               ("C-M-#" . consult-register)
               ;; Other custom bindings
+              ("C-c i" . consult-info)
               ("M-y" . consult-yank-pop)                ;; orig. yank-pop
               ;; M-g bindings in goto-map
               ("M-g e" . consult-compile-error)
@@ -633,6 +633,15 @@
        :ensure t
        :config (treemacs-icons-dired-mode))
    #+END_SRC
+
+** Command log mode
+
+   Add in command log mode.
+
+   #+begin_src emacs-lisp
+     (use-package command-log-mode
+       :ensure t)
+   #+end_src
 
 * directories, navigation, searching, movement
 ** paredit-mode
@@ -892,6 +901,15 @@
       (setq projectile-indexing-method 'alien)
     #+END_SRC
 
+*** Consult projectile
+
+    Use projectile from Consult
+
+    #+begin_src emacs-lisp
+      (use-package consult-projectile
+        :ensure t)
+    #+end_src
+
 ** perspective
 
    Add perspective mode.
@@ -907,6 +925,37 @@
        :defer t)
    #+END_SRC
 
+** Ag
+
+   Add in ag package
+
+   #+begin_src emacs-lisp
+     (use-package ag
+       :ensure t)  
+   #+end_src
+
+** Ripgrep
+
+   Add in ripgrep package
+
+   #+begin_src emacs-lisp
+     (use-package rg
+       :ensure t)  
+   #+end_src
+
+** Winnow mode
+
+   Add winnow mode to help filter results.
+
+   #+begin_src emacs-lisp
+     (use-package winnow
+       :ensure t
+       :hook
+       (ag-mode . winnow-mode)
+       (rg-mode . winnow-mode)
+       (compilation-mode . winnow-mode))
+   #+end_src
+   
 ** Jump to top or bottom of window
 
    Set up move-to-window-line 0 and move-to-window-line -
@@ -1138,7 +1187,6 @@
 
 **** Agenda
 
-     
 ***** org-mode and Google Calendar with org-gcal
 
       Instead of importing google calendar events using a shell script
@@ -1511,8 +1559,10 @@
 
     #+BEGIN_SRC emacs-lisp
       (use-package rainbow-delimiters 
-	:ensure t)
-      (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+        :ensure t
+        :hook
+        (prog-mode . rainbow-delimiters-mode)
+        (org-mode . rainbow-delimiters-mode))
     #+END_SRC
 
 *** flycheck
