@@ -439,8 +439,8 @@
        :custom
        (completion-styles '(orderless basic))
        (completion-category-overrides
-        '((buffer (styles orderless-prefix basic partial-completion))
-          (command (styles orderless-prefix basic partial-completion)))))
+        '((buffer (styles orderless-prefixes basic partial-completion))
+          (command (styles orderless-prefixes basic partial-completion)))))
      (setq read-file-name-completion-ignore-case t
            read-buffer-completion-ignore-case t
            completion-ignore-case t)
