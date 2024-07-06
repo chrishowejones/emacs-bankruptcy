@@ -1693,6 +1693,315 @@
       (add-hook 'prog-mode-hook 'my-buffer-face-mode-fixed)
     #+END_SRC
 
+** lisp modes
+
+   emacs-lisp and clojure are the two that really go in here for now,
+   though in the future scheme and common lisp could be added.
+
+*** lisp hooks
+
+    These are the common lisp hooks we want shared across all lisp
+    modes.
+
+    #+BEGIN_SRC emacs-lisp
+      (setq lisp-hooks (lambda ()
+                         (eldoc-mode +1)
+                         (diminish 'eldoc-mode)
+                         (define-key paredit-mode-map
+                           (kbd "{") 'paredit-open-curly)
+                         (define-key paredit-mode-map
+                           (kbd "}") 'paredit-close-curly)
+                         (local-set-key (kbd "C-;") 'comment-dwim)))
+    #+END_SRC
+
+*** emacs-lisp
+
+**** lisp-mode-hook
+
+     Let's add the lisp mode hook to the emacs-lisp-mode
+
+     #+BEGIN_SRC emacs-lisp
+       (add-hook 'emacs-lisp-mode-hook lisp-hooks)
+     #+END_SRC
+
+**** Pop Up Help in Emacs Lisp
+
+     Thx again to [[http://twitter.com/krisajenkins][Kris Jenkins]] and his [[http://blog.jenkster.com/2013/12/popup-help-in-emacs-lisp.html][blog post]] I've got even yet
+     more help with emacs-lisp functions in a popup just like in ac
+     stuff in clojure modes. Thanks to [[http://twitter.com/sanityinc][Steve Purcell]] we have an
+     improved version that gets faces and vars in addition to
+     functions, so in some ways it is even a bit better than what is
+     available in cider/clojure-mode (from my understanding anyway).
+
+     #+BEGIN_SRC emacs-lisp
+       (require 'popup)
+
+       (defun describe-thing-in-popup ()
+         (interactive)
+         (let* ((thing (symbol-at-point))
+                (help-xref-following t)
+                (description (with-temp-buffer
+                               (help-mode)
+                               (help-xref-interned thing)
+                               (buffer-string))))
+           (popup-tip description
+                      :point (point)
+                      :around t
+                      :height 30
+                      :scroll-bar t
+                      :margin t)))
+     #+END_SRC
+
+***** The usual help keybinding
+
+      Let's use C-c C-d for describing functions at point as this is
+      the binding in cider/nrepl that I'm used to. We'll probably do
+      this in other modes as well so we'll make it a local keybinding
+      and then it will more or less [[http://en.wikipedia.org/wiki/DWIM][dwim]].
+      Let's use C-c C-k (like cider does) to run eval buffer in
+      emacs-lisp mode.
+
+
+      #+BEGIN_SRC emacs-lisp
+        (add-hook 'emacs-lisp-mode-hook
+                  (lambda () (local-set-key (kbd "C-c C-d") 'describe-thing-in-popup)
+                             (local-set-key (kbd "C-c C-k") 'eval-buffer)))
+      #+END_SRC
+
+***** auto complete bash style in shell
+
+      I found the autocompletion for shell wasn't working properly
+      and didn't work like bash
+
+      #+BEGIN_SRC emacs-lisp
+        (use-package bash-completion
+          :ensure t
+          :config (bash-completion-setup))
+      #+END_SRC
+
+*** clojure
+
+    I do *love* coding in clojure. The tool chain has been evolving
+    quite a bit over the last few years.
+
+    Everything has gone from being built only with maven to maven
+    being just for core and everything else being done with [[http://leiningen.org/][Leiningen]].
+
+    On the emacs side we've gone from the swank and slime, to nrepl
+    and nrepl.el, to now we have nrepl and cider.el. Trying to move to
+    cider.el is what caused me to declare .emacs.d bankruptcy this
+    time and restructure everything.
+
+    Most of the clojure emacs goodness if available in the github
+    repo called [[https://github.com/clojure-emacs][clojure-emacs]].
+**** boot
+***** treat .boot files as clojure source
+
+      #+BEGIN_SRC emacs-lisp
+        (add-to-list 'auto-mode-alist '("\\.boot\\'" . clojure-mode))
+      #+END_SRC
+
+***** treat boot scripts files as clojure
+
+      #+BEGIN_SRC emacs-lisp
+        (add-to-list 'magic-mode-alist '(".* boot" . clojure-mode))
+      #+END_SRC
+
+**** cider
+
+***** install
+
+      You can get most of the clojure support by just elpa installing
+      cider.
+
+      #+BEGIN_SRC emacs-lisp
+        (use-package cider
+          :ensure t
+          :config (diminish 'cider-mode "Cλ"))
+
+      #+END_SRC
+
+***** clojure-mode-hook
+
+      We'll also want to get our lisp-hooks into our clojurey
+      goodness. It would be a shame to not have it here.
+
+      #+BEGIN_SRC emacs-lisp
+        (add-hook 'clojure-mode-hook lisp-hooks)
+        (setq clojure-toplevel-inside-comment-form nil)
+      #+END_SRC
+
+***** Save cider history
+
+      We also want to save the history of our interactions. There might
+      be gold there.
+
+      #+BEGIN_SRC emacs-lisp
+        (setq cider-repl-history-file (concat user-emacs-directory "cider-history"))
+      #+END_SRC
+
+***** subword-mode
+
+      I also want to be able to navigate to the "-" characters in words.
+
+      #+BEGIN_SRC emacs-lisp
+        (add-hook 'cider-mode-hook 'subword-mode)
+        (add-hook 'cider-mode-hook (lambda () (setq lsp-enable-completion-at-point nil)))
+      #+END_SRC
+
+***** Don't destroy that repl buffer while pretty printing
+
+      It can be very frustrating to be poking away at clojure data
+      structures in the repl and then accidentally print a big, or
+      worse and infinite sequence. This should stop that.
+
+      #+BEGIN_SRC emacs-lisp
+        (setq cider-print-options '(("length" 1000)))
+      #+END_SRC
+
+      And seeing as we are limiting what we print, we should pretty
+      print by default.
+
+      #+BEGIN_SRC emacs-lisp
+        (setq cider-repl-use-pretty-printing t)
+      #+END_SRC
+
+***** Customisations in CIDER
+
+      Supress auto-display of the REPL buffer in separate window and
+      make 'C-c C-z' switch to the CIDER REPL in the current window
+
+      #+BEGIN_SRC emacs-lisp
+        (setq cider-repl-pop-to-buffer-on-connect nil)
+        (setq cider-repl-display-in-current-window t)
+      #+END_SRC
+
+***** Start figwheel-sidecar shortcuts
+
+      From the Using Figwheel REPL within nREPL page.
+
+      #+BEGIN_SRC emacs-lisp
+        (defun cider-figwheel-repl ()
+          (interactive)
+          (save-some-buffers)
+          (with-current-buffer (cider-current-repl-buffer)
+            (goto-char (point-max))
+            (insert
+                "(require 'figwheel-sidecar.repl-api)
+                 (do (figwheel-sidecar.repl-api/start-figwheel!) nil) ; idempotent
+                     (figwheel-sidecar.repl-api/cljs-repl)")
+            (cider-repl-return)))
+          (add-hook 'cider-repl-mode-hook
+                    (lambda () (local-set-key (kbd "C-c C-f") 'cider-figwheel-repl)))
+      #+END_SRC
+
+***** A few repl tweaks
+
+      I want paredit, rainbow delimiters and clojure-mode highlighting
+      in my repl buffer.
+
+      #+BEGIN_SRC emacs-lisp
+        (add-hook 'cider-repl-mode-hook #'paredit-mode)
+        (add-hook 'cider-repl-mode-hook
+                    (lambda () (local-set-key (kbd "<return>") 'cider-repl-return)))
+        (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
+        (add-hook 'cider-repl-mode-hook #'eldoc-mode)
+      #+END_SRC
+
+**** REBL repl
+
+     #+BEGIN_SRC emacs-lisp
+       ;; Similar to C-x C-e, but sends to REBL
+       (defun rebl-eval-last-sexp ()
+         (interactive)
+         (let* ((bounds (cider-last-sexp 'bounds))
+                (s (cider-last-sexp))
+                (reblized (concat "(cognitect.rebl/inspect " s ")")))
+           (cider-interactive-eval reblized nil bounds (cider--nrepl-print-request-map))))
+
+       ;; Similar to C-M-x, but sends to REBL
+       (defun rebl-eval-defun-at-point ()
+         (interactive)
+         (let* ((bounds (cider-defun-at-point 'bounds))
+                (s (cider-defun-at-point))
+                (reblized (concat "(cognitect.rebl/inspect " s ")")))
+           (cider-interactive-eval reblized nil bounds (cider--nrepl-print-request-map))))
+
+       ;; C-S-x send defun to rebl
+       ;; C-x C-r send last sexp to rebl (Normally bound to "find-file-read-only"... Who actually uses that though?)
+       (add-hook 'cider-mode-hook
+                 (lambda ()
+                   (local-set-key (kbd "C-S-x") #'rebl-eval-defun-at-point)
+                   (local-set-key (kbd "C-x M-r") #'rebl-eval-last-sexp)))
+     #+END_SRC
+
+**** clj-refactor
+
+     Lots of cool little time savers in here.
+
+     #+BEGIN_SRC emacs-lisp
+       (maybe-install-and-require 'clj-refactor)
+       (defun my-clojure-mode-hook ()
+         (clj-refactor-mode 1)
+         (yas-minor-mode 1) ; for adding require/use/import statements
+         (cljr-add-keybindings-with-prefix "C-c C-m")
+         (setq cljr-favor-prefix-notation nil)
+         (setq cljr-add-ns-to-blank-clj-files nil)
+         (setq cljr-insert-newline-after-require nil)
+         (setq lsp-ui-doc-enable nil))
+
+         (add-hook
+           'clojure-mode-hook #'my-clojure-mode-hook)
+     #+END_SRC
+
+**** clojurescript
+
+     Get those cljs files building automatically and get the errors
+     popping up in your emacs.
+
+     #+BEGIN_SRC emacs-lisp
+       (maybe-install-and-require 'cljsbuild-mode)
+     #+END_SRC
+
+**** Clojure Cheat Sheet
+
+     It was this helm addon from Kris Jenkins that made me start to
+     look at helm. And having the clojure cheat sheet to hand is
+     useful.
+
+     I like binding cheatsheets to s-f9.
+     cheatsheet is installed as part of CIDER 17 now
+
+     #+BEGIN_SRC emacs-lisp
+       (add-hook 'clojure-mode-hook
+         (lambda () (local-set-key [s-f9] 'clojure-view-cheatsheet)))
+     #+END_SRC
+
+**** Flycheck clojure
+
+     Saw this mentioned in Bat's CIDER manual so thought I'd give it a
+     shot
+
+     #+BEGIN_SRC emacs-lisp
+       (maybe-install-and-require 'flycheck-clojure)
+       (maybe-install-and-require 'flycheck-pos-tip)
+     #+END_SRC
+
+**** clj-kondo linting
+
+     Make sure you have the clj-kondo executable on your path.
+
+     #+BEGIN_SRC emacs-lisp
+      (maybe-install-and-require 'flycheck-clj-kondo)
+      (dolist (checker '(clj-kondo-clj clj-kondo-cljs clj-kondo-cljc clj-kondo-edn))
+              (setq flycheck-checkers (cons checker (delq checker flycheck-checkers))))
+      (dolist (checkers '((clj-kondo-clj . clojure-joker)
+                          (clj-kondo-cljs . clojurescript-joker)
+                          (clj-kondo-cljc . clojure-joker)
+                          (clj-kondo-edn . edn-joker)))
+              (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers))))
+     #+END_SRC
+
 * Data Modes
 
 * Multimedia
