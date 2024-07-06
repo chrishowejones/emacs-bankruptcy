@@ -111,7 +111,7 @@
 ** Multiple Cursors
 
    This is a replacement for the iedit that I used to have. Neale
-   Swinnerton was the one who showed this to me and it looked really
+   Swinnerton was the one who showed this to Bruce and it looked really
    cool.
 
    #+BEGIN_SRC emacs-lisp
@@ -227,23 +227,6 @@
    #+begin_src emacs-lisp
      (setq reb-re-syntax 'string)
    #+end_src
-
-* Multiple Cursors
-
-  This is a replacement for the iedit that I used to have. Neale
-  Swinnerton was the one who showed this to me and it looked really
-  cool.
-
-  #+BEGIN_SRC emacs-lisp
-    (use-package multiple-cursors
-      :ensure t
-      :config
-      (multiple-cursors-mode 1)
-      (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
-      (global-set-key (kbd "C->") 'mc/mark-next-like-this)
-      (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-      (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
-  #+END_SRC
 
 * Macintosh Specific Setup
 
@@ -375,7 +358,7 @@
 
 *** Startup Screen
 
-    I'd also like to ski the startup screen and go straight to
+    I'd also like to skip the startup screen and go straight to
     the *dashboard* buffer.
 
     #+BEGIN_SRC emacs-lisp
