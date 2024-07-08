@@ -2024,11 +2024,11 @@
                            (clj-kondo-edn . edn-joker)))
          (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers))))
      #+END_SRC
-     
+
 ** Language Server Protocol
 
 *** LSP config
-    
+
     This is my set up for the Language Server Protocol.
 
     #+begin_src emacs-lisp
@@ -2038,12 +2038,32 @@
         ;; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
         (setq lsp-keymap-prefix "M-s-l")
         :hook (;;  concrete major-modes to use lsp (e. g. clojure-mode)
-               (clojure-mode . lsp)
-               (clojurec-mode . lsp)
-               (clojurescript-mode . lsp)
+               (clojure-mode . lsp-deferred)
+               (clojurec-mode . lsp-deferred)
+               (clojurescript-mode . lsp-deferred)
                ;; if you want which-key integration
-               (lsp-mode . lsp-enable-which-key-integration))
-        :commands lsp)
+               (lsp-mode . lsp-enable-which-key-integration)
+               (lsp-mode . flycheck-mode)
+               (lsp-mode . lsp-lens-mode))
+        :commands lsp
+        :config (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
+        )
+    #+end_src
+
+    Set up ui
+
+    #+begin_src emacs-lisp
+      (use-package lsp-ui
+        :ensure t
+        :commands lsp-ui-mode)
+    #+end_src
+
+    Add in consult support.
+
+    #+begin_src emacs-lisp
+      (use-package consult-lsp
+        :ensure t
+        :config (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
     #+end_src
 
 * Data Modes
