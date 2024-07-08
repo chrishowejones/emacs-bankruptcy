@@ -983,6 +983,14 @@
        (global-set-key (kbd "C-k") 'crux-smart-kill-line))
    #+END_SRC
 
+** Revert buffer shortcut key
+
+   Define a key chord for revert-buffer.
+
+   #+begin_src emacs-lisp
+     (define-key global-map (kbd "s-u") 'revert-buffer)
+   #+end_src
+
 * Text Modes
 
 ** Markdown mode
@@ -2016,6 +2024,27 @@
                            (clj-kondo-edn . edn-joker)))
          (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers))))
      #+END_SRC
+     
+** Language Server Protocol
+
+*** LSP config
+    
+    This is my set up for the Language Server Protocol.
+
+    #+begin_src emacs-lisp
+      (use-package lsp-mode
+        :ensure t
+        :init
+        ;; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
+        (setq lsp-keymap-prefix "M-s-l")
+        :hook (;;  concrete major-modes to use lsp (e. g. clojure-mode)
+               (clojure-mode . lsp)
+               (clojurec-mode . lsp)
+               (clojurescript-mode . lsp)
+               ;; if you want which-key integration
+               (lsp-mode . lsp-enable-which-key-integration))
+        :commands lsp)
+    #+end_src
 
 * Data Modes
 
