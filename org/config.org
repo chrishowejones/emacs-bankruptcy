@@ -417,7 +417,8 @@
        ;; for the consult-grep commands.
        (setq vertico-multiform-categories
              '((file grid)
-               (consult-grep buffer)))
+               (consult-grep buffer)
+               (consult-imenu buffer)))
        ;; Use `consult-completion-in-region' if Vertico is enabled.
        ;; Otherwise use the default `completion--in-region' function.
        (setq completion-in-region-function
@@ -437,10 +438,10 @@
      (use-package orderless
        :ensure t
        :custom
-       (completion-styles '(orderless basic))
+       (completion-styles '(basic orderless))
        (completion-category-overrides
-        '((buffer (styles orderless-prefixes basic partial-completion))
-          (command (styles orderless-prefixes basic partial-completion)))))
+        '((buffer (styles basic partial-completion))
+          (command (styles basic partial-completion)))))
      (setq read-file-name-completion-ignore-case t
            read-buffer-completion-ignore-case t
            completion-ignore-case t)
@@ -652,7 +653,7 @@
        :config
        (diminish 'paredit-mode "()")
        :hook
-       (prog-mode-hook . paredit-mode))
+       prog-mode)
    #+END_SRC
 
 ** paredit spaces for non s-expr langs
@@ -1708,9 +1709,9 @@
                          (eldoc-mode +1)
                          (diminish 'eldoc-mode)
                          (define-key paredit-mode-map
-                           (kbd "{") 'paredit-open-curly)
+                                     (kbd "{") 'paredit-open-curly)
                          (define-key paredit-mode-map
-                           (kbd "}") 'paredit-close-curly)
+                                     (kbd "}") 'paredit-close-curly)
                          (local-set-key (kbd "C-;") 'comment-dwim)))
     #+END_SRC
 
@@ -1765,7 +1766,7 @@
       #+BEGIN_SRC emacs-lisp
         (add-hook 'emacs-lisp-mode-hook
                   (lambda () (local-set-key (kbd "C-c C-d") 'describe-thing-in-popup)
-                             (local-set-key (kbd "C-c C-k") 'eval-buffer)))
+                    (local-set-key (kbd "C-c C-k") 'eval-buffer)))
       #+END_SRC
 
 ***** auto complete bash style in shell
@@ -1817,8 +1818,8 @@
       #+BEGIN_SRC emacs-lisp
         (use-package cider
           :ensure t
-          :config (diminish 'cider-mode "Cλ"))
-
+          :pin melpa-stable)
+        (diminish 'cider-mode "Cλ")
       #+END_SRC
 
 ***** clojure-mode-hook
@@ -1887,12 +1888,12 @@
           (with-current-buffer (cider-current-repl-buffer)
             (goto-char (point-max))
             (insert
-                "(require 'figwheel-sidecar.repl-api)
+             "(require 'figwheel-sidecar.repl-api)
                  (do (figwheel-sidecar.repl-api/start-figwheel!) nil) ; idempotent
                      (figwheel-sidecar.repl-api/cljs-repl)")
             (cider-repl-return)))
-          (add-hook 'cider-repl-mode-hook
-                    (lambda () (local-set-key (kbd "C-c C-f") 'cider-figwheel-repl)))
+        (add-hook 'cider-repl-mode-hook
+                  (lambda () (local-set-key (kbd "C-c C-f") 'cider-figwheel-repl)))
       #+END_SRC
 
 ***** A few repl tweaks
@@ -1903,7 +1904,7 @@
       #+BEGIN_SRC emacs-lisp
         (add-hook 'cider-repl-mode-hook #'paredit-mode)
         (add-hook 'cider-repl-mode-hook
-                    (lambda () (local-set-key (kbd "<return>") 'cider-repl-return)))
+                  (lambda () (local-set-key (kbd "<return>") 'cider-repl-return)))
         (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
         (add-hook 'cider-repl-mode-hook #'eldoc-mode)
       #+END_SRC
@@ -1940,7 +1941,8 @@
      Lots of cool little time savers in here.
 
      #+BEGIN_SRC emacs-lisp
-       (maybe-install-and-require 'clj-refactor)
+       (use-package clj-refactor
+         :ensure t)
        (defun my-clojure-mode-hook ()
          (clj-refactor-mode 1)
          (yas-minor-mode 1) ; for adding require/use/import statements
@@ -1950,8 +1952,8 @@
          (setq cljr-insert-newline-after-require nil)
          (setq lsp-ui-doc-enable nil))
 
-         (add-hook
-           'clojure-mode-hook #'my-clojure-mode-hook)
+       (add-hook
+        'clojure-mode-hook #'my-clojure-mode-hook)
      #+END_SRC
 
 **** clojurescript
@@ -1960,7 +1962,8 @@
      popping up in your emacs.
 
      #+BEGIN_SRC emacs-lisp
-       (maybe-install-and-require 'cljsbuild-mode)
+       (use-package cljsbuild-mode
+         :ensure t)
      #+END_SRC
 
 **** Clojure Cheat Sheet
@@ -1974,7 +1977,7 @@
 
      #+BEGIN_SRC emacs-lisp
        (add-hook 'clojure-mode-hook
-         (lambda () (local-set-key [s-f9] 'clojure-view-cheatsheet)))
+                 (lambda () (local-set-key [s-f9] 'clojure-view-cheatsheet)))
      #+END_SRC
 
 **** Flycheck clojure
@@ -1983,8 +1986,19 @@
      shot
 
      #+BEGIN_SRC emacs-lisp
-       (maybe-install-and-require 'flycheck-clojure)
-       (maybe-install-and-require 'flycheck-pos-tip)
+       (use-package flycheck-clojure
+         :ensure t)
+       (use-package flycheck-pos-tip
+         :ensure t)
+     #+END_SRC
+
+**** Joker linting using flycheck-joker
+
+     Make sure you have the joker executable on your path somewhere.
+
+     #+BEGIN_SRC emacs-lisp
+       (use-package flycheck-joker
+         :ensure t)
      #+END_SRC
 
 **** clj-kondo linting
@@ -1992,14 +2006,15 @@
      Make sure you have the clj-kondo executable on your path.
 
      #+BEGIN_SRC emacs-lisp
-      (maybe-install-and-require 'flycheck-clj-kondo)
-      (dolist (checker '(clj-kondo-clj clj-kondo-cljs clj-kondo-cljc clj-kondo-edn))
-              (setq flycheck-checkers (cons checker (delq checker flycheck-checkers))))
-      (dolist (checkers '((clj-kondo-clj . clojure-joker)
-                          (clj-kondo-cljs . clojurescript-joker)
-                          (clj-kondo-cljc . clojure-joker)
-                          (clj-kondo-edn . edn-joker)))
-              (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers))))
+       (use-package flycheck-clj-kondo
+         :ensure t)
+       (dolist (checker '(clj-kondo-clj clj-kondo-cljs clj-kondo-cljc clj-kondo-edn))
+         (setq flycheck-checkers (cons checker (delq checker flycheck-checkers))))
+       (dolist (checkers '((clj-kondo-clj . clojure-joker)
+                           (clj-kondo-cljs . clojurescript-joker)
+                           (clj-kondo-cljc . clojure-joker)
+                           (clj-kondo-edn . edn-joker)))
+         (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers))))
      #+END_SRC
 
 * Data Modes
