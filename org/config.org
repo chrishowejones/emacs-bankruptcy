@@ -2030,6 +2030,29 @@
          (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers))))
      #+END_SRC
 
+** JavaScript
+
+*** js2 mode
+
+    According to [[http://twitter.com/sw1nn][Neale Swinnerton]] js2-mode is the way to go.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package js2-mode
+        :ensure t
+        :config
+        (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+        (add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
+        ;; Better imenu
+        (add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
+        (setq js2-basic-offset 2))
+    #+END_SRC
+
+    And we can hook it in to run node.js shell scripts as well.
+
+    #+BEGIN_SRC emacs-lisp
+      (add-to-list 'interpreter-mode-alist '("node" . js2-mode))
+    #+END_SRC
+
 ** Language Server Protocol
 
 *** LSP config
@@ -2070,7 +2093,7 @@
         :ensure t
         :config (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
     #+end_src
-
+    
 * Data Modes
 
 * Multimedia
