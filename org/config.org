@@ -2101,6 +2101,21 @@
       (use-package tree-sitter-langs
         :ensure t
         :after tree-sitter)
+
+** DAP - Debug Adapter Protocol
+
+*** DAP mode config
+
+    I use DAP mode for debugging.
+
+    #+begin_src emacs-lisp
+      (use-package dap-mode
+        :ensure t
+        :after lsp-mode
+        :hook ((lsp-mode . dap-mode)
+               (lsp-mode . dap-ui-mode)
+               (lsp-mode . dap-ui-controls-mode))
+        :config (dap-auto-configure-mode))
     #+end_src
 
 ** Language Server Protocol
@@ -2121,6 +2136,7 @@
                (clojurescript-mode . lsp-deferred)
                (js2-mode . lsp-deferred)
                (typescript-mode . lsp-deferred)
+               (java-mode . lsp-deferred)
                ;; if you want which-key integration
                (lsp-mode . lsp-enable-which-key-integration)
                (lsp-mode . flycheck-mode)
@@ -2129,7 +2145,10 @@
         :config
         (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
         (setq lsp-completion-enable t)
-        (setq lsp-completion-mode t))
+        (setq lsp-completion-mode t)
+        (setq gc-cons-threshold 1000000)
+        (setq read-process-output-max (* 1024 1024 2))
+        (setq lsp-idle-delay 0.3))
     #+end_src
 
     Set up ui
@@ -2145,8 +2164,31 @@
     #+begin_src emacs-lisp
       (use-package consult-lsp
         :ensure t
-        :config (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
+        :config
+        (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
     #+end_src
+
+*** LSP for Java
+
+    Add in Java LSP and config for it and dap-java.
+
+    #+begin_src emacs-lisp
+      (use-package lsp-java
+        :ensure t
+        :after lsp-mode
+        :config
+        (require 'dap-java))
+    #+end_src
+
+    Bind debug Java keys after loading Java mode
+
+    #+begin_src emacs-lisp
+      (defun bind-java-dap-keys ()
+          (define-key java-mode-map (kbd "M-s-l t t") 'dap-java-run-test-method)
+        (define-key java-mode-map (kbd "M-s-l t d") dap-java-debug-test-method))
+    (with-eval-after-load 'java-mode (bind-java-dap-keys))  
+    #+end_src
+
 
 * Data Modes
 

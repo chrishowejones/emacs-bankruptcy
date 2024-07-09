@@ -8,7 +8,6 @@
 (add-to-list 'load-path (or (and load-file-name (directory-file-name (file-name-directory load-file-name))) (car load-path)))
 
 
-
 ;;; Generated autoloads from consult-lsp.el
 
 (autoload 'consult-lsp-diagnostics "consult-lsp" "\
@@ -29,7 +28,7 @@ kind; otherwise they are returned in the order that they appear in the file.
 
 (fn GROUP-RESULTS)" t)
 (register-definition-prefixes "consult-lsp" '("consult-lsp-"))
-
+
 ;;; End of scraped data
 
 (provide 'consult-lsp-autoloads)
