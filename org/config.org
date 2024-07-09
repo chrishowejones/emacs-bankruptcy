@@ -636,7 +636,9 @@
      (use-package command-log-mode
        :ensure t
        :config
-       (command-log-mode t))
+       (command-log-mode t)
+       :bind
+       ("C-c l" . clm/toggle-command-log-buffer))
    #+end_src
 
 * directories, navigation, searching, movement
@@ -1666,7 +1668,10 @@
     currently on by using M-n and M-p.
 
     #+BEGIN_SRC emacs-lisp
-      (use-package smartscan :ensure t)
+      (use-package smartscan :ensure t
+        :hook
+        (prog-mode . smartscan-mode)
+        (org-mode . smartscan-mode))
       (add-hook 'prog-mode-hook
                 '(lambda () (smartscan-mode 1)))
     #+END_SRC

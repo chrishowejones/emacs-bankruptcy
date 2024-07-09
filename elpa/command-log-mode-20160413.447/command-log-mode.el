@@ -320,3 +320,4 @@ Clears the command log buffer after saving."
 (provide 'command-log-mode)
 
 ;;; command-log-mode.el ends here
+
