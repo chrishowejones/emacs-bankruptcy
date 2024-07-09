@@ -385,6 +385,26 @@
       (setq inhibit-startup-screen t)
     #+END_SRC
 
+
+** Recent file mode
+
+   Add in recentf mode.
+
+   #+begin_src emacs-lisp
+     (recentf-mode t)
+     (setq recentf-max-menu-items 25)
+     (setq recentf-max-saved-items 25)
+   #+end_src
+
+** Hydra
+
+   Add in Hydra
+
+   #+begin_src emacs-lisp
+     (use-package hydra
+       :ensure t)
+   #+end_src
+   
 ** ediff
 
    ediff is my favourite way of comparing files, directories, versions
@@ -435,9 +455,11 @@
        ;; Use the grid display for files and a buffer
        ;; for the consult-grep commands.
        (setq vertico-multiform-categories
-             '((file grid)
-               (consult-grep buffer)
-               (consult-imenu buffer)))
+             '((file grid)))
+       (setq vertico-multiform-commands
+             '((consult-grep buffer)
+               (consult-imenu buffer)
+               (crux-recentf-find-file grid)))
        ;; Use `consult-completion-in-region' if Vertico is enabled.
        ;; Otherwise use the default `completion--in-region' function.
        (setq completion-in-region-function
@@ -659,7 +681,7 @@
        :bind
        ("C-c l" . clm/toggle-command-log-buffer))
    #+end_src
-
+   
 * directories, navigation, searching, movement
 ** paredit-mode
 
