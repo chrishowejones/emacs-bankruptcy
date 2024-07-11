@@ -209,23 +209,20 @@
      (add-hook 'prog-mode-hook 'hs-minor-mode)
    #+END_SRC
 
-** Reuse frames on display buffer
-
-   Reuse frames on display buffer.
-
-   #+begin_src emacs-lisp
-     (setopt
-      display-buffer-base-action
-      '((display-buffer-reuse-window)
-        (reusable-frames . 0)))
-   #+end_src
-
 ** Set regex syntax to string
 
    Set the regex syntax to string to prevent double escaping of regex expressions.
 
    #+begin_src emacs-lisp
      (setq reb-re-syntax 'string)
+   #+end_src
+
+** Set select help window
+
+   I want to select the help window so I have my cursor in the right place to press q to quit.
+
+   #+begin_src emacs-lisp :tangle yes
+     (setq help-window-select t)
    #+end_src
 
 * Macintosh Specific Setup
@@ -249,6 +246,28 @@
          (use-package exec-path-from-shell
            :ensure t)
          (exec-path-from-shell-initialize)))
+   #+END_SRC
+
+** command key as meta
+
+   Function to remap meta and super keys for builtin mac keyboard.
+
+   #+BEGIN_SRC emacs-lisp
+     (defun macbook-keyboard-remap ()
+       "Remap meta and super to suit the builtin Macbook keyboard"
+       (interactive)
+       (setq mac-command-modifier 'meta)
+       (setq mac-option-modifier 'super))
+   #+END_SRC
+
+   Function to remap meta and super keys for PC keyboard.
+
+   #+BEGIN_SRC emacs-lisp
+     (defun pc-keyboard-remap ()
+       "Remap meta and super to suit an external PC style keyboard"
+       (interactive)
+       (setq mac-command-modifier 'super)
+       (setq mac-option-modifier 'meta))
    #+END_SRC
 
 * Make it Pretty
@@ -1739,6 +1758,7 @@
      #+END_SRC
 
 **** Pop Up Help in Emacs Lisp
+     DEADLINE: <2024-07-11 Thu>
 
      Thx again to [[http://twitter.com/krisajenkins][Kris Jenkins]] and his [[http://blog.jenkster.com/2013/12/popup-help-in-emacs-lisp.html][blog post]] I've got even yet
      more help with emacs-lisp functions in a popup just like in ac
@@ -1766,6 +1786,7 @@
                       :margin t)))
      #+END_SRC
 
+
 ***** The usual help keybinding
 
       Let's use C-c C-d for describing functions at point as this is
@@ -1782,16 +1803,26 @@
                     (local-set-key (kbd "C-c C-k") 'eval-buffer)))
       #+END_SRC
 
-***** auto complete bash style in shell
 
-      I found the autocompletion for shell wasn't working properly
-      and didn't work like bash
+***** Help binding for org-mode (as C-c C-d is used for org-deadline)
 
-      #+BEGIN_SRC emacs-lisp
-        (use-package bash-completion
-          :ensure t
-          :config (bash-completion-setup))
-      #+END_SRC
+      Let's use C-c d for describing functions at point in org-mode (for embedded code).
+
+      #+begin_src emacs-lisp :tangle yes
+        (add-hook 'org-mode-hook
+                  (lambda () (local-set-key (kbd "C-c d") 'describe-thing-in-popup)))
+      #+end_src
+
+*** auto complete bash style in shell
+
+    I found the autocompletion for shell wasn't working properly
+    and didn't work like bash
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package bash-completion
+        :ensure t
+        :config (bash-completion-setup))
+    #+END_SRC
 
 *** clojure
 
@@ -2116,7 +2147,7 @@
         :ensure t
         :config (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
     #+end_src
-    
+
 * Data Modes
 
 * Multimedia
