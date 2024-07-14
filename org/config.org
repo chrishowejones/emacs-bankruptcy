@@ -404,7 +404,7 @@
      (use-package hydra
        :ensure t)
    #+end_src
-   
+
 ** ediff
 
    ediff is my favourite way of comparing files, directories, versions
@@ -681,7 +681,7 @@
        :bind
        ("C-c l" . clm/toggle-command-log-buffer))
    #+end_src
-   
+
 * directories, navigation, searching, movement
 ** paredit-mode
 
@@ -719,6 +719,9 @@
 
    #+BEGIN_SRC emacs-lisp
      (add-hook 'text-mode-hook 'my-paredit-nonlisp)
+     (add-hook 'js2-mode-hook 'my-paredit-nonlisp)
+     (add-hook 'typescript-mode-hook 'my-paredit-nonlisp)
+     (add-hook 'java-mode-hook 'my-paredit-nonlisp)
    #+END_SRC
 
 ** dired
@@ -2124,6 +2127,26 @@
         :ensure t
         :after tree-sitter)
 
+      (setq treesit-language-source-alist
+            '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+              (cmake "https://github.com/uyha/tree-sitter-cmake")
+              (css "https://github.com/tree-sitter/tree-sitter-css")
+              (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+              (go "https://github.com/tree-sitter/tree-sitter-go")
+              (html "https://github.com/tree-sitter/tree-sitter-html")
+              (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+              (json "https://github.com/tree-sitter/tree-sitter-json")
+              (make "https://github.com/alemuller/tree-sitter-make")
+              (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+              (python "https://github.com/tree-sitter/tree-sitter-python")
+              (toml "https://github.com/tree-sitter/tree-sitter-toml")
+              (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+              (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+              (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+      (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
+    #+end_src
+
 ** DAP - Debug Adapter Protocol
 
 *** DAP mode config
@@ -2206,9 +2229,9 @@
 
     #+begin_src emacs-lisp
       (defun bind-java-dap-keys ()
-          (define-key java-mode-map (kbd "M-s-l t t") 'dap-java-run-test-method)
+        (define-key java-mode-map (kbd "M-s-l t t") 'dap-java-run-test-method)
         (define-key java-mode-map (kbd "M-s-l t d") dap-java-debug-test-method))
-    (with-eval-after-load 'java-mode (bind-java-dap-keys))  
+      (with-eval-after-load 'java-mode (bind-java-dap-keys))
     #+end_src
 
 
