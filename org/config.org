@@ -226,28 +226,6 @@
    #+end_src
 
 * Macintosh Specific Setup
-
-** $PATH is broken
-
-   If you don't run emacs in a terminal on Mac OS X then it can be
-   really awkward to get the stuff you want in your path. This is the
-   best way I've found so far to sort this out and get things like
-   ~/bin and /usr/loca/bin in a $PATH that emacs can access. I quite
-   like running emacs from outside the terminal.
-
-   Thanks to the lovely and helpful [[https://twitter.com/_tobrien][Tom O'Brien]] I've got a better way
-   of doing this and now my emacs environment will be in sync with my
-   shell. You can out more at the github page for
-   [[https://github.com/purcell/exec-path-from-shell][exec-path-from-shell]].
-
-   #+BEGIN_SRC emacs-lisp
-     (when (memq window-system '(mac ns))
-       (progn
-         (use-package exec-path-from-shell
-           :ensure t)
-         (exec-path-from-shell-initialize)))
-   #+END_SRC
-
 ** command key as meta
 
    Function to remap meta and super keys for builtin mac keyboard.
@@ -1624,6 +1602,17 @@
    #+END_SRC
 
 * Programming Modes
+** shell
+   
+   #+BEGIN_SRC emacs-lisp
+     (global-set-key [C-M-return] 'shell)
+     ;; Use bash explicitly cos fancy shells like zsh don't render well in emacs
+     (setq explicit-shell-file-name "/bin/zsh")
+     (setq shell-file-name "zsh")
+     (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+     (add-to-list 'comint-output-filter-functions 'ansi-color-process-output)
+   #+END_SRC
+
 ** restclient
 
    Added in rest client to allow for manual testing of restful client.
@@ -2341,7 +2330,7 @@
         (define-key java-mode-map (kbd "M-s-l t d") dap-java-debug-test-method))
       (with-eval-after-load 'java-mode (bind-java-dap-keys))
     #+end_src
-
+    
 
 * Data Modes
 
@@ -2374,3 +2363,10 @@
    #+end_src
 
 * Misc
+** Add exec path from shell
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package exec-path-from-shell
+       :ensure t)
+     (exec-path-from-shell-initialize)
+   #+END_SRC
