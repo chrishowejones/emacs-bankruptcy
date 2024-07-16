@@ -489,7 +489,7 @@
            completion-ignore-case t)
    #+end_src
 
-** COMMENT Embark
+** Embark
 
    Use Embark to choose an action based on what is near at point.
 
@@ -1011,7 +1011,10 @@
        :config
        (persp-mode))
      (use-package persp-projectile
-       :defer t)
+       :ensure t
+       :defer t
+       :config
+       (customize-set-variable 'persp-mode-prefix-key (kbd "C-c M-p")))
    #+END_SRC
 
 ** Ag
