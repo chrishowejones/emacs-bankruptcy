@@ -2231,6 +2231,16 @@
                ("C-c l" . ts-load-file-and-go)))
     #+END_SRC
 
+** Jest Test mode
+
+   Run Jest tests
+
+   #+BEGIN_SRC emacs-lisp
+       (use-package jest-test-mode
+         :ensure t
+         :commands jest-test-mode
+         :hook (typescript-mode js2-mode typescript-tsx-mode))
+   #+END_SRC
 
 ** pastebins
 
@@ -2327,7 +2337,7 @@
     #+begin_src emacs-lisp
       (defun bind-java-dap-keys ()
         (define-key java-mode-map (kbd "M-s-l t t") 'dap-java-run-test-method)
-        (define-key java-mode-map (kbd "M-s-l t d") dap-java-debug-test-method))
+        (define-key java-mode-map (kbd "M-s-l t d") 'dap-java-debug-test-method))
       (with-eval-after-load 'java-mode (bind-java-dap-keys))
     #+end_src
     
