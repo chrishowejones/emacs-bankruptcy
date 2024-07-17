@@ -36,6 +36,16 @@
      (org-mode-gt-lt-fix)
    #+END_SRC
 
+** Add in vc-use-package
+
+   Install vc-use-package so I can install from Git.
+
+   #+begin_src emacs-lisp :tangle yes
+     (unless (package-installed-p 'vc-use-package)
+       (package-vc-install "https://github.com/slotThe/vc-use-package"))
+     (require 'vc-use-package)
+   #+end_src
+
 * Local Config
 
 ** custom.el
@@ -895,6 +905,18 @@
      #+BEGIN_SRC emacs-lisp
        (setq markdown-open-command "open")
      #+END_SRC
+
+*** Conventional Commits
+
+    Add in a mode to do conventional commit messages.
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package conventional-commit
+        :vc (conventional-commit :url "https://github.com/akirak/conventional-commit.el.git"
+                                 :branch "master")
+        :hook
+        (git-commit-mode . conventional-commit-setup))
+    #+end_src
 
 ** backup directories
 
