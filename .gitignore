@@ -47,3 +47,5 @@ org-roam.db
 code-review-*
 .dap-breakpoints
 **/*.pyc
+elpa/conventional-commit/
+elpa/vc-use-package/
