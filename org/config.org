@@ -417,7 +417,7 @@
        (diminish 'company-mode "CA")
        (global-set-key (kbd "C-M-i") 'company-complete)
        (setq company-tooltip-flip-when-above t)
-       (setq company-minimum-prefix-length 2)               ; WARNING, probably you will get perfomance issue if min len is 0!
+       (setq company-minimum-prefix-length 1)               ; WARNING, probably you will get perfomance issue if min len is 0!
        (setq company-tooltip-limit 20)                      ; bigger popup window
        (setq company-tooltip-align-annotations 't)          ; align annotations to the right tooltip border
        (setq company-idle-delay 0.3)                        ; decrease delay before autocompletion popup shows
