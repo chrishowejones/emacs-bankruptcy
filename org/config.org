@@ -466,6 +466,7 @@
              '((consult-grep buffer)
                (consult-ripgrep buffer)
                (consult-imenu buffer)
+               (imenu buffer)
                (crux-recentf-find-file grid)))
        ;; Use `consult-completion-in-region' if Vertico is enabled.
        ;; Otherwise use the default `completion--in-region' function.
@@ -1127,7 +1128,9 @@
 
     #+BEGIN_SRC emacs-lisp
       (use-package yaml-mode
-        :ensure t)
+        :ensure t
+        :bind
+        ("C-;" . comment-dwim))
     #+END_SRC
 
 *** css
@@ -1636,6 +1639,13 @@
       (use-package redtick :ensure t)
     #+END_SRC
 
+*** Comment do what I mean in org
+
+    Add in key binding for comment-dwim
+
+    #+begin_src emacs-lisp :tangle yes
+      (add-hook 'org-mode-hook (lambda () (local-set-key (kbd "C-;") 'org-comment-dwim)))
+    #+end_src
 
 ** Org faces
 
@@ -1833,6 +1843,16 @@
 
       (add-hook 'prog-mode-hook 'my-buffer-face-mode-fixed)
     #+END_SRC
+
+    
+*** Set comment-dwim key binding for prog-mode
+
+    Set the C-; key chord for comment-dwim.
+
+    #+begin_src emacs-lisp :tangle yes
+      (define-key prog-mode-map
+                  (kbd "C-;") 'comment-dwim)
+    #+end_src
 
 ** lisp modes
 
