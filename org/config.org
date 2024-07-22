@@ -2315,6 +2315,17 @@
          :hook (typescript-mode js2-mode typescript-tsx-mode))
    #+END_SRC
 
+** Terraform
+
+   Set up Terraform mode.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package terraform-mode
+       :ensure t
+       :hook
+       (outline-minor-mode))
+   #+end_src
+
 ** pastebins
 
    gist, pastebin, refheap. All good ways of sharing snippets of code
