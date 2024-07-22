@@ -1111,6 +1111,14 @@
      (define-key global-map (kbd "s-u") 'revert-buffer)
    #+end_src
 
+** Transpose sexp key
+
+   Transpose sexpr mapped to C-M-t
+
+   #+begin_src emacs-lisp :tangle yes
+     (global-set-key (kbd "C-M-t") 'transpose-sexpr)
+   #+end_src
+
 * Text Modes
 
 ** Markdown mode
