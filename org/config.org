@@ -246,11 +246,12 @@
 
 ** Reuse window on display buffer
 
-   Try and reuse a window already using the buffer and then fall back to using an existing window and finally pop up a window if all else fails.
+   Try and reuse a window already using the buffer and then fall back to pop up a window and finally using an existing window
+   if all else fails.
 
    #+begin_src emacs-lisp :tangle yes
      (setopt display-buffer-base-action
-             '((display-buffer-reuse-window display-buffer-use-some-window display-buffer-pop-up-window)))
+             '((display-buffer-reuse-window display-buffer-pop-up-window display-buffer-use-some-window)))
    #+end_src
 
 * Macintosh Specific Setup
@@ -2321,8 +2322,6 @@
         :ensure t)
     #+END_SRC
 
-** Language Server Protocol
-
 ** Apheleia
 
     auto-format different source code files extremely intelligently
@@ -2335,6 +2334,7 @@
         (apheleia-global-mode +1))
     #+END_SRC
 
+** Language Server Protocol
 
 *** LSP config
 
