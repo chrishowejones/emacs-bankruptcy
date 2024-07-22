@@ -892,6 +892,15 @@
         :ensure t)
     #+END_SRC
 
+*** github review
+
+    Add in github review.
+    
+    #+BEGIN_SRC emacs-lisp
+      (use-package github-review-mode
+        :ensure t)
+    #+END_SRC
+
 *** git-messenger
 
     Get the commit information for the current line. A bit like a mini
