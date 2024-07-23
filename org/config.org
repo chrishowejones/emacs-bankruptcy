@@ -905,7 +905,7 @@
     Add in github review.
     
     #+BEGIN_SRC emacs-lisp
-      (use-package github-review-mode
+      (use-package github-review
         :ensure t)
     #+END_SRC
 
