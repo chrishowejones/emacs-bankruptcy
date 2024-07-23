@@ -344,6 +344,7 @@
    #+BEGIN_SRC emacs-lisp
      (use-package dashboard :ensure t)
      (dashboard-setup-startup-hook)
+     (setq dashboard-projects-backend 'projectile)
      (setq dashboard-items '((recents  . 10)
                              (bookmarks . 5)
                              (projects . 5)
