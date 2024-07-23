@@ -737,6 +737,14 @@
        ("C-c l" . clm/toggle-command-log-buffer))
    #+end_src
 
+** Imenu key binding
+
+   Set s-i as imenu keybinding.
+
+   #+begin_src emacs-lisp :tangle yes
+     (global-set-key (kbd "s-i") 'imenu)
+   #+end_src
+
 * directories, navigation, searching, movement
 ** paredit-mode
 
