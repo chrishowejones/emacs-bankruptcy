@@ -254,6 +254,14 @@
              '((display-buffer-reuse-window display-buffer-pop-up-window display-buffer-use-some-window)))
    #+end_src
 
+** Set auth sources to use gpg
+
+   Set auth sources to use the .authinfo.gpg file.
+
+   #+begin_src emacs-lisp :tangle yes
+     (setq auth-sources '("~/.authinfo.gpg"))
+   #+end_src
+   
 * Macintosh Specific Setup
 ** command key as meta
 
@@ -842,6 +850,18 @@
       (global-set-key (kbd "C-x g") 'magit-status)
     #+END_SRC
 
+*** forge
+
+    Use forge with magit
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package forge
+        :ensure t
+        :pin melpa
+        :after magit)
+
+    #+end_src
+
 *** git-gutter-mode+
 
     It is really nice having +/= in the gutter. I like it more than
@@ -1055,6 +1075,14 @@
        (customize-set-variable 'persp-mode-prefix-key (kbd "C-c M-p")))
    #+END_SRC
 
+** ibuffer
+
+   I like ibuffer so rebind C-x C-b to use it.
+
+   #+BEGIN_SRC emacs-lisp
+     (global-set-key (kbd "C-x C-b") 'ibuffer)
+   #+END_SRC
+
 ** Ag
 
    Add in ag package
@@ -1175,6 +1203,12 @@
 
 
 ** Org mode customisation
+
+*** Turn off paredit in org mode
+
+    #+begin_src emacs-lisp :tangle yes
+      (add-hook 'org-mode-hook (lambda () (paredit-mode 0)))
+    #+end_src
 
 *** Adapt indentation
 
@@ -2445,6 +2479,15 @@
 
 * Data Modes
 
+** Dockerfile mode
+
+   Add in Dockerfile mode.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package dockerfile-mode
+       :ensure t)
+   #+end_src
+
 * Multimedia
 
 * Notification Systems
@@ -2481,3 +2524,4 @@
        :ensure t)
      (exec-path-from-shell-initialize)
    #+END_SRC
+
