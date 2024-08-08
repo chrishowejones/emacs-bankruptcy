@@ -346,6 +346,32 @@
        :ensure t)
    #+END_SRC
 
+** Keycast
+
+I like showing the key presses in mode line so I can install keycast and then invoke keycast-mode-line-mode.
+
+   #+begin_src emacs-lisp
+     (use-package keycast
+       :ensure t)
+   #+end_src
+
+** Visual line mode
+
+  Use visual line mode to visually wrap lines when they don't fit on screen. Doesn't actually add new lines. 
+  
+  #+begin_src emacs-lisp
+   (global-visual-line-mode t)
+  #+end_src
+
+** Auto fill mode 
+
+  Line break long lines.
+
+  #+begin_src emacs-lisp
+   (setq fill-column 120) 
+   (auto-fill-mode t)  
+  #+end_src
+
 * Tool Configuration
 ** Dashboard
 
