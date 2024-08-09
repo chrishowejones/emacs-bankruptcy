@@ -262,6 +262,14 @@
      (setq auth-sources '("~/.authinfo.gpg"))
    #+end_src
    
+** Plstore to store OAuth tokens
+
+   Cache passphrase for symmetrical encryption.
+
+   #+begin_src emacs-lisp
+     (setq plstore-cache-passphrase-for-symmetric-encryption t)
+   #+end_src
+   
 * Macintosh Specific Setup
 ** command key as meta
 
@@ -1410,6 +1418,7 @@ I like showing the key presses in mode line so I can install keycast and then in
       #+BEGIN_SRC emacs-lisp
         (use-package org-gcal
           :ensure t)
+        (add-to-list 'plstore-encrypt-to '("220EA16443C4070D8FBCFF797C9CA3DEC6A37B67"))
       #+END_SRC
 
 ***** Agenda Windows
@@ -2550,4 +2559,5 @@ I like showing the key presses in mode line so I can install keycast and then in
        :ensure t)
      (exec-path-from-shell-initialize)
    #+END_SRC
+
 
