@@ -261,7 +261,7 @@
    #+begin_src emacs-lisp :tangle yes
      (setq auth-sources '("~/.authinfo.gpg"))
    #+end_src
-   
+
 ** Plstore to store OAuth tokens
 
    Cache passphrase for symmetrical encryption.
@@ -269,7 +269,7 @@
    #+begin_src emacs-lisp
      (setq plstore-cache-passphrase-for-symmetric-encryption t)
    #+end_src
-   
+
 * Macintosh Specific Setup
 ** command key as meta
 
@@ -356,7 +356,7 @@
 
 ** Keycast
 
-I like showing the key presses in mode line so I can install keycast and then invoke keycast-mode-line-mode.
+   I like showing the key presses in mode line so I can install keycast and then invoke keycast-mode-line-mode.
 
    #+begin_src emacs-lisp
      (use-package keycast
@@ -365,20 +365,20 @@ I like showing the key presses in mode line so I can install keycast and then in
 
 ** Visual line mode
 
-  Use visual line mode to visually wrap lines when they don't fit on screen. Doesn't actually add new lines. 
-  
-  #+begin_src emacs-lisp
-   (global-visual-line-mode t)
-  #+end_src
+   Use visual line mode to visually wrap lines when they don't fit on screen. Doesn't actually add new lines.
 
-** Auto fill mode 
+   #+begin_src emacs-lisp
+     (global-visual-line-mode t)
+   #+end_src
 
-  Line break long lines.
+** Auto fill mode
 
-  #+begin_src emacs-lisp
-   (setq fill-column 120) 
-   (auto-fill-mode t)  
-  #+end_src
+   Line break long lines.
+
+   #+begin_src emacs-lisp
+     (setq fill-column 120)
+     (auto-fill-mode t)
+   #+end_src
 
 * Tool Configuration
 ** Dashboard
@@ -889,11 +889,10 @@ I like showing the key presses in mode line so I can install keycast and then in
     Use forge with magit
 
     #+begin_src emacs-lisp :tangle yes
-      (use-package forge
-        :ensure t
-        :pin melpa
-        :after magit)
-
+      ;; (use-package forge
+      ;;   :ensure t
+      ;;   :pin melpa
+      ;;   :after magit)
     #+end_src
 
 *** git-gutter-mode+
@@ -958,7 +957,7 @@ I like showing the key presses in mode line so I can install keycast and then in
 *** github review
 
     Add in github review.
-    
+
     #+BEGIN_SRC emacs-lisp
       (use-package github-review
         :ensure t)
@@ -1222,6 +1221,30 @@ I like showing the key presses in mode line so I can install keycast and then in
         ("C-;" . comment-dwim))
     #+END_SRC
 
+*** web mode
+
+    Use web mode for html, php(?), jsp, etc.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package web-mode
+        :ensure t
+        :config
+        (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+        (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+        (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
+        (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+        (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+        (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+        (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
+        (add-to-list 'auto-mode-alist '("\\.hmtl?\\'" . web-mode))
+        (setq web-mode-markup-indent-offset 2)
+        (setq web-mode-css-markup-indent-offset 2)
+        (setq web-mode-code-indent-offset 2)
+        (add-hook 'web-mode-hook 'my-paredit-nonlisp)
+        (flycheck-add-mode 'typescript-tslint 'web-mode))
+
+    #+END_SRC
+
 *** css
 
     Think I need to give this some more sugar sometime....
@@ -1418,7 +1441,7 @@ I like showing the key presses in mode line so I can install keycast and then in
       #+BEGIN_SRC emacs-lisp
         (use-package org-gcal
           :ensure t)
-        (add-to-list 'plstore-encrypt-to '("220EA16443C4070D8FBCFF797C9CA3DEC6A37B67"))
+        (add-to-list 'plstore-encrypt-to "220EA16443C4070D8FBCFF797C9CA3DEC6A37B67")
       #+END_SRC
 
 ***** Agenda Windows
@@ -1753,7 +1776,7 @@ I like showing the key presses in mode line so I can install keycast and then in
 
 * Programming Modes
 ** shell
-   
+
    #+BEGIN_SRC emacs-lisp
      (global-set-key [C-M-return] 'shell)
      ;; Use bash explicitly cos fancy shells like zsh don't render well in emacs
@@ -1909,12 +1932,14 @@ I like showing the key presses in mode line so I can install keycast and then in
                 '(lambda () (smartscan-mode 1)))
     #+END_SRC
 
-*** Set line numbers mode in prog modes
+*** Set line numbers mode in prog and html/css/xml modes
 
-    Set line numbers on in all programming modes.
+    Set line numbers on in all programming and html/css/xml modes.
 
     #+BEGIN_SRC emacs-lisp
       (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+      (add-hook 'yaml-mode-hook 'display-line-numbers-mode)
+      (add-hook 'web-mode-hook 'display-line-numbers-mode)
     #+END_SRC
 
 
@@ -1940,7 +1965,7 @@ I like showing the key presses in mode line so I can install keycast and then in
       (add-hook 'prog-mode-hook 'my-buffer-face-mode-fixed)
     #+END_SRC
 
-    
+
 *** Set comment-dwim key binding for prog-mode
 
     Set the C-; key chord for comment-dwim.
@@ -2384,11 +2409,11 @@ I like showing the key presses in mode line so I can install keycast and then in
       (use-package ts-comint
         :ensure t
         :bind (:map typescript-mode-map
-               ("C-x C-e" . ts-send-last-sexp)
-               ("C-M-x" . ts-send-last-sexp-and-go)
-               ("C-c b" . ts-send-buffer)
-               ("C-c C-b" . ts-send-buffer-and-go)
-               ("C-c l" . ts-load-file-and-go)))
+                    ("C-x C-e" . ts-send-last-sexp)
+                    ("C-M-x" . ts-send-last-sexp-and-go)
+                    ("C-c b" . ts-send-buffer)
+                    ("C-c C-b" . ts-send-buffer-and-go)
+                    ("C-c l" . ts-load-file-and-go)))
     #+END_SRC
 
 ** Jest Test mode
@@ -2396,10 +2421,10 @@ I like showing the key presses in mode line so I can install keycast and then in
    Run Jest tests
 
    #+BEGIN_SRC emacs-lisp
-       (use-package jest-test-mode
-         :ensure t
-         :commands jest-test-mode
-         :hook (typescript-mode js2-mode typescript-tsx-mode))
+     (use-package jest-test-mode
+       :ensure t
+       :commands jest-test-mode
+       :hook (typescript-mode js2-mode typescript-tsx-mode))
    #+END_SRC
 
 ** Terraform
@@ -2430,15 +2455,15 @@ I like showing the key presses in mode line so I can install keycast and then in
 
 ** Apheleia
 
-    auto-format different source code files extremely intelligently
-    https://github.com/radian-software/apheleia
+   auto-format different source code files extremely intelligently
+   https://github.com/radian-software/apheleia
 
-    #+BEGIN_SRC emacs-lisp
-      (use-package apheleia
-        :ensure t
-        :config
-        (apheleia-global-mode +1))
-    #+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (use-package apheleia
+       :ensure t
+       :config
+       (apheleia-global-mode +1))
+   #+END_SRC
 
 ** Language Server Protocol
 
@@ -2510,7 +2535,7 @@ I like showing the key presses in mode line so I can install keycast and then in
         (define-key java-mode-map (kbd "M-s-l t d") 'dap-java-debug-test-method))
       (with-eval-after-load 'java-mode (bind-java-dap-keys))
     #+end_src
-    
+
 
 * Data Modes
 
@@ -2559,5 +2584,3 @@ I like showing the key presses in mode line so I can install keycast and then in
        :ensure t)
      (exec-path-from-shell-initialize)
    #+END_SRC
-
-
