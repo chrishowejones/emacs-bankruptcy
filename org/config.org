@@ -380,6 +380,43 @@
      (auto-fill-mode t)
    #+end_src
 
+** Apheleia
+
+   auto-format different source code files extremely intelligently
+   https://github.com/radian-software/apheleia
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package apheleia
+       :ensure t
+       :config
+       (setf (alist-get 'prettier apheleia-formatters)
+             '(npx "prettier"
+                   "--trailing-comma"  "es5"
+                   "--bracket-spacing" "true"
+                   "--single-quote"    "true"
+                   "--semi"            "false"
+                   "--print-width"     "100"
+                   file))
+       (setf (alist-get 'clj-zprint apheleia-formatters)
+             '("clj-zprint"
+               "{:style [:community :justified] :map {:comma? false}} <"
+               file))
+       (add-to-list 'apheleia-mode-alist '(rjsx-mode . prettier))
+       (add-to-list 'apheleia-mode-alist '(clojure-mode . clj-zprint))
+       (apheleia-global-mode +1))
+   #+END_SRC
+
+** Editor Config
+
+   Add in mode to support .editorconfig
+
+   #+begin_src emacs-lisp
+     (use-package editorconfig
+       :ensure t
+       :config
+       (editorconfig-mode 1))
+   #+end_src
+
 * Tool Configuration
 ** Dashboard
 
@@ -1195,7 +1232,7 @@
    Transpose sexpr mapped to C-M-t
 
    #+begin_src emacs-lisp :tangle yes
-     (global-set-key (kbd "C-M-t") 'transpose-sexpr)
+     (global-set-key (kbd "C-M-t") 'transpose-sexps)
    #+end_src
 
 * Text Modes
@@ -2452,18 +2489,6 @@
       (use-package gist
         :ensure t)
     #+END_SRC
-
-** Apheleia
-
-   auto-format different source code files extremely intelligently
-   https://github.com/radian-software/apheleia
-
-   #+BEGIN_SRC emacs-lisp
-     (use-package apheleia
-       :ensure t
-       :config
-       (apheleia-global-mode +1))
-   #+END_SRC
 
 ** Language Server Protocol
 
