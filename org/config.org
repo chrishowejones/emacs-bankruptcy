@@ -953,10 +953,20 @@
     Use forge with magit
 
     #+begin_src emacs-lisp :tangle yes
-      ;; (use-package forge
-      ;;   :ensure t
-      ;;   :pin melpa
-      ;;   :after magit)
+      (use-package forge
+        :ensure t
+        :pin melpa
+        :after magit)
+    #+end_src
+
+    
+*** Code review
+
+    Use code review from a branch on a different repo that has a fix.
+
+    #+begin_src emacs-lisp
+      (use-package code-review
+        :vc (code-review :url "https://github.com/phelrine/code-review" :branch "fix/closql-update"))
     #+end_src
 
 *** git-gutter-mode+
