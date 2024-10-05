@@ -262,6 +262,16 @@
      (setq auth-sources '("~/.authinfo.gpg"))
    #+end_src
    
+** Unmap key bindings to suspend emacs
+
+  Annoying if I catch C-z and Emacs suspends.
+
+  #+begin_src emacs-lisp
+    (when (display-graphic-p)
+      (global-unset-key (kbd "C-z"))
+      (global-unset-key (kbd "C-x C-z")))
+  #+end_src
+  
 * Macintosh Specific Setup
 ** command key as meta
 
@@ -368,8 +378,8 @@ I like showing the key presses in mode line so I can install keycast and then in
   Line break long lines.
 
   #+begin_src emacs-lisp
-   (setq fill-column 120) 
-   (auto-fill-mode t)  
+    (setq-default fill-column 120) 
+    (setq-default auto-fill-function 'do-auto-fill)
   #+end_src
 
 * Tool Configuration
@@ -503,7 +513,8 @@ I like showing the key presses in mode line so I can install keycast and then in
                (consult-ripgrep buffer)
                (consult-imenu buffer)
                (imenu buffer)
-               (crux-recentf-find-file grid)))
+               (crux-recentf-find-file grid)
+               (crux-recentf-find-directory grid)))
        ;; Use `consult-completion-in-region' if Vertico is enabled.
        ;; Otherwise use the default `completion--in-region' function.
        (setq completion-in-region-function
@@ -529,7 +540,13 @@ I like showing the key presses in mode line so I can install keycast and then in
           (command (styles basic partial-completion)))))
      (setq read-file-name-completion-ignore-case t
            read-buffer-completion-ignore-case t
-           completion-ignore-case t)
+           completion-ignore-case t
+           orderless-component-separator "[ ~]")
+     (defun just-one-face (fn &rest args)
+       (let ((orderless-match-faces [completions-common-part]))
+         (apply fn args)))
+
+     (advice-add 'company-capf--candidates :around #'just-one-face)
    #+end_src
 
 ** Embark
@@ -542,7 +559,6 @@ I like showing the key presses in mode line so I can install keycast and then in
 
        :bind
        (("C-." . embark-act)         ;; pick some comfortable binding
-        ("C-;" . embark-dwim)        ;; good alternative: M-.
         ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
 
        :init
@@ -716,6 +732,7 @@ I like showing the key presses in mode line so I can install keycast and then in
      (global-set-key (kbd "C-c k") 'avy-kill-region)
      (global-set-key (kbd "C-c w") 'avy-goto-char-timer)
      (global-set-key (kbd "C-c c") 'avy-goto-char)
+     (global-set-key (kbd "M-g c") 'avy-goto-char)
    #+END_SRC
 
 ** Marginalia
@@ -778,6 +795,14 @@ I like showing the key presses in mode line so I can install keycast and then in
 
    #+begin_src emacs-lisp :tangle yes
      (global-set-key (kbd "s-i") 'imenu)
+   #+end_src
+
+** Winner mode
+
+   Activate winner mode so that I can undo windows config changes if required.
+
+   #+begin_src emacs-lisp
+    (winner-mode t)  
    #+end_src
 
 * directories, navigation, searching, movement
@@ -881,11 +906,10 @@ I like showing the key presses in mode line so I can install keycast and then in
     Use forge with magit
 
     #+begin_src emacs-lisp :tangle yes
-      (use-package forge
-        :ensure t
-        :pin melpa
-        :after magit)
-
+      ;; (use-package forge
+      ;;   :ensure t
+      ;;   :pin melpa
+      ;;   :after magit)
     #+end_src
 
 *** git-gutter-mode+
@@ -1172,7 +1196,7 @@ I like showing the key presses in mode line so I can install keycast and then in
        (global-set-key (kbd "s-r") 'crux-recentf-find-file)
        (global-set-key (kbd "C-c M-k") 'crux-kill-other-buffers)
        (global-set-key (kbd "C-c P") 'crux-kill-buffer-truename)
-       (global-set-key (kbd "C-k") 'crux-smart-kill-line))
+       (global-set-key (kbd "C-c f") 'crux-recentf-find-directory))
    #+END_SRC
 
 ** Revert buffer shortcut key
@@ -1188,7 +1212,7 @@ I like showing the key presses in mode line so I can install keycast and then in
    Transpose sexpr mapped to C-M-t
 
    #+begin_src emacs-lisp :tangle yes
-     (global-set-key (kbd "C-M-t") 'transpose-sexpr)
+     (global-set-key (kbd "C-M-t") 'transpose-sexps)
    #+end_src
 
 * Text Modes
@@ -1410,6 +1434,7 @@ I like showing the key presses in mode line so I can install keycast and then in
       #+BEGIN_SRC emacs-lisp
         (use-package org-gcal
           :ensure t)
+        (setq plstore-cache-passphrase-for-symmetric-encryption t)
       #+END_SRC
 
 ***** Agenda Windows
@@ -1733,6 +1758,17 @@ I like showing the key presses in mode line so I can install keycast and then in
     #+begin_src emacs-lisp :tangle yes
       (add-hook 'org-mode-hook (lambda () (local-set-key (kbd "C-;") 'org-comment-dwim)))
     #+end_src
+
+*** Improve Company completion for org
+
+    Company completion doesn't work well in Org mode. Adding
+    pcomplete-completions-at-point in org-mode should fix some of these issues.
+
+    #+begin_src emacs-lisp
+      (add-hook 'org-mode-hook
+       (lambda () (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)))
+    #+end_src
+
 
 ** Org faces
 
@@ -2284,13 +2320,13 @@ I like showing the key presses in mode line so I can install keycast and then in
 
     #+BEGIN_SRC emacs-lisp
       (use-package js2-mode
-        :ensure t
-        :config
-        (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-        (add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
-        ;; Better imenu
-        (add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
-        (setq js2-basic-offset 2))
+	:ensure t
+	:config
+	(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+	(add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
+	;; Better imenu
+	(add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
+	(setq js2-basic-offset 2))
     #+END_SRC
 
     And we can hook it in to run node.js shell scripts as well.
@@ -2550,4 +2586,6 @@ I like showing the key presses in mode line so I can install keycast and then in
        :ensure t)
      (exec-path-from-shell-initialize)
    #+END_SRC
+
+
 

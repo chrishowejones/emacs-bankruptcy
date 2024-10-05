@@ -63,3 +63,4 @@
 (org-babel-load-file (concat user-emacs-directory "org/config.org"))
 (provide 'init)
 ;;; init.el ends here
+(put 'narrow-to-region 'disabled nil)

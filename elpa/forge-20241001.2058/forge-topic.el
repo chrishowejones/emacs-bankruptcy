@@ -60,7 +60,7 @@ The following %-sequences are supported:
   :type 'boolean)
 
 (defcustom forge-topic-repository-slug-width 28
-  "Width of repository slugs in `forge-notifications-mode' buffers."
+  "Width of repository slugs (i.e., \"OWNER/NAME\")."
   :package-version '(forge . "0.4.0")
   :group 'forge
   :type (if (>= emacs-major-version 28) 'natnum 'number))
@@ -348,6 +348,7 @@ an error."
 Limit list based on topic type."
                 :initarg :type
                 :initform 'topic
+                :type (member topic issue pullreq nil)
                 :custom (choice
                          (const topic)
                          (const issue)
@@ -359,9 +360,11 @@ Limit list to active topics.
 A topic is \"active\" if its state (public condition) is open and/or
 its status (private condition) is unread or pending.
 
-When this is t, then the value of `state' and `status' are ignored."
+When this is t, then the value of the `state' and `status' slots are
+ignored."
                 :initarg :active
                 :initform t
+                :type boolean
                 :custom boolean)
    (state       :documentation "\
 Limit list based on topic (public) state.
@@ -369,6 +372,11 @@ Limit list based on topic (public) state.
 State is the \"public condition\".  I.e., is the topic still open?"
                 :initarg :state
                 :initform 'open
+                :type (satisfies (lambda (val)
+                                   (member val '(open
+                                                 (completed merged)
+                                                 (unplanned rejected)
+                                                 nil))))
                 :custom (choice
                          (const open)
                          (const (completed merged))
@@ -384,23 +392,29 @@ which *you* have not seen yet?
 `inbox' means \"`unread' or `pending'\"."
                 :initarg :status
                 :initform nil
+                :type (member inbox unread pending done nil)
                 :custom (choice
                          (const inbox)
                          (const unread)
                          (const pending)
                          (const done)
                          (const :tag "all (nil)" nil)))
-   (updated     :initarg :updated
-                :initform nil)
+   (updated     :documentation "\
+Date when topic was last updated."
+                :initarg :updated
+                :initform nil
+                :type (or string null))
    (milestone   :documentation "\
 Limit list to topics assigned to given milestone."
                 :initarg :milestone
                 :initform nil
+                :type (or string null)
                 :custom string)
    (labels      :documentation "\
 Limit list to topics with at least one of the given labels."
                 :initarg :labels
                 :initform nil
+                :type (list-of string)
                 :custom (repeat string))
    (marks       :documentation "\
 Limit list to topics with at least one of the given marks.
@@ -408,34 +422,42 @@ Marks are like labels, but they are private and local to the
 current Forge database."
                 :initarg :marks
                 :initform nil
+                :type (list-of string)
                 :custom (repeat string))
    (saved       :documentation "Limit list to saved topics."
                 :initarg :saved
                 :initform nil
+                :type boolean
                 :custom boolean)
    (author      :documentation "\
 Limit list to topics created by given user."
                 :initarg :author
                 :initform nil
                 :label "Author (username)"
+                :type (or string null)
                 :custom string)
    (assignee    :documentation "\
 Limit list to topics assigned to given user."
                 :initarg :assignee
                 :initform nil
                 :label "Assignee (username)"
+                :type (or string null)
                 :custom string)
    (reviewer    :documentation "\
 Limit list to topics for which a review by the given user was requested."
                 :initarg :reviewer
                 :initform nil
                 :label "Reviewer (username)"
+                :type (or string null)
                 :custom string)
-   (global      :initarg :global
-                :initform nil)
+   (global      :documentation "Whether to list topics for all repositories."
+                :initarg :global
+                :initform nil
+                :type boolean)
    (order       :documentation "Order in which topics are listed."
                 :initarg :order
                 :initform 'newest
+                :type (member newest oldest recently-updated anciently-updated)
                 :custom (choice (const newest)
                                 (const oldest)
                                 (const recently-updated)
@@ -443,10 +465,12 @@ Limit list to topics for which a review by the given user was requested."
    (limit       :documentation "Number of topics to list at most."
                 :initarg :limit
                 :initform 200
+                :type integer
                 :custom natnum)
-   (grouped     :documentation "Whether to group topics by respository."
+   (grouped     :documentation "Whether to group topics by repository."
                 :initarg :grouped
                 :initform nil
+                :type boolean
                 :custom boolean)))
 
 (cl-defun forge--list-topics
@@ -540,7 +564,7 @@ Limit list to topics for which a review by the given user was requested."
   "Read an active topic with completion using PROMPT.
 
 Open, unread and pending topics are considered active.
-Default to the current topic even if it isn't active.
+Default to the current topic, even if it isn't active.
 
 \\<forge-read-topic-minibuffer-map>While completion is in \
 progress, \\[forge-read-topic-lift-limit] lifts the limit, extending
@@ -551,7 +575,7 @@ can be selected from the start."
   (forge--read-topic prompt
                      #'forge-current-topic
                      (forge--topics-spec :type 'topic :active t)
-                     (forge--topics-spec :type 'topic :active nil)))
+                     (forge--topics-spec :type 'topic :active nil :state nil)))
 
 (defun forge--read-topic (prompt current active all)
   (let* ((current (funcall current))
@@ -850,7 +874,7 @@ can be selected from the start."
        (format (if local
                    (pcase-lambda (`(,_id ,name ,color ,_description))
                      (let* ((background (forge--sanitize-color color))
-                            (foreground (forge--contrast-color background)))
+                            (foreground (readable-foreground-color background)))
                        (magit--propertize-face
                         name `(( :background ,background
                                  :foreground ,foreground)
@@ -932,6 +956,34 @@ can be selected from the start."
 
 ;;; Insert
 
+(defun forge-insert-topics (type heading prepare)
+  "Insert a list of topics, according to PREPARE.
+
+This function is not intended to be added to section hooks directly.
+Instead create a function, which calls this function, and add wrapper
+to the section hook.
+
+PREPARE is a function which takes one arguments the repository object,
+and must return an filter object of type `forge--topics-spec' or nil.
+Insert no topics if PREPARE returns nil, or if the current repository
+isn't tracked or Forge hasn't been fully setup yet (in the latter two
+cases don't even call PREPARE).
+
+The filter object can be created either using `forge--topics-spec' or
+by `clone'ing the object returned by `forge--init-buffer-topics-spec',
+to share some settings with other topic lists in the same buffer.
+See `forge--topics-spec' for the valid slots and their values.
+
+HEADING is used as the heading of the list section and TYPE is used as
+its type.  TYPE should be a symbol of the form `SUBSET-KIND', where KIND
+is one of `topics', `issues' or `pullreqs', and SUBSET should describe
+what subset of KIND is being listed."
+  (declare (indent defun))
+  (when-let (((forge-db t))
+             (repo (forge-get-repository :tracked?))
+             (spec (funcall prepare repo)))
+    (forge--insert-topics type heading (forge--list-topics spec repo))))
+
 (defun forge--insert-topics (type heading topics)
   (when topics
     (let ((width (apply #'max (--map (length (oref it slug)) topics))))
@@ -968,7 +1020,7 @@ can be selected from the start."
     (prog1 t
       (pcase-dolist (`(,_id ,name ,color ,description) labels)
         (let* ((background (forge--sanitize-color color))
-               (foreground (forge--contrast-color background)))
+               (foreground (readable-foreground-color background)))
           (if separate (insert " ") (setq separate t))
           (insert name)
           (let ((o (make-overlay (- (point) (length name)) (point))))
@@ -1032,14 +1084,16 @@ commands in all Forge keymaps, one only has to change them here."
   "C-c C-r"                      #'forge-create-post)
 
 (define-derived-mode forge-topic-mode magit-mode "Topic"
-  "Parent mode of `forge-{issue,pullreq}-mode'.
+  "Parent major mode of `forge-{issue,pullreq}-mode'.
 This mode itself is never used directly."
+  :interactive nil
   (face-remap-add-relative 'header-line 'forge-topic-header-line)
   (setq-local markdown-translate-filename-function
               #'forge--markdown-translate-filename-function))
 
 (define-derived-mode forge-issue-mode forge-topic-mode "Issue"
-  "Mode for looking at a Forge issue.")
+  "Major mode for looking at a Forge issue."
+  :interactive nil)
 (defalias 'forge-issue-setup-buffer   #'forge-topic-setup-buffer)
 (defalias 'forge-issue-refresh-buffer #'forge-topic-refresh-buffer)
 (defvar forge-issue-headers-hook
@@ -1051,7 +1105,8 @@ This mode itself is never used directly."
     forge-insert-topic-assignees))
 
 (define-derived-mode forge-pullreq-mode forge-topic-mode "Pull-request"
-  "Mode for looking at a Forge pull-request.")
+  "Major mode for looking at a Forge pull-request."
+  :interactive nil)
 (defalias 'forge-pullreq-setup-buffer   #'forge-topic-setup-buffer)
 (defalias 'forge-pullreq-refresh-buffer #'forge-topic-refresh-buffer)
 (defvar forge-pullreq-headers-hook
@@ -1207,7 +1262,8 @@ This mode itself is never used directly."
    ""])
 
 (defconst forge--topic-set-state-group
-  ["Set state"
+  [:description
+   (lambda () (if forge--show-topic-legend "Set public state" "Set state"))
    ("o" forge-topic-state-set-open)
    ("c" forge-issue-state-set-completed)
    ("x" forge-issue-state-set-unplanned)
@@ -1215,7 +1271,8 @@ This mode itself is never used directly."
    ("x" forge-pullreq-state-set-rejected)])
 
 (defconst forge--topic-set-status-group
-  ["Set status"
+  [:description
+   (lambda () (if forge--show-topic-legend "Set private status" "Set status"))
    ("u" forge-topic-status-set-unread)
    ("p" forge-topic-status-set-pending)
    ("d" forge-topic-status-set-done)])
@@ -1237,7 +1294,7 @@ This mode itself is never used directly."
 (defvar forge--show-topic-legend t)
 
 (transient-define-suffix forge-toggle-topic-legend ()
-  "Toggle whether to show legend for faces used in topic menus."
+  "Toggle whether to show legend for faces used in topic menus and lists."
   :description (lambda () (if forge--show-topic-legend "hide legend" "show legend"))
   :transient t
   (interactive)
@@ -1248,7 +1305,7 @@ This mode itself is never used directly."
 
 ;;;; Menus
 
-;;;###autoload (autoload 'forge-topic-menu "forge-topic" nil t)
+;;;###autoload(autoload 'forge-topic-menu "forge-topic" nil t)
 (transient-define-prefix forge-topic-menu ()
   "Edit the topic at point."
   :transient-suffix t
@@ -1288,12 +1345,12 @@ This mode itself is never used directly."
                         'transient-inapt-suffix
                       'forge-suffix-active)))
 
-;;;###autoload (autoload 'forge-topic-state-menu "forge-topic" nil t)
+;;;###autoload(autoload 'forge-topic-state-menu "forge-topic" nil t)
 (transient-define-prefix forge-topic-state-menu ()
   "Set state of the current topic."
   [forge--topic-set-state-group])
 
-;;;###autoload (autoload 'forge-topic-status-menu "forge-topic" nil t)
+;;;###autoload(autoload 'forge-topic-status-menu "forge-topic" nil t)
 (transient-define-prefix forge-topic-status-menu ()
   "Set status of the current topic."
   [forge--topic-set-status-group])
@@ -1497,26 +1554,6 @@ This mode itself is never used directly."
         ((string-match-p "\\`#.\\{4\\}\\'" color) (substring color 0 3))
         ((string-match-p "\\`#.\\{8\\}\\'" color) (substring color 0 6))
         (t "#000000"))) ; Use fallback instead of invalid color.
-
-(defun forge--contrast-color (color)
-  "Return black or white depending on the luminance of COLOR."
-  (if (> (forge--x-color-luminance color) 0.5) "black" "white"))
-
-;; Copy of `rainbow-x-color-luminance'.
-(defun forge--x-color-luminance (color)
-  "Calculate the luminance of a color string (e.g., \"#ffaa00\", \"blue\").
-Return a value between 0 and 1."
-  (let ((values (color-values color)))
-    (forge--color-luminance (/ (nth 0 values) 256.0)
-                            (/ (nth 1 values) 256.0)
-                            (/ (nth 2 values) 256.0))))
-
-;; Copy of `rainbow-color-luminance'.
-;; Also see https://en.wikipedia.org/wiki/Relative_luminance.
-(defun forge--color-luminance (red green blue)
-  "Calculate the luminance of color composed of RED, GREEN and BLUE.
-Return a value between 0 and 1."
-  (/ (+ (* .2126 red) (* .7152 green) (* .0722 blue)) 256))
 
 ;;; Markdown Utilities
 
