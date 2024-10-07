@@ -919,7 +919,9 @@ I like showing the key presses in mode line so I can install keycast and then in
 
     #+begin_src emacs-lisp
       (use-package code-review
-        :vc (code-review :url "https://github.com/phelrine/code-review" :branch "fix/closql-update"))
+        :vc (code-review :url "https://github.com/phelrine/code-review" :branch "fix/closql-update")
+        :config
+        (define-key forge-topic-mode-map (kbd "C-c r") 'code-review-forge-pr-at-point))
     #+end_src
 
 *** git-gutter-mode+
