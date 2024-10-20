@@ -873,12 +873,12 @@
    wonder how you ever did any programming without it.
 
    #+BEGIN_SRC emacs-lisp
-     (use-package paredit
-       :ensure t
-       :config
-       (diminish 'paredit-mode "()")
-       :hook
-       prog-mode)
+     ;; (use-package paredit
+     ;;   :ensure t
+     ;;   :config
+     ;;   (diminish 'paredit-mode "()")
+     ;;   :hook
+     ;;   prog-mode)
    #+END_SRC
 
 ** paredit spaces for non s-expr langs
@@ -887,24 +887,39 @@
    non s-expr langs
 
    #+BEGIN_SRC emacs-lisp
-     (defun my-paredit-nonlisp ()
-       "Turn on paredit mode for non-lisps."
-       (interactive)
-       (set (make-local-variable 'paredit-space-for-delimiter-predicates)
-            '((lambda (endp delimiter) nil)))
-       (electric-pair-mode t)
-       (paredit-mode t))
+     ;; (defun my-paredit-nonlisp ()
+     ;;   "Turn on paredit mode for non-lisps."
+     ;;   (interactive)
+     ;;   (set (make-local-variable 'paredit-space-for-delimiter-predicates)
+     ;;        '((lambda (endp delimiter) nil)))
+     ;;   (electric-pair-mode t)
+     ;;   (paredit-mode t))
    #+END_SRC
 
    I *always* want my parens to match (except in text modes and some
    non-lisp programming modes).
 
    #+BEGIN_SRC emacs-lisp
-     (add-hook 'text-mode-hook 'my-paredit-nonlisp)
-     (add-hook 'js2-mode-hook 'my-paredit-nonlisp)
-     (add-hook 'typescript-mode-hook 'my-paredit-nonlisp)
-     (add-hook 'java-mode-hook 'my-paredit-nonlisp)
+     ;; (add-hook 'text-mode-hook 'my-paredit-nonlisp)
+     ;; (add-hook 'js2-mode-hook 'my-paredit-nonlisp)
+     ;; (add-hook 'typescript-mode-hook 'my-paredit-nonlisp)
+     ;; (add-hook 'typescript-ts-mode-hook 'my-paredit-nonlisp)
+     ;; (add-hook 'java-mode-hook 'my-paredit-nonlisp)
    #+END_SRC
+
+** SmartParens
+
+   Paredit really struggles with non lisp langs so try smartparens
+   
+   #+begin_src emacs-lisp
+     (use-package smartparens
+       :ensure t
+       :config
+       (sp-use-paredit-bindings)
+       :bind
+       ("C-)" . sp-slurp-hybrid-sexp)
+       :hook (prog-mode text-mode markdown-mode))
+   #+end_src
 
 ** dired
 
