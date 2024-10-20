@@ -1,5 +1,7 @@
 ;;; command-log-mode.el --- log keyboard commands to buffer
 
+;; Package-Version: 20160413.447
+;; Package-Revision: af600e6b4129
 ;; homepage: https://github.com/lewang/command-log-mode
 
 ;; Copyright (C) 2013 Nic Ferrier
@@ -320,4 +322,3 @@ Clears the command log buffer after saving."
 (provide 'command-log-mode)
 
 ;;; command-log-mode.el ends here
-

@@ -270,6 +270,17 @@
      (setq plstore-cache-passphrase-for-symmetric-encryption t)
    #+end_src
 
+   
+** Unmap key bindings to suspend emacs
+
+  Annoying if I catch C-z and Emacs suspends.
+
+  #+begin_src emacs-lisp
+    (when (display-graphic-p)
+      (global-unset-key (kbd "C-z"))
+      (global-unset-key (kbd "C-x C-z")))
+  #+end_src
+  
 * Macintosh Specific Setup
 ** command key as meta
 
@@ -378,6 +389,7 @@
    #+begin_src emacs-lisp
      (setq fill-column 120)
      (auto-fill-mode t)
+     (setq-default auto-fill-function 'do-auto-fill)
    #+end_src
 
 ** Apheleia
@@ -417,6 +429,18 @@
        (editorconfig-mode 1))
    #+end_src
 
+** Highlight indentation
+
+   Useful to highlight indentation for whitespace dependent modes like YAML, Python, etc.
+
+   #+begin_src emacs-lisp
+     (use-package highlight-indentation
+       :ensure t
+       :config
+       (set-face-background 'highlight-indentation-face "#e3e3d3")
+       (set-face-background 'highlight-indentation-current-column-face "#c3b3b3"))
+   #+end_src
+   
 * Tool Configuration
 ** Dashboard
 
@@ -548,7 +572,8 @@
                (consult-ripgrep buffer)
                (consult-imenu buffer)
                (imenu buffer)
-               (crux-recentf-find-file grid)))
+               (crux-recentf-find-file grid)
+               (crux-recentf-find-directory grid)))
        ;; Use `consult-completion-in-region' if Vertico is enabled.
        ;; Otherwise use the default `completion--in-region' function.
        (setq completion-in-region-function
@@ -574,7 +599,13 @@
           (command (styles basic partial-completion)))))
      (setq read-file-name-completion-ignore-case t
            read-buffer-completion-ignore-case t
-           completion-ignore-case t)
+           completion-ignore-case t
+           orderless-component-separator "[ ~]")
+     (defun just-one-face (fn &rest args)
+       (let ((orderless-match-faces [completions-common-part]))
+         (apply fn args)))
+
+     (advice-add 'company-capf--candidates :around #'just-one-face)
    #+end_src
 
 ** Embark
@@ -587,7 +618,6 @@
 
        :bind
        (("C-." . embark-act)         ;; pick some comfortable binding
-        ("C-;" . embark-dwim)        ;; good alternative: M-.
         ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
 
        :init
@@ -761,6 +791,7 @@
      (global-set-key (kbd "C-c k") 'avy-kill-region)
      (global-set-key (kbd "C-c w") 'avy-goto-char-timer)
      (global-set-key (kbd "C-c c") 'avy-goto-char)
+     (global-set-key (kbd "M-g c") 'avy-goto-char)
    #+END_SRC
 
 ** Marginalia
@@ -814,7 +845,7 @@
        :config
        (command-log-mode t)
        :bind
-       ("C-c l" . clm/toggle-command-log-buffer))
+       ("C-c l" . clm/open-command-log-buffer))
    #+end_src
 
 ** Imenu key binding
@@ -823,6 +854,14 @@
 
    #+begin_src emacs-lisp :tangle yes
      (global-set-key (kbd "s-i") 'imenu)
+   #+end_src
+
+** Winner mode
+
+   Activate winner mode so that I can undo windows config changes if required.
+
+   #+begin_src emacs-lisp
+    (winner-mode t)  
    #+end_src
 
 * directories, navigation, searching, movement
@@ -834,12 +873,12 @@
    wonder how you ever did any programming without it.
 
    #+BEGIN_SRC emacs-lisp
-     (use-package paredit
-       :ensure t
-       :config
-       (diminish 'paredit-mode "()")
-       :hook
-       prog-mode)
+     ;; (use-package paredit
+     ;;   :ensure t
+     ;;   :config
+     ;;   (diminish 'paredit-mode "()")
+     ;;   :hook
+     ;;   prog-mode)
    #+END_SRC
 
 ** paredit spaces for non s-expr langs
@@ -848,24 +887,39 @@
    non s-expr langs
 
    #+BEGIN_SRC emacs-lisp
-     (defun my-paredit-nonlisp ()
-       "Turn on paredit mode for non-lisps."
-       (interactive)
-       (set (make-local-variable 'paredit-space-for-delimiter-predicates)
-            '((lambda (endp delimiter) nil)))
-       (electric-pair-mode t)
-       (paredit-mode t))
+     ;; (defun my-paredit-nonlisp ()
+     ;;   "Turn on paredit mode for non-lisps."
+     ;;   (interactive)
+     ;;   (set (make-local-variable 'paredit-space-for-delimiter-predicates)
+     ;;        '((lambda (endp delimiter) nil)))
+     ;;   (electric-pair-mode t)
+     ;;   (paredit-mode t))
    #+END_SRC
 
    I *always* want my parens to match (except in text modes and some
    non-lisp programming modes).
 
    #+BEGIN_SRC emacs-lisp
-     (add-hook 'text-mode-hook 'my-paredit-nonlisp)
-     (add-hook 'js2-mode-hook 'my-paredit-nonlisp)
-     (add-hook 'typescript-mode-hook 'my-paredit-nonlisp)
-     (add-hook 'java-mode-hook 'my-paredit-nonlisp)
+     ;; (add-hook 'text-mode-hook 'my-paredit-nonlisp)
+     ;; (add-hook 'js2-mode-hook 'my-paredit-nonlisp)
+     ;; (add-hook 'typescript-mode-hook 'my-paredit-nonlisp)
+     ;; (add-hook 'typescript-ts-mode-hook 'my-paredit-nonlisp)
+     ;; (add-hook 'java-mode-hook 'my-paredit-nonlisp)
    #+END_SRC
+
+** SmartParens
+
+   Paredit really struggles with non lisp langs so try smartparens
+   
+   #+begin_src emacs-lisp
+     (use-package smartparens
+       :ensure t
+       :config
+       (sp-use-paredit-bindings)
+       :bind
+       ("C-)" . sp-slurp-hybrid-sexp)
+       :hook (prog-mode text-mode markdown-mode))
+   #+end_src
 
 ** dired
 
@@ -926,10 +980,22 @@
     Use forge with magit
 
     #+begin_src emacs-lisp :tangle yes
-      ;; (use-package forge
-      ;;   :ensure t
-      ;;   :pin melpa
-      ;;   :after magit)
+      (use-package forge
+        :ensure t
+        :pin melpa
+        :after magit)
+    #+end_src
+
+    
+*** Code review
+
+    Use code review from a branch on a different repo that has a fix.
+
+    #+begin_src emacs-lisp
+      (use-package code-review
+        :vc (code-review :url "https://github.com/phelrine/code-review" :branch "fix/closql-update")
+        :config
+        (define-key forge-topic-mode-map (kbd "C-c r") 'code-review-forge-pr-at-point))
     #+end_src
 
 *** git-gutter-mode+
@@ -1216,7 +1282,7 @@
        (global-set-key (kbd "s-r") 'crux-recentf-find-file)
        (global-set-key (kbd "C-c M-k") 'crux-kill-other-buffers)
        (global-set-key (kbd "C-c P") 'crux-kill-buffer-truename)
-       (global-set-key (kbd "C-k") 'crux-smart-kill-line))
+       (global-set-key (kbd "C-c f") 'crux-recentf-find-directory))
    #+END_SRC
 
 ** Revert buffer shortcut key
@@ -1245,7 +1311,9 @@
      (use-package markdown-mode
        :ensure t
        :mode ("README\\.md\\'" . gfm-mode)
-       :init (setq markdown-command "multimarkdown"))
+       :init (setq markdown-command "multimarkdown")
+       :hook
+       highlight-indentation-current-column-mode)
    #+end_src
 
 ** html, yaml, xml
@@ -1255,7 +1323,9 @@
       (use-package yaml-mode
         :ensure t
         :bind
-        ("C-;" . comment-dwim))
+        ("C-;" . comment-dwim)
+        :hook
+        highlight-indentation-current-column-mode)
     #+END_SRC
 
 *** web mode
@@ -1294,7 +1364,7 @@
        (add-hook 'css-mode-hook 'rainbow-mode)
      #+END_SRC
 
-
+     
 
 ** Org mode customisation
 
@@ -1478,7 +1548,7 @@
       #+BEGIN_SRC emacs-lisp
         (use-package org-gcal
           :ensure t)
-        (add-to-list 'plstore-encrypt-to "220EA16443C4070D8FBCFF797C9CA3DEC6A37B67")
+        (setq plstore-cache-passphrase-for-symmetric-encryption t)
       #+END_SRC
 
 ***** Agenda Windows
@@ -1803,6 +1873,17 @@
       (add-hook 'org-mode-hook (lambda () (local-set-key (kbd "C-;") 'org-comment-dwim)))
     #+end_src
 
+*** Improve Company completion for org
+
+    Company completion doesn't work well in Org mode. Adding
+    pcomplete-completions-at-point in org-mode should fix some of these issues.
+
+    #+begin_src emacs-lisp
+      (add-hook 'org-mode-hook
+       (lambda () (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)))
+    #+end_src
+
+
 ** Org faces
 
    Require org-faces.
@@ -1965,8 +2046,6 @@
         :hook
         (prog-mode . smartscan-mode)
         (org-mode . smartscan-mode))
-      (add-hook 'prog-mode-hook
-                '(lambda () (smartscan-mode 1)))
     #+END_SRC
 
 *** Set line numbers mode in prog and html/css/xml modes
@@ -2355,13 +2434,13 @@
 
     #+BEGIN_SRC emacs-lisp
       (use-package js2-mode
-        :ensure t
-        :config
-        (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-        (add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
-        ;; Better imenu
-        (add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
-        (setq js2-basic-offset 2))
+	:ensure t
+	:config
+	(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+	(add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
+	;; Better imenu
+	(add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
+	(setq js2-basic-offset 2))
     #+END_SRC
 
     And we can hook it in to run node.js shell scripts as well.
@@ -2429,7 +2508,6 @@
 *** Typescript mode
 
     #+BEGIN_SRC emacs-lisp
-
       (use-package typescript-mode
         :after tree-sitter
         :ensure t
@@ -2490,6 +2568,27 @@
         :ensure t)
     #+END_SRC
 
+** Apheleia
+
+    auto-format different source code files extremely intelligently
+    https://github.com/radian-software/apheleia
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package apheleia
+        :ensure t)
+    #+END_SRC
+
+** EditorConfig
+
+   Add in editor config support.
+
+   #+begin_src emacs-lisp
+     (use-package editorconfig
+       :ensure t
+       :config
+       (editorconfig-mode 1))
+   #+end_src
+
 ** Language Server Protocol
 
 *** LSP config
@@ -2509,6 +2608,8 @@
                (js2-mode . lsp-deferred)
                (typescript-mode . lsp-deferred)
                (java-mode . lsp-deferred)
+               (terraform-mode . lsp-deferred)
+               (yaml-mode . lsp-deferred)
                ;; if you want which-key integration
                (lsp-mode . lsp-enable-which-key-integration)
                (lsp-mode . flycheck-mode)
