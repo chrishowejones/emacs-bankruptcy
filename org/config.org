@@ -845,7 +845,7 @@
        :config
        (command-log-mode t)
        :bind
-       ("C-c l" . clm/toggle-command-log-buffer))
+       ("C-c l" . clm/open-command-log-buffer))
    #+end_src
 
 ** Imenu key binding
