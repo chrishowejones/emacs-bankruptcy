@@ -915,10 +915,18 @@
      (use-package smartparens
        :ensure t
        :config
+       (require 'smartparens-config)
        (sp-use-paredit-bindings)
+       (smartparens-strict-mode 1)
        :bind
        ("C-)" . sp-slurp-hybrid-sexp)
-       :hook (prog-mode text-mode markdown-mode))
+       :hook
+       ((prog-mode . smartparens-mode)
+        (text-mode . smartparens-mode)
+        (markdown-mode . smartparens-mode)
+        (prog-mode . smartparens-strict-mode)
+        (text-mode . smartparens-strict-mode)
+        (markdown-mode . smartparens-strict-mode)))
    #+end_src
 
 ** dired
