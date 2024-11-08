@@ -2691,10 +2691,10 @@
      (add-hook 'typescript-mode 'eglot-ensure)
      (add-hook 'typescript-ts-mode 'eglot-ensure)
      (defun set-eglot-mode-map ()         
-         (define-key eglot-mode-map (kbd "C-c r") 'eglot-rename)
-         (define-key eglot-mode-map (kbd "C-c o") 'eglot-code-action-organize-imports)
-         (define-key eglot-mode-map (kbd "C-c h") 'eldoc))
-     (add-hook 'eglot-mode 'set-eglot-mode-map)
+       (define-key eglot-mode-map (kbd "C-c r") 'eglot-rename)
+       (define-key eglot-mode-map (kbd "C-c C-o") 'eglot-code-action-organize-imports)
+       (define-key eglot-mode-map (kbd "C-c h") 'eldoc))
+     (add-hook 'eglot-managed-mode-hook 'set-eglot-mode-map)
    #+end_src
 
 * Data Modes
