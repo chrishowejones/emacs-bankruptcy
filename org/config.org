@@ -654,7 +654,6 @@
        :bind  (;; C-c bindings in mode-specific-map
                ("C-c M-x" . consult-mode-command)
                ("C-c h" . consult-history)
-               ("C-c k" . consult-kmacro)
                ("C-c m" . consult-man)
                ([remap Info-search] . consult-info)
                ;; C-x bindings in ctl-x-map
@@ -692,7 +691,6 @@
                ("C-c s k" . consult-keep-lines)
                ("C-c s u" . consult-focus-lines)
                ;; Isearch integration
-               ("M-s e" . consult-isearch-history)
                :map isearch-mode-map
                ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
                ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
@@ -753,16 +751,16 @@
 
        ;; By default consult-project-function uses project-root from project.el.
        ;; Optionally configure a different project root function.
-       ;;;; 1. project.el (the default)
+               ;;;; 1. project.el (the default)
        ;; (setq consult-project-function #'consult--default-project--function)
-       ;;;; 2. vc.el (vc-root-dir)
+               ;;;; 2. vc.el (vc-root-dir)
        ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-       ;;;; 3. locate-dominating-file
+               ;;;; 3. locate-dominating-file
        ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
        ;; 4. projectile.el (projectile-project-root)
        (autoload 'projectile-project-root "projectile")
        (setq consult-project-function (lambda (_) (projectile-project-root)))
-       ;;;; 5. No project support
+               ;;;; 5. No project support
        ;; (setq consult-project-function nil)
 
        )
@@ -863,6 +861,15 @@
    #+begin_src emacs-lisp
     (winner-mode t)  
    #+end_src
+   
+** Eldoc box mode
+
+   Add eldoc box mode for eldoc popups
+
+   #+begin_src emacs-lisp
+     (use-package eldoc-box
+       :ensure t)
+   #+end_src
 
 * directories, navigation, searching, movement
 ** paredit-mode
@@ -873,12 +880,12 @@
    wonder how you ever did any programming without it.
 
    #+BEGIN_SRC emacs-lisp
-     ;; (use-package paredit
-     ;;   :ensure t
-     ;;   :config
-     ;;   (diminish 'paredit-mode "()")
-     ;;   :hook
-     ;;   prog-mode)
+     (use-package paredit
+       :ensure t
+       :config
+       (diminish 'paredit-mode "()")
+       :hook
+       clojure-mode)
    #+END_SRC
 
 ** paredit spaces for non s-expr langs
@@ -918,16 +925,18 @@
        :config
        (require 'smartparens-config)
        (sp-use-paredit-bindings)
-       (smartparens-strict-mode 1)
-       (sp-local-pair 'typescript-mode "<" nil :actions :rem)
-       (sp-local-pair 'typescript-ts-mode "<" nil :actions :rem)
+       (sp-local-pair 'typescript-mode "<" nil :actions nil)
+       (sp-local-pair 'typescript-ts-mode "<" nil :actions nil)
        :bind
        ("C-)" . sp-slurp-hybrid-sexp)
        :hook
        ((prog-mode . smartparens-mode)
         (text-mode . smartparens-mode)
         (markdown-mode . smartparens-mode)
-        (prog-mode . smartparens-strict-mode)
+        (typescript-mode . smartparens-strict-mode)
+        (terraform-mode . smartparens-strict-mode)
+        (typescript-ts-mode . smartparens-strict-mode)
+        (js2-mode . smartparens-strict-mode)
         (text-mode . smartparens-strict-mode)
         (markdown-mode . smartparens-strict-mode)))
    #+end_src
@@ -1358,8 +1367,7 @@
         (setq web-mode-markup-indent-offset 2)
         (setq web-mode-css-markup-indent-offset 2)
         (setq web-mode-code-indent-offset 2)
-        (add-hook 'web-mode-hook 'my-paredit-nonlisp)
-        (flycheck-add-mode 'typescript-tslint 'web-mode))
+        (add-hook 'web-mode-hook 'my-paredit-nonlisp))
 
     #+END_SRC
 
@@ -1894,6 +1902,11 @@
        (lambda () (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)))
     #+end_src
 
+*** org cycle if cursor at beginning of buffer
+
+    #+begin_src emacs-lisp
+      (setq org-cycle-global-at-bob t)
+    #+end_src
 
 ** Org faces
 
@@ -1902,7 +1915,7 @@
    #+BEGIN_SRC emacs-lisp
      (require 'org-faces)
    #+END_SRC
-
+   
 * Programming Modes
 ** shell
 
@@ -2116,10 +2129,6 @@
       (setq lisp-hooks (lambda ()
                          (eldoc-mode +1)
                          (diminish 'eldoc-mode)
-                         (define-key paredit-mode-map
-                                     (kbd "{") 'paredit-open-curly)
-                         (define-key paredit-mode-map
-                                     (kbd "}") 'paredit-close-curly)
                          (local-set-key (kbd "C-;") 'comment-dwim)))
     #+END_SRC
 
@@ -2267,7 +2276,7 @@
 
       #+BEGIN_SRC emacs-lisp
         (add-hook 'cider-mode-hook 'subword-mode)
-        (add-hook 'cider-mode-hook (lambda () (setq lsp-enable-completion-at-point nil)))
+        ;; (add-hook 'cider-mode-hook (lambda () (setq lsp-enable-completion-at-point nil)))
       #+END_SRC
 
 ***** Don't destroy that repl buffer while pretty printing
@@ -2370,7 +2379,8 @@
          (setq cljr-favor-prefix-notation nil)
          (setq cljr-add-ns-to-blank-clj-files nil)
          (setq cljr-insert-newline-after-require nil)
-         (setq lsp-ui-doc-enable nil))
+         ;; (setq lsp-ui-doc-enable nil)
+         )
 
        (add-hook
         'clojure-mode-hook #'my-clojure-mode-hook)
@@ -2505,13 +2515,13 @@
     I use DAP mode for debugging.
 
     #+begin_src emacs-lisp
-      (use-package dap-mode
-        :ensure t
-        :after lsp-mode
-        :hook ((lsp-mode . dap-mode)
-               (lsp-mode . dap-ui-mode)
-               (lsp-mode . dap-ui-controls-mode))
-        :config (dap-auto-configure-mode))
+      ;; (use-package dap-mode
+      ;;   :ensure t
+      ;;   :after lsp-mode
+      ;;   :hook ((lsp-mode . dap-mode)
+      ;;          (lsp-mode . dap-ui-mode)
+      ;;          (lsp-mode . dap-ui-controls-mode))
+      ;;   :config (dap-auto-configure-mode))
     #+end_src
 
 ** Typescript
@@ -2607,49 +2617,49 @@
     This is my set up for the Language Server Protocol.
 
     #+begin_src emacs-lisp
-      (use-package lsp-mode
-        :ensure t
-        :init
-        ;; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
-        (setq lsp-keymap-prefix "M-s-l")
-        :hook (;;  concrete major-modes to use lsp (e. g. clojure-mode)
-               (clojure-mode . lsp-deferred)
-               (clojurec-mode . lsp-deferred)
-               (clojurescript-mode . lsp-deferred)
-               (js2-mode . lsp-deferred)
-               (typescript-mode . lsp-deferred)
-               (java-mode . lsp-deferred)
-               (terraform-mode . lsp-deferred)
-               (yaml-mode . lsp-deferred)
-               ;; if you want which-key integration
-               (lsp-mode . lsp-enable-which-key-integration)
-               (lsp-mode . flycheck-mode)
-               (lsp-mode . lsp-lens-mode))
-        :commands lsp
-        :config
-        (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
-        (setq lsp-completion-enable t)
-        (setq lsp-completion-mode t)
-        (setq gc-cons-threshold 1000000)
-        (setq read-process-output-max (* 1024 1024 2))
-        (setq lsp-idle-delay 0.3))
+      ;; (use-package lsp-mode
+      ;;   :ensure t
+      ;;   :init
+      ;;   ;; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
+      ;;   (setq lsp-keymap-prefix "M-s-l")
+      ;;   :hook (;;  concrete major-modes to use lsp (e. g. clojure-mode)
+      ;;          (clojure-mode . lsp-deferred)
+      ;;          (clojurec-mode . lsp-deferred)
+      ;;          (clojurescript-mode . lsp-deferred)
+      ;;          (js2-mode . lsp-deferred)
+      ;;          (typescript-mode . lsp-deferred)
+      ;;          (java-mode . lsp-deferred)
+      ;;          (terraform-mode . lsp-deferred)
+      ;;          (yaml-mode . lsp-deferred)
+      ;;          ;; if you want which-key integration
+      ;;          (lsp-mode . lsp-enable-which-key-integration)
+      ;;          (lsp-mode . flycheck-mode)
+      ;;          (lsp-mode . lsp-lens-mode))
+      ;;   :commands lsp
+      ;;   :config
+      ;;   (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
+      ;;   (setq lsp-completion-enable t)
+      ;;   (setq lsp-completion-mode t)
+      ;;   (setq gc-cons-threshold 1000000)
+      ;;   (setq read-process-output-max (* 1024 1024 2))
+      ;;   (setq lsp-idle-delay 0.3))
     #+end_src
 
     Set up ui
 
     #+begin_src emacs-lisp
-      (use-package lsp-ui
-        :ensure t
-        :commands lsp-ui-mode)
+      ;; (use-package lsp-ui
+      ;;   :ensure t
+      ;;   :commands lsp-ui-mode)
     #+end_src
 
     Add in consult support.
 
     #+begin_src emacs-lisp
-      (use-package consult-lsp
-        :ensure t
-        :config
-        (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
+      ;; (use-package consult-lsp
+      ;;   :ensure t
+      ;;   :config
+      ;;   (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
     #+end_src
 
 *** LSP for Java
@@ -2657,11 +2667,11 @@
     Add in Java LSP and config for it and dap-java.
 
     #+begin_src emacs-lisp
-      (use-package lsp-java
-        :ensure t
-        :after lsp-mode
-        :config
-        (require 'dap-java))
+      ;; (use-package lsp-java
+      ;;   :ensure t
+      ;;   :after lsp-mode
+      ;;   :config
+      ;;   (require 'dap-java))
     #+end_src
 
     Bind debug Java keys after loading Java mode
@@ -2673,6 +2683,19 @@
       (with-eval-after-load 'java-mode (bind-java-dap-keys))
     #+end_src
 
+** Eglot
+
+   Try Eglot instead of LSP.
+
+   #+begin_src emacs-lisp
+     (add-hook 'typescript-mode 'eglot-ensure)
+     (add-hook 'typescript-ts-mode 'eglot-ensure)
+     (defun set-eglot-mode-map ()         
+         (define-key eglot-mode-map (kbd "C-c r") 'eglot-rename)
+         (define-key eglot-mode-map (kbd "C-c o") 'eglot-code-action-organize-imports)
+         (define-key eglot-mode-map (kbd "C-c h") 'eldoc))
+     (add-hook 'eglot-mode 'set-eglot-mode-map)
+   #+end_src
 
 * Data Modes
 
