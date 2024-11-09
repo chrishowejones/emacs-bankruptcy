@@ -1009,10 +1009,10 @@
     having line numbers and thus I've dumped linum-mode.
 
     #+BEGIN_SRC emacs-lisp
-      (use-package git-gutter-fringe+
-        :ensure t
-        :config
-        (global-git-gutter+-mode t))
+      ;; (use-package git-gutter-fringe+
+      ;;   :ensure t
+      ;;   :config
+      ;;   (global-git-gutter+-mode t))
     #+END_SRC
 
     It is also quite nice to be able to navigate a file by he git
