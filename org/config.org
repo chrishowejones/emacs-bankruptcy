@@ -873,12 +873,12 @@
    wonder how you ever did any programming without it.
 
    #+BEGIN_SRC emacs-lisp
-     ;; (use-package paredit
-     ;;   :ensure t
-     ;;   :config
-     ;;   (diminish 'paredit-mode "()")
-     ;;   :hook
-     ;;   prog-mode)
+     (use-package paredit
+       :ensure t
+       :config
+       (diminish 'paredit-mode "()")
+       :hook
+       (lisp-mode clojure-mode))
    #+END_SRC
 
 ** paredit spaces for non s-expr langs
@@ -890,11 +890,10 @@
      (defun my-paredit-nonlisp ()
        "Turn on paredit mode for non-lisps."
        (interactive)
-       ;; (set (make-local-variable 'paredit-space-for-delimiter-predicates)
-       ;;      '((lambda (endp delimiter) nil)))
+       (set (make-local-variable 'paredit-space-for-delimiter-predicates)
+            '((lambda (endp delimiter) nil)))
        (electric-pair-mode t)
-       ;; (paredit-mode t)
-       )
+       (paredit-mode t))
    #+END_SRC
 
    I *always* want my parens to match (except in text modes and some
@@ -923,13 +922,8 @@
        (sp-local-pair 'typescript-ts-mode "<" nil :actions :rem)
        :bind
        ("C-)" . sp-slurp-hybrid-sexp)
-       :hook
-       ((prog-mode . smartparens-mode)
-        (text-mode . smartparens-mode)
-        (markdown-mode . smartparens-mode)
-        (prog-mode . smartparens-strict-mode)
-        (text-mode . smartparens-strict-mode)
-        (markdown-mode . smartparens-strict-mode)))
+       :hook (js2-mode typescript-mode typescript-ts-mode yaml-mode
+              java-mode terraform-mode text-mode markdown-mode))
    #+end_src
 
 ** dired
@@ -1358,9 +1352,7 @@
         (setq web-mode-markup-indent-offset 2)
         (setq web-mode-css-markup-indent-offset 2)
         (setq web-mode-code-indent-offset 2)
-        (add-hook 'web-mode-hook 'my-paredit-nonlisp)
-        (flycheck-add-mode 'typescript-tslint 'web-mode))
-
+        (add-hook 'web-mode-hook 'my-paredit-nonlisp))
     #+END_SRC
 
 *** css
