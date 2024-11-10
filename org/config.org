@@ -270,17 +270,17 @@
      (setq plstore-cache-passphrase-for-symmetric-encryption t)
    #+end_src
 
-   
+
 ** Unmap key bindings to suspend emacs
 
-  Annoying if I catch C-z and Emacs suspends.
+   Annoying if I catch C-z and Emacs suspends.
 
-  #+begin_src emacs-lisp
-    (when (display-graphic-p)
-      (global-unset-key (kbd "C-z"))
-      (global-unset-key (kbd "C-x C-z")))
-  #+end_src
-  
+   #+begin_src emacs-lisp
+     (when (display-graphic-p)
+       (global-unset-key (kbd "C-z"))
+       (global-unset-key (kbd "C-x C-z")))
+   #+end_src
+
 * Macintosh Specific Setup
 ** command key as meta
 
@@ -388,8 +388,8 @@
 
    #+begin_src emacs-lisp
      (setq fill-column 120)
-     (auto-fill-mode t)
-     (setq-default auto-fill-function 'do-auto-fill)
+     ;; (auto-fill-mode t)
+     ;; (setq-default auto-fill-function 'do-auto-fill)
    #+end_src
 
 ** Apheleia
@@ -440,7 +440,7 @@
        (set-face-background 'highlight-indentation-face "#e3e3d3")
        (set-face-background 'highlight-indentation-current-column-face "#c3b3b3"))
    #+end_src
-   
+
 * Tool Configuration
 ** Dashboard
 
@@ -538,16 +538,50 @@
        :init
        (add-hook 'after-init-hook 'global-company-mode)
        (diminish 'company-mode "CA")
+       :config
+       (setq-default company-tooltip-limit 20                         ; bigger popup window
+                     company-minimum-prefix-length 1                  ; WARNING, probably you will get perfomance issue if min len is 0!
+                     company-tooltip-align-annotations 't             ; align annotations to the right tooltip border
+                     company-idle-delay 0.3                           ; decrease delay before autocompletion popup shows
+                     company-begin-commands '(self-insert-command)    ; start autocompletion only after typing
+                     company-frontends '(company-pseudo-tooltip-frontend company-preview-frontend)
+                     company-tooltip-flip-when-above t)
        (global-set-key (kbd "C-M-i") 'company-complete)
-       (setq company-tooltip-flip-when-above t)
-       (setq company-minimum-prefix-length 1)               ; WARNING, probably you will get perfomance issue if min len is 0!
-       (setq company-tooltip-limit 20)                      ; bigger popup window
-       (setq company-tooltip-align-annotations 't)          ; align annotations to the right tooltip border
-       (setq company-idle-delay 0.3)                        ; decrease delay before autocompletion popup shows
-       (setq company-begin-commands '(self-insert-command)) ; start autocompletion only after typing
        (global-set-key (kbd "C-c /") 'company-files)        ; Force complete file names on "C-c /" key
        )
    #+END_SRC
+
+** cape
+
+   Cape provides Completion At Point Extensions
+
+   #+begin_src emacs-lisp
+     (use-package cape
+       :ensure t
+       ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+       ;; Press C-c p ? to for help.
+       :bind ("M-+" . cape-prefix-map) ;; Alternative keys: M-p, M-+, ...
+       ;; Alternatively bind Cape commands individually.
+       ;; :bind (("C-c p d" . cape-dabbrev)
+       ;;        ("C-c p h" . cape-history)
+       ;;        ("C-c p f" . cape-file)
+       ;;        ...)
+       :init
+       ;; Add to the global default value of `completion-at-point-functions' which is
+       ;; used by `completion-at-point'.  The order of the functions matters, the
+       ;; first function returning a result wins.  Note that the list of buffer-local
+       ;; completion functions takes precedence over the global list.
+       (add-hook 'completion-at-point-functions #'cape-dabbrev)
+       (add-hook 'completion-at-point-functions #'cape-file)
+       ;; (add-hook 'completion-at-point-functions #'cape-elisp-block)
+       ;; (add-hook 'completion-at-point-functions #'cape-history)
+       ;; ...
+       (add-hook 'prog-mode-hook
+                 (lambda ()
+                   (setq-local completion-at-point-functions
+                               (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point))))) ; try using codeium and lsp in prog modes
+       )
+   #+end_src
 
 ** Vertico for completion
 
@@ -861,7 +895,7 @@
    Activate winner mode so that I can undo windows config changes if required.
 
    #+begin_src emacs-lisp
-    (winner-mode t)  
+     (winner-mode t)
    #+end_src
 
 * directories, navigation, searching, movement
@@ -878,7 +912,8 @@
        :config
        (diminish 'paredit-mode "()")
        :hook
-       (lisp-mode clojure-mode))
+       ((lisp-mode . paredit-mode)
+        (clojure-mode . paredit-mode)))
    #+END_SRC
 
 ** paredit spaces for non s-expr langs
@@ -910,7 +945,7 @@
 ** SmartParens
 
    Paredit really struggles with non lisp langs so try smartparens
-   
+
    #+begin_src emacs-lisp
      (use-package smartparens
        :ensure t
@@ -923,7 +958,7 @@
        :bind
        ("C-)" . sp-slurp-hybrid-sexp)
        :hook (js2-mode typescript-mode typescript-ts-mode yaml-mode
-              java-mode terraform-mode text-mode markdown-mode))
+                       java-mode terraform-mode text-mode markdown-mode))
    #+end_src
 
 ** dired
@@ -991,7 +1026,7 @@
         :after magit)
     #+end_src
 
-    
+
 *** Code review
 
     Use code review from a branch on a different repo that has a fix.
@@ -1369,7 +1404,7 @@
        (add-hook 'css-mode-hook 'rainbow-mode)
      #+END_SRC
 
-     
+
 
 ** Org mode customisation
 
@@ -1885,7 +1920,7 @@
 
     #+begin_src emacs-lisp
       (add-hook 'org-mode-hook
-       (lambda () (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)))
+                (lambda () (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)))
     #+end_src
 
 
@@ -1898,6 +1933,71 @@
    #+END_SRC
 
 * Programming Modes
+
+** Codeium
+
+   Try out codeium AI.
+
+   #+begin_src emacs-lisp
+     ;; we recommend using use-package to organize your init.el
+     (use-package codeium
+       ;; if you use straight
+       ;; :straight '(:type git :host github :repo "Exafunction/codeium.el")
+       ;; otherwise, make sure that the codeium.el file is on load-path
+       :vc (codeium :url "https://github.com/Exafunction/codeium.el.git")
+       :init
+       ;; use globally
+       ;; (add-to-list 'completion-at-point;; -functions #'codeium-completion-at-point)
+       ;; or on a hook
+       ;; (add-hook 'python-mode-hook
+       ;;     (lambda ()
+       ;;         (setq-local completion-at-point-functions '(codeium-completion-at-point))))
+
+       ;; if you want multiple completion backends, use cape (https://github.com/minad/cape):
+       ;; an async company-backend is coming soon!
+
+       ;; codeium-completion-at-point is autoloaded, but you can
+       ;; optionally set a timer, which might speed up things as the
+       ;; codeium local language server takes ~0.2s to start up
+       ;; (add-hook 'emacs-startup-hook
+       ;;  (lambda () (run-with-timer 0.1 nil #'codeium-init)))
+
+       ;; :defer t ;; lazy loading, if you want
+       :config
+       (setq use-dialog-box nil) ;; do not use popup boxes
+
+       ;; if you don't want to use customize to save the api-key
+       ;; (setq codeium/metadata/api_key "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
+
+       ;; get codeium status in the modeline
+       (setq codeium-mode-line-enable
+             (lambda (api) (not (memq api '(CancelRequest Heartbeat AcceptCompletion)))))
+       (add-to-list 'mode-line-format '(:eval (car-safe codeium-mode-line)) t)
+       ;; alternatively for a more extensive mode-line
+       ;; (add-to-list 'mode-line-format '(-50 "" codeium-mode-line) t)
+
+       ;; use M-x codeium-diagnose to see apis/fields that would be sent to the local language server
+       (setq codeium-api-enabled
+             (lambda (api)
+               (memq api '(GetCompletions Heartbeat CancelRequest GetAuthToken RegisterUser auth-redirect AcceptCompletion))))
+       ;; you can also set a config for a single buffer like this:
+       ;; (add-hook 'python-mode-hook
+       ;;     (lambda ()
+       ;;         (setq-local codeium/editor_options/tab_size 4)))
+
+       ;; You can overwrite all the codeium configs!
+       ;; for example, we recommend limiting the string sent to codeium for better performance
+       (defun my-codeium/document/text ()
+         (buffer-substring-no-properties (max (- (point) 3000) (point-min)) (min (+ (point) 1000) (point-max))))
+       ;; if you change the text, you should also change the cursor_offset
+       ;; warning: this is measured by UTF-8 encoded bytes
+       (defun my-codeium/document/cursor_offset ()
+         (codeium-utf8-byte-length
+          (buffer-substring-no-properties (max (- (point) 3000) (point-min)) (point))))
+       (setq codeium/document/text 'my-codeium/document/text)
+       (setq codeium/document/cursor_offset 'my-codeium/document/cursor_offset))
+   #+end_src
+
 ** shell
 
    #+BEGIN_SRC emacs-lisp
@@ -2285,10 +2385,16 @@
 
       Supress auto-display of the REPL buffer in separate window and
       make 'C-c C-z' switch to the CIDER REPL in the current window
+      Set up cider-complete-at-point alongside lsp and codeium
 
       #+BEGIN_SRC emacs-lisp
         (setq cider-repl-pop-to-buffer-on-connect nil)
         (setq cider-repl-display-in-current-window t)
+        (add-hook 'cider-mode-hook
+                  (lambda ()
+                    (setq-local completion-at-point-functions
+                                (list (cape-capf-super
+                                       #'codeium-completion-at-point #'cider-complete-at-point #'lsp-completion-at-point)))))
       #+END_SRC
 
 ***** Start figwheel-sidecar shortcuts
@@ -2439,13 +2545,13 @@
 
     #+BEGIN_SRC emacs-lisp
       (use-package js2-mode
-	:ensure t
-	:config
-	(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-	(add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
-	;; Better imenu
-	(add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
-	(setq js2-basic-offset 2))
+        :ensure t
+        :config
+        (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+        (add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
+        ;; Better imenu
+        (add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
+        (setq js2-basic-offset 2))
     #+END_SRC
 
     And we can hook it in to run node.js shell scripts as well.
@@ -2459,37 +2565,37 @@
     Coloring for JS and Typescript.
 
     #+begin_src emacs-lisp
-            (use-package tree-sitter
-              :ensure t
-              :config
-              ;; activate tree-sitter on any buffer containing code for which it has a parser available
-              (global-tree-sitter-mode)
-              ;; you can easily see the difference tree-sitter-hl-mode makes for python, ts or tsx
-              ;; by switching on and off
-              (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+      (use-package tree-sitter
+        :ensure t
+        :config
+        ;; activate tree-sitter on any buffer containing code for which it has a parser available
+        (global-tree-sitter-mode)
+        ;; you can easily see the difference tree-sitter-hl-mode makes for python, ts or tsx
+        ;; by switching on and off
+        (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
 
-            (use-package tree-sitter-langs
-              :ensure t
-              :after tree-sitter)
+      (use-package tree-sitter-langs
+        :ensure t
+        :after tree-sitter)
 
-            ;; (setq treesit-language-source-alist
-            ;;       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-            ;;         (cmake "https://github.com/uyha/tree-sitter-cmake")
-            ;;         (css "https://github.com/tree-sitter/tree-sitter-css")
-            ;;         (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-            ;;         (go "https://github.com/tree-sitter/tree-sitter-go")
-            ;;         (html "https://github.com/tree-sitter/tree-sitter-html")
-            ;;         (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-            ;;         (json "https://github.com/tree-sitter/tree-sitter-json")
-            ;;         (make "https://github.com/alemuller/tree-sitter-make")
-            ;;         (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-            ;;         (python "https://github.com/tree-sitter/tree-sitter-python")
-            ;;         (toml "https://github.com/tree-sitter/tree-sitter-toml")
-            ;;         (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-            ;;         (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-            ;;         (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+      ;; (setq treesit-language-source-alist
+      ;;       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+      ;;         (cmake "https://github.com/uyha/tree-sitter-cmake")
+      ;;         (css "https://github.com/tree-sitter/tree-sitter-css")
+      ;;         (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+      ;;         (go "https://github.com/tree-sitter/tree-sitter-go")
+      ;;         (html "https://github.com/tree-sitter/tree-sitter-html")
+      ;;         (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+      ;;         (json "https://github.com/tree-sitter/tree-sitter-json")
+      ;;         (make "https://github.com/alemuller/tree-sitter-make")
+      ;;         (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+      ;;         (python "https://github.com/tree-sitter/tree-sitter-python")
+      ;;         (toml "https://github.com/tree-sitter/tree-sitter-toml")
+      ;;         (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+      ;;         (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+      ;;         (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-            ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
+      ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
     #+end_src
 
 ** DAP - Debug Adapter Protocol
@@ -2575,13 +2681,13 @@
 
 ** Apheleia
 
-    auto-format different source code files extremely intelligently
-    https://github.com/radian-software/apheleia
+   auto-format different source code files extremely intelligently
+   https://github.com/radian-software/apheleia
 
-    #+BEGIN_SRC emacs-lisp
-      (use-package apheleia
-        :ensure t)
-    #+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (use-package apheleia
+       :ensure t)
+   #+END_SRC
 
 ** EditorConfig
 
@@ -2622,8 +2728,8 @@
         :commands lsp
         :config
         (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
-        (setq lsp-completion-enable t)
-        (setq lsp-completion-mode t)
+        (setq lsp-completion-enable nil)
+        (setq lsp-completion-mode nil) ; Let cape deal with completion backends
         (setq gc-cons-threshold 1000000)
         (setq read-process-output-max (* 1024 1024 2))
         (setq lsp-idle-delay 0.3))
