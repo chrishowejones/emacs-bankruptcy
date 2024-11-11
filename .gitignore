@@ -50,3 +50,4 @@ code-review-*
 **/*.pyc
 elpa/conventional-commit/
 elpa/vc-use-package/
+codeium/**
