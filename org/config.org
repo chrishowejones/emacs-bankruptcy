@@ -576,10 +576,11 @@
        ;; (add-hook 'completion-at-point-functions #'cape-elisp-block)
        ;; (add-hook 'completion-at-point-functions #'cape-history)
        ;; ...
-       (add-hook 'prog-mode-hook
-                 (lambda ()
-                   (setq-local completion-at-point-functions
-                               (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point))))) ; try using codeium and lsp in prog modes
+       ;; (add-hook 'prog-mode-hook
+       ;;           (lambda ()
+       ;;             (setq-local completion-at-point-functions
+       ;;                         (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point)))))
+                                             ; try using codeium and lsp in prog modes
        )
    #+end_src
 
@@ -2309,6 +2310,17 @@
 
     Most of the clojure emacs goodness if available in the github
     repo called [[https://github.com/clojure-emacs][clojure-emacs]].
+
+    #+begin_src emacs-lisp
+      (use-package clojure-mode
+        :ensure t
+        :hook
+        (clojure-mode .
+                      (lambda ()
+                        (setq-local completion-at-point-functions
+                                    '(lsp-completion-at-point)))))
+    #+end_src
+
 **** boot
 ***** treat .boot files as clojure source
 
@@ -2361,7 +2373,7 @@
 
       #+BEGIN_SRC emacs-lisp
         (add-hook 'cider-mode-hook 'subword-mode)
-        (add-hook 'cider-mode-hook (lambda () (setq lsp-enable-completion-at-point nil)))
+        ;; (add-hook 'cider-mode-hook (lambda () (setq lsp-enable-completion-at-point nil)))
       #+END_SRC
 
 ***** Don't destroy that repl buffer while pretty printing
@@ -2394,7 +2406,7 @@
                   (lambda ()
                     (setq-local completion-at-point-functions
                                 (list (cape-capf-super
-                                       #'codeium-completion-at-point #'cider-complete-at-point #'lsp-completion-at-point)))))
+                                        #'cider-complete-at-point #'lsp-completion-at-point)))))
       #+END_SRC
 
 ***** Start figwheel-sidecar shortcuts
@@ -2551,6 +2563,12 @@
         (add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
         ;; Better imenu
         (add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
+        ;; try using codeium and lsp
+        (add-hook 'js2-mode-hook
+                  (lambda ()
+                    (setq lsp-completion-enable nil)
+                    (setq-local completion-at-point-functions
+                                (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point)))))
         (setq js2-basic-offset 2))
     #+END_SRC
 
@@ -2624,7 +2642,12 @@
         :ensure t
         :config
         (setq typescript-indent-level 2)
-        (electric-indent-mode nil))
+        (electric-indent-mode nil)
+        ;; try using codeium and lsp
+        (add-hook 'typescript-mode-hook
+                  (lambda ()
+                    (setq-local completion-at-point-functions
+                                (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point))))))
     #+END_SRC
 
 *** ts-comint repl for typescript
@@ -2661,7 +2684,12 @@
      (use-package terraform-mode
        :ensure t
        :hook
-       (outline-minor-mode))
+       (outline-minor-mode)
+       :config
+       (add-hook 'terraform-mode-hook
+                 (lambda ()
+                   (setq-local completion-at-point-functions
+                               (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point))))))
    #+end_src
 
 ** pastebins
@@ -2728,11 +2756,12 @@
         :commands lsp
         :config
         (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
-        (setq lsp-completion-enable nil)
-        (setq lsp-completion-mode nil) ; Let cape deal with completion backends
+        (setq lsp-completion-enable t)
+        ;;(setq lsp-completion-mode nil) ; Let cape deal with completion backends
         (setq gc-cons-threshold 1000000)
         (setq read-process-output-max (* 1024 1024 2))
-        (setq lsp-idle-delay 0.3))
+        (setq lsp-idle-delay 0.3)        
+        )
     #+end_src
 
     Set up ui
