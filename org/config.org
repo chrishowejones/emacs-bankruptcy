@@ -951,15 +951,18 @@
      (use-package smartparens
        :ensure t
        :config
-       (require 'smartparens-config)
        (sp-use-paredit-bindings)
-       (smartparens-strict-mode 1)
-       (sp-local-pair 'typescript-mode "<" nil :actions :rem)
-       (sp-local-pair 'typescript-ts-mode "<" nil :actions :rem)
+       (sp-local-pair 'typescript-mode "<" ">" :actions nil)
+       (sp-local-pair 'typescript-ts-mode "<" ">" :actions nil)
        :bind
        ("C-)" . sp-slurp-hybrid-sexp)
-       :hook (js2-mode typescript-mode typescript-ts-mode yaml-mode
-                       java-mode terraform-mode text-mode markdown-mode))
+       :hook
+       ((js2-mode . smartparens-strict-mode)
+        (typescript-mode . smartparens-strict-mode)
+        (typescript-ts-mode . smartparens-strict-mode)
+        (yaml-mode . smartparens-strict-mode)
+        (java-mode . smartparens-strict-mode)
+        (terraform-mode . smartparens-strict-mode)))
    #+end_src
 
 ** dired
@@ -2211,10 +2214,6 @@
       (setq lisp-hooks (lambda ()
                          (eldoc-mode +1)
                          (diminish 'eldoc-mode)
-                         (define-key paredit-mode-map
-                                     (kbd "{") 'paredit-open-curly)
-                         (define-key paredit-mode-map
-                                     (kbd "}") 'paredit-close-curly)
                          (local-set-key (kbd "C-;") 'comment-dwim)))
     #+END_SRC
 
