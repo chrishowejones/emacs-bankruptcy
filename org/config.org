@@ -2628,7 +2628,19 @@
         :hook ((lsp-mode . dap-mode)
                (lsp-mode . dap-ui-mode)
                (lsp-mode . dap-ui-controls-mode))
-        :config (dap-auto-configure-mode))
+        :config
+        (dap-auto-configure-mode))
+    #+end_src
+
+    
+
+*** DAP node config
+
+    Config for dap in node.js
+
+    #+begin_src emacs-lisp
+      (require 'dap-node)
+      (dap-node-setup)
     #+end_src
 
 ** Typescript
@@ -2754,12 +2766,11 @@
                (lsp-mode . lsp-lens-mode))
         :commands lsp
         :config
-        (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
         (setq lsp-completion-enable t)
         ;;(setq lsp-completion-mode nil) ; Let cape deal with completion backends
         (setq gc-cons-threshold 1000000)
         (setq read-process-output-max (* 1024 1024 2))
-        (setq lsp-idle-delay 0.3)        
+        (setq lsp-idle-delay 0.3)
         )
     #+end_src
 
@@ -2768,7 +2779,11 @@
     #+begin_src emacs-lisp
       (use-package lsp-ui
         :ensure t
-        :commands lsp-ui-mode)
+        :bind (("C-<tab>" . lsp-ui-doc-focus-frame))
+        :commands lsp-ui-mode
+        :config
+        (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
+      )
     #+end_src
 
     Add in consult support.
