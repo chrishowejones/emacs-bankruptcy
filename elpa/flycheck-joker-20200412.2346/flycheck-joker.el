@@ -4,7 +4,8 @@
 ;;
 ;; Author: Roman Bataev <roman.bataev@gmail.com>
 ;; Created: 12 February 2017
-;; Version: 1.5.0
+;; Package-Version: 20200412.2346
+;; Package-Revision: 93576295fef7
 ;; Package-Requires: ((flycheck "0.18"))
 
 ;;; Commentary:

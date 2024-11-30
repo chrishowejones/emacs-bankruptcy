@@ -4,7 +4,8 @@
 
 ;; Author: Charles L.G. Comstock <dgtized@gmail.com>
 ;; Created: 3 Sept 2017
-;; Version: 0.1
+;; Package-Version: 20210105.1919
+;; Package-Revision: c3beff156884
 ;; URL: https://github.com/dgtized/winnow.el
 ;; Keywords: matching
 ;; Package-Requires: ((emacs "24"))

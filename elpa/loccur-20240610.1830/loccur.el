@@ -6,7 +6,8 @@
 ;;
 ;; Created: 2009-09-08
 
-;; Version: 1.2.5
+;; Package-Version: 20240610.1830
+;; Package-Revision: f47c53a24a9d
 ;; Package-Requires: ((emacs "25.1"))
 ;; Keywords: matching
 ;; URL: https://codeberg.org/fourier/loccur

@@ -4,6 +4,8 @@
 
 ;; Author: Yann Hodique <yhodique@gmail.com>
 ;; Keywords:
+;; Package-Version: 20230825.1217
+;; Package-Revision: b5a8d8209340
 ;; Homepage: https://github.com/sigma/gh.el
 
 ;; This file is free software; you can redistribute it and/or modify

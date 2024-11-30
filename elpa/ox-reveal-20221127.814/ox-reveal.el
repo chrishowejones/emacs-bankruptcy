@@ -4,7 +4,8 @@
 
 ;; Author: Yujie Wen <yjwen.ty at gmail dot com>
 ;; Created: 2013-04-27
-;; Version: 1.0
+;; Package-Version: 20221127.814
+;; Package-Revision: f55c851bf6ae
 ;; Package-Requires: ((org "8.3"))
 ;; Keywords: outlines, hypermedia, slideshow, presentation
 

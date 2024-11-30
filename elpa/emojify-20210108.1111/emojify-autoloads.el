@@ -46,13 +46,15 @@ or call the function `global-emojify-mode'.")
 (custom-autoload 'global-emojify-mode "emojify" nil)
 (autoload 'global-emojify-mode "emojify" "\
 Toggle Emojify mode in all buffers.
-With prefix ARG, enable Global Emojify mode if ARG is positive; otherwise, disable it.
+With prefix ARG, enable Global Emojify mode if ARG is positive;
+otherwise, disable it.
 
 If called from Lisp, toggle the mode if ARG is `toggle'.
 Enable the mode if ARG is nil, omitted, or is a positive number.
 Disable the mode if ARG is a negative number.
 
-Emojify mode is enabled in all buffers where `emojify-mode' would do it.
+Emojify mode is enabled in all buffers where `emojify-mode' would do
+it.
 
 See `emojify-mode' for more information on Emojify mode.
 
@@ -87,15 +89,18 @@ or call the function `global-emojify-mode-line-mode'.")
 (custom-autoload 'global-emojify-mode-line-mode "emojify" nil)
 (autoload 'global-emojify-mode-line-mode "emojify" "\
 Toggle Emojify-Mode-Line mode in all buffers.
-With prefix ARG, enable Global Emojify-Mode-Line mode if ARG is positive; otherwise, disable it.
+With prefix ARG, enable Global Emojify-Mode-Line mode if ARG is
+positive; otherwise, disable it.
 
 If called from Lisp, toggle the mode if ARG is `toggle'.
 Enable the mode if ARG is nil, omitted, or is a positive number.
 Disable the mode if ARG is a negative number.
 
-Emojify-Mode-Line mode is enabled in all buffers where `emojify-mode-line-mode' would do it.
+Emojify-Mode-Line mode is enabled in all buffers where
+`emojify-mode-line-mode' would do it.
 
-See `emojify-mode-line-mode' for more information on Emojify-Mode-Line mode.
+See `emojify-mode-line-mode' for more information on Emojify-Mode-Line
+mode.
 
 (fn &optional ARG)" t)
 (autoload 'emojify-apropos-emoji "emojify" "\

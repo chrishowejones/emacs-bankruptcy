@@ -5,7 +5,8 @@
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
 ;; Maintainer: Neil Okamoto
 ;; URL: https://github.com/emacsorphanage/git-messenger
-;; Version: 0.18
+;; Package-Version: 20201202.1637
+;; Package-Revision: fb9a049ac3b5
 ;; Package-Requires: ((emacs "24.3") (popup "0.5.3"))
 
 ;; This program is free software; you can redistribute it and/or modify

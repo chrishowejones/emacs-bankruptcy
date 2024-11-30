@@ -4,7 +4,8 @@
 
 ;; Author: Alexander Miller <alexanderm@web.de>
 ;; Package-Requires: ((emacs "26.1") (projectile "0.14.0") (treemacs "0.0"))
-;; Version: 0
+;; Package-Version: 20240131.2042
+;; Package-Revision: bcba09c1581c
 ;; Homepage: https://github.com/Alexander-Miller/treemacs
 
 ;; This program is free software; you can redistribute it and/or modify

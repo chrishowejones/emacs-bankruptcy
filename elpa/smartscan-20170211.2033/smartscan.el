@@ -5,7 +5,8 @@
 ;; Author: Mickey Petersen <mickey@masteringemacs.org>
 ;; Maintainer: Mickey Petersen <mickey@masteringemacs.org>
 ;; Keywords: extensions
-;; Version: 0.3
+;; Package-Version: 20170211.2033
+;; Package-Revision: 234e07714571
 
 ;;; Contributions
 ;; Thanks to Ryan Mulligan, Thomas Wallrafen, Brian Malehorn and Steve

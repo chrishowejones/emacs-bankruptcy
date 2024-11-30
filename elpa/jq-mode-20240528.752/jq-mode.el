@@ -5,7 +5,8 @@
 ;; Author: Bjarte Johansen <Bjarte dot Johansen at gmail dot com>
 ;; Homepage: https://github.com/ljos/jq-mode
 ;; Package-Requires: ((emacs "25.1"))
-;; Version: 0.4.1
+;; Package-Version: 20240528.752
+;; Package-Revision: a0f79eba786d
 
 ;; This file is not part of GNU Emacs.
 

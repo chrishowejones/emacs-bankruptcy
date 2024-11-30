@@ -5,7 +5,8 @@
 ;; Author: Gerry Agbobada
 ;; Maintainer: Gerry Agbobada
 ;; Package-Requires: ((emacs "27.1") (lsp-mode "5.0") (consult "0.16") (f "0.20.0"))
-;; Version: 1.1-dev
+;; Package-Version: 20240507.2105
+;; Package-Revision: 68583913168b
 ;; Homepage: https://github.com/gagbo/consult-lsp
 
 ;; Copyright (c) 2021 Gerry Agbobada and contributors

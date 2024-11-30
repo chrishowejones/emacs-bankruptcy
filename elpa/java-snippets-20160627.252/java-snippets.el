@@ -4,6 +4,8 @@
 
 ;; Author: Takayoshi Kimura
 ;; URL: https://github.com/nekop/yasnippet-java-mode
+;; Package-Version: 20160627.252
+;; Package-Revision: 738523debb10
 ;; Package-Requires: ((yasnippet "0.8.0"))
 
 ;;; Commentary:

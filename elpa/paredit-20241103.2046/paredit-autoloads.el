@@ -35,8 +35,6 @@ evaluate `paredit-mode'.
 The mode's hook is called both when the mode is enabled and when
 it is disabled.
 
-\\{paredit-mode-map}
-
 (fn &optional ARG)" t)
 (autoload 'enable-paredit-mode "paredit" "\
 Turn on pseudo-structural editing of Lisp code." t)

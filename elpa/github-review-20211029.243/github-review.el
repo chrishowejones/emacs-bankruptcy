@@ -4,7 +4,8 @@
 ;; Keywords: git, tools, vc, github
 ;; Homepage: https://github.com/charignon/github-review
 ;; Package-Requires: ((emacs "25.1") (s "1.12.0") (ghub "2.0") (dash "2.11.0") (deferred "0.5.1") (a "0.1.1"))
-;; Package-Version: 0.1
+;; Package-Version: 20211029.243
+;; Package-Revision: 725fbc7b3852
 
 ;; This file is not part of GNU Emacs
 

@@ -246,12 +246,12 @@
 
 ** Reuse window on display buffer
 
-   Try and reuse a window already using the buffer and then fall back to pop up a window and finally using an existing window
+   Try and reuse a window already using the buffer and then using an existing window, finally fall back to pop up a window
    if all else fails.
 
    #+begin_src emacs-lisp :tangle yes
      (setopt display-buffer-base-action
-             '((display-buffer-reuse-window display-buffer-pop-up-window display-buffer-use-some-window)))
+             '((display-buffer-reuse-window display-buffer-use-some-window display-buffer-pop-up-window)))
    #+end_src
 
 ** Set auth sources to use gpg
@@ -540,11 +540,11 @@
        (diminish 'company-mode "CA")
        :config
        (setq-default company-tooltip-limit 20                         ; bigger popup window
-                     company-minimum-prefix-length 1                  ; WARNING, probably you will get perfomance issue if min len is 0!
+                     company-minimum-prefix-length 2                  ; WARNING, probably you will get perfomance issue if min len is 0!
                      company-tooltip-align-annotations 't             ; align annotations to the right tooltip border
                      company-idle-delay 0.3                           ; decrease delay before autocompletion popup shows
                      company-begin-commands '(self-insert-command)    ; start autocompletion only after typing
-                     company-frontends '(company-pseudo-tooltip-frontend company-preview-frontend)
+                     company-frontends '(company-pseudo-tooltip-unless-just-one-frontend company-preview-if-just-one-frontend company-echo-metadata-frontend)
                      company-tooltip-flip-when-above t)
        (global-set-key (kbd "C-M-i") 'company-complete)
        (global-set-key (kbd "C-c /") 'company-files)        ; Force complete file names on "C-c /" key
@@ -1038,6 +1038,9 @@
     #+begin_src emacs-lisp
       (use-package code-review
         :vc (code-review :url "https://github.com/phelrine/code-review" :branch "fix/closql-update")
+        :bind
+        (("C-M-n" . code-review-comment-jump-next)
+         ("C-M-p" . code-review-comment-jump-previous))
         :config
         (define-key forge-topic-mode-map (kbd "C-c r") 'code-review-forge-pr-at-point))
     #+end_src
@@ -1963,12 +1966,12 @@
        ;; codeium-completion-at-point is autoloaded, but you can
        ;; optionally set a timer, which might speed up things as the
        ;; codeium local language server takes ~0.2s to start up
-       ;; (add-hook 'emacs-startup-hook
-       ;;  (lambda () (run-with-timer 0.1 nil #'codeium-init)))
+       (add-hook 'emacs-startup-hook
+         (lambda () (run-with-timer 0.1 nil #'codeium-init)))
 
        ;; :defer t ;; lazy loading, if you want
        :config
-       (setq use-dialog-box nil) ;; do not use popup boxes
+       (setq use-dialog-box t) ;; do not use popup boxes
 
        ;; if you don't want to use customize to save the api-key
        ;; (setq codeium/metadata/api_key "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
@@ -2639,8 +2642,10 @@
     Config for dap in node.js
 
     #+begin_src emacs-lisp
-      (require 'dap-node)
-      (dap-node-setup)
+      (use-package dap-node
+        :after dap-mode
+        :config
+        (dap-node-setup))
     #+end_src
 
 ** Typescript
@@ -2684,8 +2689,18 @@
      (use-package jest-test-mode
        :ensure t
        :commands jest-test-mode
-       :hook (typescript-mode js2-mode typescript-tsx-mode))
+       ;; :hook (typescript-mode js2-mode typescript-tsx-mode)
+       )
    #+END_SRC
+
+** Vite Test mode
+
+   Run vitest tests.
+
+   #+begin_src emacs-lisp
+     (use-package vite-test-mode
+       :vc (vite-test-mode :url "https://github.com/chrishowejones/vite-test-mode" :branch "master"))
+   #+end_src
 
 ** Terraform
 
@@ -2748,8 +2763,7 @@
     #+begin_src emacs-lisp
       (use-package lsp-mode
         :ensure t
-        :init
-        ;; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
+        :init ; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
         (setq lsp-keymap-prefix "M-s-l")
         :hook (;;  concrete major-modes to use lsp (e. g. clojure-mode)
                (clojure-mode . lsp-deferred)
@@ -2779,6 +2793,7 @@
     #+begin_src emacs-lisp
       (use-package lsp-ui
         :ensure t
+        :after lsp-mode
         :bind (("C-<tab>" . lsp-ui-doc-focus-frame))
         :commands lsp-ui-mode
         :config
@@ -2791,6 +2806,7 @@
     #+begin_src emacs-lisp
       (use-package consult-lsp
         :ensure t
+        :after lsp-mode
         :config
         (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
     #+end_src
@@ -2815,7 +2831,6 @@
         (define-key java-mode-map (kbd "M-s-l t d") 'dap-java-debug-test-method))
       (with-eval-after-load 'java-mode (bind-java-dap-keys))
     #+end_src
-
 
 * Data Modes
 

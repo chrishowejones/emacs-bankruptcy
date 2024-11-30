@@ -6,6 +6,8 @@
 ;; Author: Nic Ferrier <nferrier@ferrier.me.uk>
 ;; Maintainer: GitHub user "Jcaw"
 ;; Created: 5th October 2010
+;; Package-Version: 20190702.1509
+;; Package-Revision: 29ef0f51a65a
 ;; Keywords: lisp, http, hypermedia
 
 ;; This file is NOT part of GNU Emacs.

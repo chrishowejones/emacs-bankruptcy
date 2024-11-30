@@ -8,7 +8,8 @@
 ;;               Phil Hagelberg
 ;;               Dan McKinley
 ;;               Marcelo Muñoz Araya <ma.munoz.araya@gmail.com>
-;; Version: 1.4.0
+;; Package-Version: 20171128.406
+;; Package-Revision: b2712a61d04a
 ;; Package-Requires: ((emacs "24.1") (gh "0.10.0"))
 ;; Keywords: tools
 ;; Homepage: https://github.com/defunkt/gist.el

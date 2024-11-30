@@ -4,7 +4,8 @@
 
 ;; Author: Yann Hodique <yann.hodique@gmail.com>
 ;; Keywords: extensions
-;; Version: 0.9.1
+;; Package-Version: 20201223.1853
+;; Package-Revision: 490496d974d0
 ;; URL: https://github.com/sigma/marshal.el
 ;; Package-Requires: ((emacs "25.1") (ht "2.0"))
 

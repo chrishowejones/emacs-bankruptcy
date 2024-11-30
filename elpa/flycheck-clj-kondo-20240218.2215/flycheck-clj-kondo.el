@@ -6,7 +6,8 @@
 ;;
 ;; Author: Michiel Borkent <michielborkent@gmail.com>
 ;; Created: 3 April 2019
-;; Version: 0.0.4-snapshot
+;; Package-Version: 20240218.2215
+;; Package-Revision: e38c67ba9db1
 ;; Homepage: https://github.com/borkdude/flycheck-clj-kondo
 ;; Package-Requires: ((emacs "26.1") (flycheck "34"))
 

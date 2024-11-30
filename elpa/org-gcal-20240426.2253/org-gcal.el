@@ -2,7 +2,8 @@
 
 ;; Author: myuhe <yuhei.maeda_at_gmail.com>
 ;; URL: https://github.com/kidd/org-gcal.el
-;; Version: 0.4.2
+;; Package-Version: 20240426.2253
+;; Package-Revision: 9f9d93e4f0d5
 ;; Maintainer: Raimon Grau <raimonster@gmail.com>
 ;; Copyright (C) :2014 myuhe all rights reserved.
 ;; Keywords: convenience,

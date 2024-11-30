@@ -4,7 +4,8 @@
 
 ;; Author: Yann Hodique <yann.hodique@gmail.com>
 ;; Keywords: lisp, extensions
-;; Version: 0.1
+;; Package-Version: 20201226.534
+;; Package-Revision: d5934ce10ba3
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is free software; you can redistribute it and/or modify

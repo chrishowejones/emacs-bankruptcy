@@ -5,7 +5,8 @@
 ;; Author: Daniel Wu
 ;; Created: 2014-04-14
 ;; Keywords: project, convenience
-;; Version: 1.0.0
+;; Package-Version: 20210618.708
+;; Package-Revision: 6e4c2e017d59
 ;; Package-Requires: ((perspective "1.9") (projectile "2.4") (cl-lib "0.3"))
 
 ;; This file is NOT part of GNU Emacs.

@@ -1,6 +1,7 @@
 ;;; lsp-java.el --- Java support for lsp-mode  -*- lexical-binding: t; -*-
 
-;; Version: 3.0
+;; Package-Version: 20240524.2207
+;; Package-Revision: 4909c14b9012
 
 ;; Package-Requires: ((emacs "27.1") (lsp-mode "6.0") (markdown-mode "2.3") (dash "2.18.0") (f "0.20.0") (ht "2.0") (request "0.3.0") (treemacs "2.5") (dap-mode "0.5"))
 ;; Keywords: languague, tools

@@ -6,7 +6,8 @@
 ;; Keywords: languages
 ;; Package-Requires: ((emacs "27.1") (dash "2.18.0") (f "0.20.0") (ht "2.0") (treemacs "2.5") (lsp-mode "6.0"))
 ;; Homepage: https://github.com/emacs-lsp/lsp-treemacs
-;; Version: 0.5
+;; Package-Version: 20240406.2141
+;; Package-Revision: e223fbb6c09e
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

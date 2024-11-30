@@ -1,12 +1,10 @@
-(define-package "log4e" "20240123.1313" "provide logging framework for elisp" 'nil :commit "6d71462df9bf595d3861bfb328377346aceed422" :authors
-  '(("Hiroaki Otsu" . "ootsuhiroaki@gmail.com"))
-  :maintainers
-  '(("Hiroaki Otsu" . "ootsuhiroaki@gmail.com"))
-  :maintainer
-  '("Hiroaki Otsu" . "ootsuhiroaki@gmail.com")
-  :keywords
-  '("log")
-  :url "https://github.com/aki2o/log4e")
-;; Local Variables:
-;; no-byte-compile: t
-;; End:
+;; -*- no-byte-compile: t; lexical-binding: nil -*-
+(define-package "log4e" "20240123.1313"
+  "Provide logging framework for elisp."
+  ()
+  :url "https://github.com/aki2o/log4e"
+  :commit "6d71462df9bf595d3861bfb328377346aceed422"
+  :revdesc "6d71462df9bf"
+  :keywords '("log")
+  :authors '(("Hiroaki Otsu" . "ootsuhiroaki@gmail.com"))
+  :maintainers '(("Hiroaki Otsu" . "ootsuhiroaki@gmail.com")))

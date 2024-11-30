@@ -7,7 +7,8 @@
 ;;     Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; Maintainer: Peter Fraenkel <pnf@podsnap.com>
 ;; URL: https://github.com/clojure-emacs/squiggly-clojure
-;; Version: 1.8.0
+;; Package-Version: 20191215.2227
+;; Package-Revision: bc85f9dfe1bc
 ;; Package-Requires: ((cider "0.22.0") (flycheck "32-cvs") (let-alist "1.0.1") (emacs "25"))
 
 ;; This file is not part of GNU Emacs.

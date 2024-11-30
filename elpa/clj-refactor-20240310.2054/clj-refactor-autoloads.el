@@ -254,8 +254,6 @@ evaluate `clj-refactor-mode'.
 The mode's hook is called both when the mode is enabled and when
 it is disabled.
 
-\\{clj-refactor-map}
-
 (fn &optional ARG)" t)
 (register-definition-prefixes "clj-refactor" '("*cljr--noninteractive*" "cjr--occurrence-count" "clj" "hydra-cljr-"))
 

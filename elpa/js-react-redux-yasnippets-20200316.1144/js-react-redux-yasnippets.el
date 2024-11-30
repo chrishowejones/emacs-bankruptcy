@@ -5,7 +5,8 @@
 
 ;; Author: sooqua
 ;; Keywords: convenience,snippets
-;; Version: 0.0.2
+;; Package-Version: 20200316.1144
+;; Package-Revision: 9f509043f01f
 ;; Url: https://github.com/sooqua/js-react-redux-yasnippets
 ;; Package-Requires: ((emacs "24.3") (yasnippet "0.8.0"))
 

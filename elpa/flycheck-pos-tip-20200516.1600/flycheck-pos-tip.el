@@ -8,7 +8,8 @@
 ;; Maintainer: Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; URL: https://github.com/flycheck/flycheck-pos-tip
 ;; Keywords: tools, convenience
-;; Version: 0.4-cvs
+;; Package-Version: 20200516.1600
+;; Package-Revision: dc57beac0e59
 ;; Package-Requires: ((emacs "24.1") (flycheck "0.22") (pos-tip "0.4.6"))
 
 ;; This file is not part of GNU Emacs.
