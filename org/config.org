@@ -539,10 +539,10 @@
        (add-hook 'after-init-hook 'global-company-mode)
        (diminish 'company-mode "CA")
        :config
-       (setq-default company-tooltip-limit 20                         ; bigger popup window
+       (setq-default company-tooltip-limit 30                         ; bigger popup window
                      company-minimum-prefix-length 2                  ; WARNING, probably you will get perfomance issue if min len is 0!
                      company-tooltip-align-annotations 't             ; align annotations to the right tooltip border
-                     company-idle-delay 0.3                           ; decrease delay before autocompletion popup shows
+                     company-idle-delay 0.4                           ; decrease delay before autocompletion popup shows
                      company-begin-commands '(self-insert-command)    ; start autocompletion only after typing
                      company-frontends '(company-pseudo-tooltip-unless-just-one-frontend company-preview-if-just-one-frontend company-echo-metadata-frontend)
                      company-tooltip-flip-when-above t)
@@ -582,6 +582,15 @@
        ;;                         (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point)))))
                                              ; try using codeium and lsp in prog modes
        )
+   #+end_src
+
+   Wrap Company backend in Cape.
+
+   #+begin_src emacs-lisp :tangle yes
+     ;; Use Company backends as Capfs.
+     (setq-local completion-at-point-functions
+       (mapcar #'cape-company-to-capf
+         (list #'company-files #'company-keywords #'company-dabbrev)))
    #+end_src
 
 ** Vertico for completion
