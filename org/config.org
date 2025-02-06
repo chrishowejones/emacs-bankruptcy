@@ -571,8 +571,8 @@
        ;; used by `completion-at-point'.  The order of the functions matters, the
        ;; first function returning a result wins.  Note that the list of buffer-local
        ;; completion functions takes precedence over the global list.
-       (add-hook 'completion-at-point-functions #'cape-dabbrev)
-       (add-hook 'completion-at-point-functions #'cape-file)
+       ;; (add-hook 'completion-at-point-functions #'cape-dabbrev)
+       ;; (add-hook 'completion-at-point-functions #'cape-file)
        ;; (add-hook 'completion-at-point-functions #'cape-elisp-block)
        ;; (add-hook 'completion-at-point-functions #'cape-history)
        ;; ...
@@ -1027,6 +1027,22 @@
     #+BEGIN_SRC emacs-lisp
       (global-set-key (kbd "C-x g") 'magit-status)
     #+END_SRC
+
+    
+**** Add pinentry to allow pin for code signing
+
+     In order to allow magit to prompt for a passcode for a GPG signature we need to install
+     pinentry and start the pinentry server.
+
+     You also need to add `allow-emacs-pinentry` to `~/.gnupg/gpg-agent.conf` and reload the gpg agent using
+     `gpgconf --reload gpg-agent`
+
+     #+begin_src emacs-lisp
+       (use-package pinentry
+         :ensure t
+         :after magit
+         :config (pinentry-start))
+     #+end_src
 
 *** forge
 
@@ -2012,6 +2028,18 @@
           (buffer-substring-no-properties (max (- (point) 3000) (point-min)) (point))))
        (setq codeium/document/text 'my-codeium/document/text)
        (setq codeium/document/cursor_offset 'my-codeium/document/cursor_offset))
+   #+end_src
+
+** Copilot
+
+   Add in copilot mode.
+
+   #+begin_src emacs-lisp
+     (use-package copilot
+       :vc (copilot :url "https://github.com/copilot-emacs/copilot.el"
+                    :branch "main")
+       ;; :hook prog-mode
+       )
    #+end_src
 
 ** shell
