@@ -2587,6 +2587,7 @@
                            (clj-kondo-edn . edn-joker)))
          (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers))))
      #+END_SRC
+     
 
 ** JavaScript
 
@@ -2669,19 +2670,8 @@
                (lsp-mode . dap-ui-mode)
                (lsp-mode . dap-ui-controls-mode))
         :config
-        (dap-auto-configure-mode))
-    #+end_src
-
-    
-
-*** DAP node config
-
-    Config for dap in node.js
-
-    #+begin_src emacs-lisp
-      (use-package dap-node
-        :after dap-mode
-        :config
+        (dap-auto-configure-mode)
+        (require 'dap-node)
         (dap-node-setup))
     #+end_src
 
@@ -2736,7 +2726,8 @@
 
    #+begin_src emacs-lisp
      (use-package vite-test-mode
-       :vc (vite-test-mode :url "https://github.com/chrishowejones/vite-test-mode" :branch "master"))
+       :vc (vite-test-mode :url "https://github.com/chrishowejones/vite-test-mode" :branch "master")
+       )
    #+end_src
 
 ** Terraform
