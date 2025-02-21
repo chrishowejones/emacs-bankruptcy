@@ -2588,7 +2588,6 @@
          (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers))))
      #+END_SRC
      
-
 ** JavaScript
 
 *** js2 mode
@@ -2746,6 +2745,20 @@
                                (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point))))))
    #+end_src
 
+** Erlang
+   
+*** Erlang mode
+
+    Install erlang mode
+
+    #+begin_src emacs-lisp
+      (setq load-path (cons "~/.kerl/builds/27.2.4/otp_src_27.2.4/lib/tools/emacs" load-path))
+      (require 'erlang-start)
+      (setq erlang-root-dir "~/.kerl/builds/27.2.4/otp_src_27.2.4/")
+      (setq exec-path (cons "~/.kerl/builds/27.2.4/otp_src_27.2.4/bin" exec-path))
+      (setq erlang-man-root-dir "~/.kerl/builds/27.2.4/otp_src_27.2.4/man")
+    #+end_src
+
 ** pastebins
 
    gist, pastebin, refheap. All good ways of sharing snippets of code
@@ -2872,6 +2885,15 @@
    #+end_src
 
 * Multimedia
+
+** PDF tools
+
+   Install pdf-tools
+
+   #+begin_src emacs-lisp
+     (use-package pdf-tools
+       :ensure t)
+   #+end_src
 
 * Notification Systems
 
