@@ -96,6 +96,18 @@
      (define-key global-map (kbd "RET") 'newline-and-indent)
    #+END_SRC
 
+** Delete trailing whitespace
+
+   #+begin_src emacs-lisp :tangle yes
+     (add-hook 'before-save-hook 'delete-trailing-whitespace)
+   #+end_src
+
+** Require final newline
+
+   #+begin_src emacs-lisp :tangle yes
+     (setq require-final-newline t)
+   #+end_src
+
 ** diminish
 
    As we add lots of useful minor-modes the mode line can get a bit
@@ -1028,7 +1040,7 @@
       (global-set-key (kbd "C-x g") 'magit-status)
     #+END_SRC
 
-    
+
 **** Add pinentry to allow pin for code signing
 
      In order to allow magit to prompt for a passcode for a GPG signature we need to install
@@ -2587,7 +2599,7 @@
                            (clj-kondo-edn . edn-joker)))
          (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers))))
      #+END_SRC
-     
+
 ** JavaScript
 
 *** js2 mode
@@ -2746,7 +2758,7 @@
    #+end_src
 
 ** Erlang
-   
+
 *** Erlang mode
 
     Install erlang mode
@@ -2757,6 +2769,41 @@
       (setq erlang-root-dir "~/.kerl/builds/27.2.4/otp_src_27.2.4/")
       (setq exec-path (cons "~/.kerl/builds/27.2.4/otp_src_27.2.4/bin" exec-path))
       (setq erlang-man-root-dir "~/.kerl/builds/27.2.4/otp_src_27.2.4/man")
+    #+end_src
+
+
+*** Flycheck for Erlang
+
+    Set up Flycheck for Erlang
+
+    #+begin_src emacs-lisp
+      (add-hook 'erlang-mode-hook
+                (lambda ()
+                  (flycheck-select-checker 'erlang)
+                  (flycheck-mode)))
+    #+end_src
+
+*** Distel
+
+    Install Distel for Erlang
+
+    #+begin_src emacs-lisp
+      (push "~/.emacs.d/distel/elisp/" load-path)
+      (require 'distel)
+      (distel-setup)
+      ;; prevent annoying hang-on-compile
+      (defvar inferior-erlang-prompt-timeout t)
+      ;; default node name to emacs@localhost
+      (setq inferior-erlang-machine-options '("-sname" "emacs"))
+      ;; tell distel to default to that node
+      (setq erl-nodename-cache
+            (make-symbol
+             (concat
+              "emacs@"
+              ;; Mac OS X uses "name.local" instead of "name", this should work
+              ;; pretty much anywhere without having to muck with NetInfo
+              ;; ... but I only tested it on Mac OS X.
+              (car (split-string (shell-command-to-string "hostname"))))))
     #+end_src
 
 ** pastebins
@@ -2815,6 +2862,7 @@
                (java-mode . lsp-deferred)
                (terraform-mode . lsp-deferred)
                (yaml-mode . lsp-deferred)
+               (erlang-mode . lsp-deferred)
                ;; if you want which-key integration
                (lsp-mode . lsp-enable-which-key-integration)
                (lsp-mode . flycheck-mode)
@@ -2826,6 +2874,12 @@
         (setq gc-cons-threshold 1000000)
         (setq read-process-output-max (* 1024 1024 2))
         (setq lsp-idle-delay 0.3)
+        ;; ELP, added as priority 0 (> -1) so takes priority over the built-in one
+        (lsp-register-client
+         (make-lsp-client :new-connection (lsp-stdio-connection '("elp" "server"))
+                          :major-modes '(erlang-mode)
+                          :priority 0
+                          :server-id 'erlang-language-platform))
         )
     #+end_src
 
