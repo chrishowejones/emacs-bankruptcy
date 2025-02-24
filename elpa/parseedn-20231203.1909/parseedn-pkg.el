@@ -4,7 +4,7 @@
   '((emacs    "26")
     (parseclj "1.1.1")
     (map      "2"))
-  :url "https://github.com/clojure-emacs/parseedn"
+  :url "http://www.github.com/clojure-emacs/parseedn"
   :commit "3407e4530a367b6c2b857dae261cdbb67a440aaa"
   :revdesc "3407e4530a36"
   :keywords '("lisp" "clojure" "edn" "parser")
