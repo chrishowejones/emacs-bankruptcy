@@ -935,7 +935,8 @@
        (diminish 'paredit-mode "()")
        :hook
        ((lisp-mode . paredit-mode)
-        (clojure-mode . paredit-mode)))
+        (clojure-mode . paredit-mode)
+        (erlang-mode . paredit-mode)))
    #+END_SRC
 
 ** paredit spaces for non s-expr langs
