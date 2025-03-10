@@ -335,9 +335,17 @@
 *** VSCode dark theme
 
     #+BEGIN_SRC emacs-lisp
-      (use-package vscode-dark-plus-theme
+      ;; (use-package vscode-dark-plus-theme
+      ;;   :ensure t)
+      ;; (load-theme 'vscode-dark-plus t)
+    #+END_SRC
+
+*** VS dark theme
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package vs-dark-theme
         :ensure t)
-      (enable-theme 'vscode-dark-plus)
+      (load-theme 'vs-dark t)
     #+END_SRC
 
 ** Default font height
@@ -588,10 +596,10 @@
        ;; (add-hook 'completion-at-point-functions #'cape-elisp-block)
        ;; (add-hook 'completion-at-point-functions #'cape-history)
        ;; ...
-       ;; (add-hook 'prog-mode-hook
-       ;;           (lambda ()
-       ;;             (setq-local completion-at-point-functions
-       ;;                         (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point)))))
+       (add-hook 'prog-mode-hook
+                 (lambda ()
+                   (setq-local completion-at-point-functions
+                               (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point)))))
                                              ; try using codeium and lsp in prog modes
        )
    #+end_src
@@ -2366,11 +2374,12 @@
     #+begin_src emacs-lisp
       (use-package clojure-mode
         :ensure t
-        :hook
-        (clojure-mode .
-                      (lambda ()
-                        (setq-local completion-at-point-functions
-                                    '(lsp-completion-at-point)))))
+        ;; :hook
+        ;; (clojure-mode .
+        ;;               (lambda ()
+        ;;                 (setq-local completion-at-point-functions
+        ;;                             '(lsp-completion-at-point))))
+        )
     #+end_src
 
 **** boot
@@ -2770,6 +2779,7 @@
       (setq erlang-root-dir "~/.kerl/builds/27.2.4/otp_src_27.2.4/")
       (setq exec-path (cons "~/.kerl/builds/27.2.4/otp_src_27.2.4/bin" exec-path))
       (setq erlang-man-root-dir "~/.kerl/builds/27.2.4/otp_src_27.2.4/man")
+      (add-hook 'erlang-mode-hook 'my-paredit-nonlisp)
     #+end_src
 
 
