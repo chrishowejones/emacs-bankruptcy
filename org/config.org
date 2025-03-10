@@ -335,17 +335,17 @@
 *** VSCode dark theme
 
     #+BEGIN_SRC emacs-lisp
-      ;; (use-package vscode-dark-plus-theme
-      ;;   :ensure t)
-      ;; (load-theme 'vscode-dark-plus t)
+      (use-package vscode-dark-plus-theme
+        :ensure t)
+      (load-theme 'vscode-dark-plus t)
     #+END_SRC
 
 *** VS dark theme
 
     #+BEGIN_SRC emacs-lisp
-      (use-package vs-dark-theme
-        :ensure t)
-      (load-theme 'vs-dark t)
+      ;; (use-package vs-dark-theme
+      ;;   :ensure t)
+      ;; (load-theme 'vs-dark t)
     #+END_SRC
 
 ** Default font height
