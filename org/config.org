@@ -556,7 +556,7 @@
                      company-tooltip-align-annotations 't             ; align annotations to the right tooltip border
                      company-idle-delay 0.4                           ; decrease delay before autocompletion popup shows
                      company-begin-commands '(self-insert-command)    ; start autocompletion only after typing
-                     company-frontends '(company-pseudo-tooltip-unless-just-one-frontend company-preview-if-just-one-frontend company-echo-metadata-frontend)
+                     company-frontends '(company-preview-if-just-one-frontend company-pseudo-tooltip-unless-just-one-frontend company-echo-metadata-frontend)
                      company-tooltip-flip-when-above t)
        (global-set-key (kbd "C-M-i") 'company-complete)
        (global-set-key (kbd "C-c /") 'company-files)        ; Force complete file names on "C-c /" key
@@ -2370,7 +2370,7 @@
         (clojure-mode .
                       (lambda ()
                         (setq-local completion-at-point-functions
-                                    '(lsp-completion-at-point)))))
+                                    (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point))))))
     #+end_src
 
 **** boot
@@ -2765,11 +2765,38 @@
     Install erlang mode
 
     #+begin_src emacs-lisp
-      (setq load-path (cons "~/.kerl/builds/27.2.4/otp_src_27.2.4/lib/tools/emacs" load-path))
-      (require 'erlang-start)
-      (setq erlang-root-dir "~/.kerl/builds/27.2.4/otp_src_27.2.4/")
-      (setq exec-path (cons "~/.kerl/builds/27.2.4/otp_src_27.2.4/bin" exec-path))
-      (setq erlang-man-root-dir "~/.kerl/builds/27.2.4/otp_src_27.2.4/man")
+      (setq load-path (cons "~/.kerl/builds/27.3/otp_src_27.3/lib/tools/emacs" load-path))
+      (defun set-erlang-completion
+        ()
+        (interactive)
+        (setq lsp-completion-enable nil)
+        (setq-local
+             completion-at-point-functions (list
+                                            (cape-capf-super
+                                             #'codeium-completion-at-point
+                                             #'lsp-completion-at-point))))
+      (use-package erlang :load-path
+        ("~/.kerl/builds/27.3/otp_src_27.3/lib/tools/emacs")
+        :mode
+        (("\\.erl?$" . erlang-mode)
+         ("rebar\\.config$" . erlang-mode)
+         ("relx\\.config$" . erlang-mode)
+         ("sys\\.config\\.src$" . erlang-mode)
+         ("sys\\.config$" . erlang-mode)
+         ("\\.config\\.src?$" . erlang-mode)
+         ("\\.config\\.script?$" . erlang-mode)
+         ("\\.hrl?$" . erlang-mode)
+         ("\\.app?$" . erlang-mode)
+         ("\\.app.src?$" . erlang-mode)
+         ("\\Emakefile" . erlang-mode))
+        :config
+        (require 'erlang-start)
+        (setq erlang-root-dir "~/.kerl/builds/27.2/otp_src_27.3/")
+        (setq exec-path (cons "~/.kerl/builds/27.3/otp_src_27.3/bin" exec-path))
+        (setq erlang-man-root-dir "~/.kerl/builds/27.3/otp_src_27.3/man")
+        :hook
+        (my-paredit-nonlisp set-erlang-completion)
+        )
     #+end_src
 
 
