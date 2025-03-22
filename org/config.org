@@ -2055,6 +2055,19 @@
        )
    #+end_src
 
+** Gptel
+
+   Add in GPTel mode to allow integration of any AI.
+
+   #+begin_src emacs-lisp
+     (use-package gptel
+       :ensure t
+       :config
+       (gptel-make-anthropic "Claude"          ;Any name you want
+         :stream t                             ;Streaming responses
+         :key anthropic-key))
+   #+end_src
+
 ** shell
 
    #+BEGIN_SRC emacs-lisp
