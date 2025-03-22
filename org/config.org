@@ -556,7 +556,7 @@
                      company-tooltip-align-annotations 't             ; align annotations to the right tooltip border
                      company-idle-delay 0.4                           ; decrease delay before autocompletion popup shows
                      company-begin-commands '(self-insert-command)    ; start autocompletion only after typing
-                     company-frontends '(company-preview-if-just-one-frontend company-pseudo-tooltip-unless-just-one-frontend company-echo-metadata-frontend)
+                     company-frontends '(company-pseudo-tooltip-unless-just-one-frontend company-preview-if-just-one-frontend)
                      company-tooltip-flip-when-above t)
        (global-set-key (kbd "C-M-i") 'company-complete)
        (global-set-key (kbd "C-c /") 'company-files)        ; Force complete file names on "C-c /" key
@@ -2454,11 +2454,11 @@
       #+BEGIN_SRC emacs-lisp
         (setq cider-repl-pop-to-buffer-on-connect nil)
         (setq cider-repl-display-in-current-window t)
-        (add-hook 'cider-mode-hook
-                  (lambda ()
-                    (setq-local completion-at-point-functions
-                                (list (cape-capf-super
-                                        #'cider-complete-at-point #'lsp-completion-at-point)))))
+        ;; (add-hook 'cider-mode-hook
+        ;;           (lambda ()
+        ;;             (setq-local completion-at-point-functions
+        ;;                         (list (cape-capf-super
+        ;;                                 #'codeium-completion-at-point)))))
       #+END_SRC
 
 ***** Start figwheel-sidecar shortcuts
@@ -2897,8 +2897,8 @@
                (lsp-mode . lsp-lens-mode))
         :commands lsp
         :config
-        (setq lsp-completion-enable t)
-        ;;(setq lsp-completion-mode nil) ; Let cape deal with completion backends
+        (setq lsp-completion-enable nil)
+        (setq lsp-completion-mode nil) ; Let cape deal with completion backends
         (setq gc-cons-threshold 1000000)
         (setq read-process-output-max (* 1024 1024 2))
         (setq lsp-idle-delay 0.3)
