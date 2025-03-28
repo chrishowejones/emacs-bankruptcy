@@ -337,15 +337,7 @@
     #+BEGIN_SRC emacs-lisp
       (use-package vscode-dark-plus-theme
         :ensure t)
-      (load-theme 'vscode-dark-plus t)
-    #+END_SRC
-
-*** VS dark theme
-
-    #+BEGIN_SRC emacs-lisp
-      ;; (use-package vs-dark-theme
-      ;;   :ensure t)
-      ;; (load-theme 'vs-dark t)
+      (enable-theme 'vscode-dark-plus)
     #+END_SRC
 
 ** Default font height
@@ -564,7 +556,7 @@
                      company-tooltip-align-annotations 't             ; align annotations to the right tooltip border
                      company-idle-delay 0.4                           ; decrease delay before autocompletion popup shows
                      company-begin-commands '(self-insert-command)    ; start autocompletion only after typing
-                     company-frontends '(company-pseudo-tooltip-unless-just-one-frontend company-preview-if-just-one-frontend company-echo-metadata-frontend)
+                     company-frontends '(company-pseudo-tooltip-unless-just-one-frontend company-preview-if-just-one-frontend)
                      company-tooltip-flip-when-above t)
        (global-set-key (kbd "C-M-i") 'company-complete)
        (global-set-key (kbd "C-c /") 'company-files)        ; Force complete file names on "C-c /" key
@@ -596,10 +588,10 @@
        ;; (add-hook 'completion-at-point-functions #'cape-elisp-block)
        ;; (add-hook 'completion-at-point-functions #'cape-history)
        ;; ...
-       (add-hook 'prog-mode-hook
-                 (lambda ()
-                   (setq-local completion-at-point-functions
-                               (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point)))))
+       ;; (add-hook 'prog-mode-hook
+       ;;           (lambda ()
+       ;;             (setq-local completion-at-point-functions
+       ;;                         (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point)))))
                                              ; try using codeium and lsp in prog modes
        )
    #+end_src
@@ -2020,7 +2012,7 @@
        (setq use-dialog-box t) ;; do not use popup boxes
 
        ;; if you don't want to use customize to save the api-key
-       ;; (setq codeium/metadata/api_key "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
+       ;; (setq codeium/metadata/api_key anthropic-key)
 
        ;; get codeium status in the modeline
        (setq codeium-mode-line-enable
@@ -2063,6 +2055,19 @@
        )
    #+end_src
 
+** Gptel
+
+   Add in GPTel mode to allow integration of any AI.
+
+   #+begin_src emacs-lisp
+     (use-package gptel
+       :ensure t
+       :config
+       (gptel-make-anthropic "Claude"          ;Any name you want
+         :stream t                             ;Streaming responses
+         :key anthropic-key))
+   #+end_src
+
 ** shell
 
    #+BEGIN_SRC emacs-lisp
@@ -2084,7 +2089,6 @@
      (use-package restclient-jq
        :ensure t
        :hook (restclient . restclient-jq))
-
    #+END_SRC
 
 ** prog-mode
@@ -2374,12 +2378,11 @@
     #+begin_src emacs-lisp
       (use-package clojure-mode
         :ensure t
-        ;; :hook
-        ;; (clojure-mode .
-        ;;               (lambda ()
-        ;;                 (setq-local completion-at-point-functions
-        ;;                             '(lsp-completion-at-point))))
-        )
+        :hook
+        (clojure-mode .
+                      (lambda ()
+                        (setq-local completion-at-point-functions
+                                    (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point))))))
     #+end_src
 
 **** boot
@@ -2463,11 +2466,11 @@
       #+BEGIN_SRC emacs-lisp
         (setq cider-repl-pop-to-buffer-on-connect nil)
         (setq cider-repl-display-in-current-window t)
-        (add-hook 'cider-mode-hook
-                  (lambda ()
-                    (setq-local completion-at-point-functions
-                                (list (cape-capf-super
-                                        #'cider-complete-at-point #'lsp-completion-at-point)))))
+        ;; (add-hook 'cider-mode-hook
+        ;;           (lambda ()
+        ;;             (setq-local completion-at-point-functions
+        ;;                         (list (cape-capf-super
+        ;;                                 #'codeium-completion-at-point)))))
       #+END_SRC
 
 ***** Start figwheel-sidecar shortcuts
@@ -2774,12 +2777,38 @@
     Install erlang mode
 
     #+begin_src emacs-lisp
-      (setq load-path (cons "~/.kerl/builds/27.2.4/otp_src_27.2.4/lib/tools/emacs" load-path))
-      (require 'erlang-start)
-      (setq erlang-root-dir "~/.kerl/builds/27.2.4/otp_src_27.2.4/")
-      (setq exec-path (cons "~/.kerl/builds/27.2.4/otp_src_27.2.4/bin" exec-path))
-      (setq erlang-man-root-dir "~/.kerl/builds/27.2.4/otp_src_27.2.4/man")
-      (add-hook 'erlang-mode-hook 'my-paredit-nonlisp)
+      (setq load-path (cons "~/.kerl/builds/27.3/otp_src_27.3/lib/tools/emacs" load-path))
+      (defun set-erlang-completion
+        ()
+        (interactive)
+        (setq lsp-completion-enable nil)
+        (setq-local
+             completion-at-point-functions (list
+                                            (cape-capf-super
+                                             #'codeium-completion-at-point
+                                             #'lsp-completion-at-point))))
+      (use-package erlang :load-path
+        ("~/.kerl/builds/27.3/otp_src_27.3/lib/tools/emacs")
+        :mode
+        (("\\.erl?$" . erlang-mode)
+         ("rebar\\.config$" . erlang-mode)
+         ("relx\\.config$" . erlang-mode)
+         ("sys\\.config\\.src$" . erlang-mode)
+         ("sys\\.config$" . erlang-mode)
+         ("\\.config\\.src?$" . erlang-mode)
+         ("\\.config\\.script?$" . erlang-mode)
+         ("\\.hrl?$" . erlang-mode)
+         ("\\.app?$" . erlang-mode)
+         ("\\.app.src?$" . erlang-mode)
+         ("\\Emakefile" . erlang-mode))
+        :config
+        (require 'erlang-start)
+        (setq erlang-root-dir "~/.kerl/builds/27.2/otp_src_27.3/")
+        (setq exec-path (cons "~/.kerl/builds/27.3/otp_src_27.3/bin" exec-path))
+        (setq erlang-man-root-dir "~/.kerl/builds/27.3/otp_src_27.3/man")
+        :hook
+        (my-paredit-nonlisp set-erlang-completion)
+        )
     #+end_src
 
 
@@ -2815,6 +2844,19 @@
       ;;         ;; pretty much anywhere without having to muck with NetInfo
       ;;         ;; ... but I only tested it on Mac OS X.
       ;;         (car (split-string (shell-command-to-string "hostname"))))))
+    #+end_src
+
+** Python
+
+   Python mode is installed by default but I want to add hooks for code completion
+
+
+*** Completion
+
+    #+begin_src emacs-lisp
+      (add-hook 'python-mode-hook
+           (lambda ()
+               (setq-local completion-at-point-functions '(codeium-completion-at-point)))
     #+end_src
 
 ** pastebins
@@ -2880,8 +2922,8 @@
                (lsp-mode . lsp-lens-mode))
         :commands lsp
         :config
-        (setq lsp-completion-enable t)
-        ;;(setq lsp-completion-mode nil) ; Let cape deal with completion backends
+        (setq lsp-completion-enable nil)
+        (setq lsp-completion-mode nil) ; Let cape deal with completion backends
         (setq gc-cons-threshold 1000000)
         (setq read-process-output-max (* 1024 1024 2))
         (setq lsp-idle-delay 0.3)
