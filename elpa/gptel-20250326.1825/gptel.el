@@ -3,8 +3,8 @@
 ;; Copyright (C) 2023  Karthik Chikmagalur
 
 ;; Author: Karthik Chikmagalur <karthik.chikmagalur@gmail.com>
-;; Package-Version: 20250323.1958
-;; Package-Revision: 913e9dba2a97
+;; Package-Version: 20250326.1825
+;; Package-Revision: 97934261f241
 ;; Package-Requires: ((emacs "27.1") (transient "0.7.4") (compat "29.1.4.1"))
 ;; Keywords: convenience, tools
 ;; URL: https://github.com/karthink/gptel
@@ -2069,63 +2069,62 @@ Run post-response hooks."
     (with-current-buffer (plist-get info :buffer)
       (when gptel-mode
         (gptel--update-status
-         (format " Calling tool..." ) 'mode-line-emphasis)))
+         (format " Calling tool..." ) 'mode-line-emphasis))
 
-    (let ((result-alist) (pending-calls))
-      (mapc                             ; Construct function calls
-       (lambda (tool-call)
-         (letrec ((args (plist-get tool-call :args))
-                  (name (plist-get tool-call :name))
-                  (arg-values)
-                  (tool-spec
-                   (cl-find-if
-                    (lambda (ts) (equal (gptel-tool-name ts) name))
-                    (plist-get info :tools)))
-                  (process-tool-result
-                   (lambda (result)
-                     (plist-put info :tool-success t)
-                     (let ((result (gptel--to-string result)))
-                       (plist-put tool-call :result result)
-                       (push (list tool-spec args result) result-alist))
-                     (cl-incf tool-idx)
-                     (when (>= tool-idx ntools) ; All tools have run
-                       (gptel--inject-prompt
-                        backend (plist-get info :data)
-                        (gptel--parse-tool-results
-                         backend (plist-get info :tool-use)))
-                       (funcall (plist-get info :callback)
-                                (cons 'tool-result result-alist) info)
-                       (gptel--fsm-transition fsm)))))
-           (if (null tool-spec)
-               (message "Unknown tool called by model: %s" name)
-             (setq arg-values
-                   (mapcar
-                    (lambda (arg)
-                      (let ((key (intern (concat ":" (plist-get arg :name)))))
-                        (plist-get args key)))
-                    (gptel-tool-args tool-spec)))
-             ;; Check if tool requires confirmation
-             (if (and gptel-confirm-tool-calls (or (eq gptel-confirm-tool-calls t)
-                                                   (gptel-tool-confirm tool-spec)))
-                 (push (list tool-spec arg-values process-tool-result)
-                       pending-calls)
-               ;; If not, run the tool
-               (if (gptel-tool-async tool-spec)
-                   (apply (gptel-tool-function tool-spec)
-                          process-tool-result arg-values)
-                 (let ((result
-                        (condition-case errdata
-                            (apply (gptel-tool-function tool-spec) arg-values)
-                          (error (mapconcat #'gptel--to-string errdata " ")))))
-                   (funcall process-tool-result result)))))))
-       tool-use)
-      (when pending-calls
-        (with-current-buffer (plist-get info :buffer)
+      (let ((result-alist) (pending-calls))
+        (mapc                           ; Construct function calls
+         (lambda (tool-call)
+           (letrec ((args (plist-get tool-call :args))
+                    (name (plist-get tool-call :name))
+                    (arg-values)
+                    (tool-spec
+                     (cl-find-if
+                      (lambda (ts) (equal (gptel-tool-name ts) name))
+                      (plist-get info :tools)))
+                    (process-tool-result
+                     (lambda (result)
+                       (plist-put info :tool-success t)
+                       (let ((result (gptel--to-string result)))
+                         (plist-put tool-call :result result)
+                         (push (list tool-spec args result) result-alist))
+                       (cl-incf tool-idx)
+                       (when (>= tool-idx ntools) ; All tools have run
+                         (gptel--inject-prompt
+                          backend (plist-get info :data)
+                          (gptel--parse-tool-results
+                           backend (plist-get info :tool-use)))
+                         (funcall (plist-get info :callback)
+                                  (cons 'tool-result result-alist) info)
+                         (gptel--fsm-transition fsm)))))
+             (if (null tool-spec)
+                 (message "Unknown tool called by model: %s" name)
+               (setq arg-values
+                     (mapcar
+                      (lambda (arg)
+                        (let ((key (intern (concat ":" (plist-get arg :name)))))
+                          (plist-get args key)))
+                      (gptel-tool-args tool-spec)))
+               ;; Check if tool requires confirmation
+               (if (and gptel-confirm-tool-calls (or (eq gptel-confirm-tool-calls t)
+                                                     (gptel-tool-confirm tool-spec)))
+                   (push (list tool-spec arg-values process-tool-result)
+                         pending-calls)
+                 ;; If not, run the tool
+                 (if (gptel-tool-async tool-spec)
+                     (apply (gptel-tool-function tool-spec)
+                            process-tool-result arg-values)
+                   (let ((result
+                          (condition-case errdata
+                              (apply (gptel-tool-function tool-spec) arg-values)
+                            (error (mapconcat #'gptel--to-string errdata " ")))))
+                     (funcall process-tool-result result)))))))
+         tool-use)
+        (when pending-calls
           (setq gptel--fsm-last fsm)
           (when gptel-mode (gptel--update-status
-                            (format " Run tools?" ) 'mode-line-emphasis)))
-        (funcall (plist-get info :callback)
-                 (cons 'tool-call pending-calls) info)))))
+                            (format " Run tools?" ) 'mode-line-emphasis))
+          (funcall (plist-get info :callback)
+                   (cons 'tool-call pending-calls) info))))))
 
 ;;;; State machine predicates
 ;; Predicates used to find the next state to transition to, see
@@ -2530,7 +2529,11 @@ Optional RAW disables text properties and transformation."
                                    (plist-get info :include-reasoning))
                (save-excursion (goto-char (point-max)) (insert text)))
            (with-current-buffer (marker-buffer start-marker)
-             (let ((blocks (if (derived-mode-p 'org-mode)
+             (let ((separator         ;Separate from response prefix if required
+                    (and (not tracking-marker) gptel-mode
+                         (not (string-suffix-p "\n" (gptel-response-prefix-string)))
+                         "\n"))
+                   (blocks (if (derived-mode-p 'org-mode)
                                `("#+begin_reasoning\n" . ,(concat "\n#+end_reasoning"
                                                            gptel-response-separator))
                              ;; TODO(reasoning) remove properties and strip instead
@@ -2543,7 +2546,7 @@ Optional RAW disables text properties and transformation."
                       0 (length text) '(gptel ignore front-sticky (gptel)) text)
                      (gptel--insert-response
                       (concat (car blocks) text (cdr blocks)) info t))
-                 (gptel--insert-response (car blocks) info t)
+                 (gptel--insert-response (concat separator (car blocks)) info t)
                  (gptel--insert-response text info)
                  (gptel--insert-response (cdr blocks) info t))
                (when (derived-mode-p 'org-mode) ;fold block
@@ -2954,12 +2957,18 @@ for streaming responses only."
                         (org-cycle))))))
             (unless (and reasoning-marker tracking-marker
                          (= reasoning-marker tracking-marker))
-              (gptel-curl--stream-insert-response
-               (if (derived-mode-p 'org-mode)
-                   "#+begin_reasoning\n"
-                 ;; TODO(reasoning) remove properties and strip instead
-                 (propertize "``` reasoning\n" 'gptel 'ignore))
-               info t))
+              (let ((separator        ;Separate from response prefix if required
+                     (and (not tracking-marker) gptel-mode
+                          (not (string-suffix-p
+                                "\n" (gptel-response-prefix-string)))
+                          "\n")))
+                (gptel-curl--stream-insert-response
+                 (concat separator
+                         (if (derived-mode-p 'org-mode)
+                             "#+begin_reasoning\n"
+                           ;; TODO(reasoning) remove properties and strip instead
+                           (propertize "``` reasoning\n" 'gptel 'ignore)))
+                 info t)))
             (if (eq include 'ignore)
                 (progn
                   (add-text-properties
@@ -3094,10 +3103,15 @@ for tool call results.  INFO contains the state of the request."
          do (funcall
              (plist-get info :callback)
              (let* ((name (gptel-tool-name tool))
-                    (separator (if (and tool-marker tracking-marker
-                                        (= tracking-marker tool-marker))
-                                   "\n"
-                                 gptel-response-separator))
+                    (separator        ;Separate from response prefix if required
+                     (cond ((not tracking-marker)
+                            (and gptel-mode
+                                 (not (string-suffix-p
+                                       "\n" (gptel-response-prefix-string)))
+                                 "\n"))           ;start of response
+                           ((not (and tool-marker ;not consecutive tool result blocks
+                                      (= tracking-marker tool-marker)))
+                            gptel-response-separator)))
                     (tool-use
                      ;; TODO(tool) also check args since there may be more than
                      ;; one call/result for the same tool
@@ -3119,7 +3133,7 @@ for tool call results.  INFO contains the state of the request."
                     (propertize
                      (concat "\n" call "\n\n" (org-escape-code-in-string result))
                      'gptel `(tool . ,id))
-                    "\n#+end_tool")
+                    "\n#+end_tool\n")
                  ;; TODO(tool) else branch is handling all front-ends as markdown.
                  ;; At least escape markdown.
                  (concat
@@ -3131,7 +3145,7 @@ for tool call results.  INFO contains the state of the request."
                    (concat "\n" call "\n\n" result)
                    'gptel `(tool . ,id))
                   ;; TODO(tool) remove properties and strip instead of ignoring
-                  (propertize "\n```" 'gptel 'ignore))))
+                  (propertize "\n```\n" 'gptel 'ignore))))
              info
              'raw)
          ;; tool-result insertion has updated the tracking marker
@@ -3145,7 +3159,7 @@ for tool call results.  INFO contains the state of the request."
            (ignore-errors
              (save-excursion
                (goto-char tracking-marker)
-               (beginning-of-line)
+               (forward-line -1)
                (when (looking-at "^#\\+end_tool")
                  (org-cycle))))))))))
 
