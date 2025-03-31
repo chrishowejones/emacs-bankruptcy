@@ -2856,7 +2856,7 @@
     #+begin_src emacs-lisp
       (add-hook 'python-mode-hook
            (lambda ()
-               (setq-local completion-at-point-functions '(codeium-completion-at-point)))
+               (setq-local completion-at-point-functions '(codeium-completion-at-point))))
     #+end_src
 
 ** pastebins
