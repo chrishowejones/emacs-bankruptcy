@@ -1979,6 +1979,93 @@
 
 * Programming Modes
 
+** Language Server Protocol
+
+*** LSP config
+
+    This is my set up for the Language Server Protocol.
+
+    #+begin_src emacs-lisp
+      (use-package lsp-mode
+        :pin melpa-stable
+        :ensure t
+        :init ; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
+        (setq lsp-keymap-prefix "M-s-l")
+        :hook (;;  concrete major-modes to use lsp (e. g. clojure-mode)
+               (clojure-mode . lsp-deferred)
+               (clojurec-mode . lsp-deferred)
+               (clojurescript-mode . lsp-deferred)
+               (js2-mode . lsp-deferred)
+               (typescript-mode . lsp-deferred)
+               (java-mode . lsp-deferred)
+               (terraform-mode . lsp-deferred)
+               (yaml-mode . lsp-deferred)
+               (erlang-mode . lsp-deferred)
+               (kotlin-mode . lsp-deferred)
+               ;; if you want which-key integration
+               (lsp-mode . lsp-enable-which-key-integration)
+               (lsp-mode . flycheck-mode)
+               (lsp-mode . lsp-lens-mode))
+        :commands lsp
+        :config
+        (setq lsp-completion-enable nil)
+        (setq lsp-completion-mode nil) ; Let cape deal with completion backends
+        (setq gc-cons-threshold 1000000)
+        (setq read-process-output-max (* 1024 1024 2))
+        (setq lsp-idle-delay 0.3)
+        ;; ELP, added as priority 0 (> -1) so takes priority over the built-in one
+        (lsp-register-client
+         (make-lsp-client :new-connection (lsp-stdio-connection '("elp" "server"))
+                          :major-modes '(erlang-mode)
+                          :priority 0
+                          :server-id 'erlang-language-platform))
+        )
+    #+end_src
+
+    Set up ui
+
+    #+begin_src emacs-lisp
+      (use-package lsp-ui
+        :ensure t
+        :after lsp-mode
+        :bind (("C-<tab>" . lsp-ui-doc-focus-frame))
+        :commands lsp-ui-mode
+        :config
+        (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
+      )
+    #+end_src
+
+    Add in consult support.
+
+    #+begin_src emacs-lisp
+      (use-package consult-lsp
+        :ensure t
+        :after lsp-mode
+        :config
+        (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
+    #+end_src
+
+*** LSP for Java
+
+    Add in Java LSP and config for it and dap-java.
+
+    #+begin_src emacs-lisp
+      (use-package lsp-java
+        :ensure t
+        :after lsp-mode
+        :config
+        (require 'dap-java))
+    #+end_src
+
+    Bind debug Java keys after loading Java mode
+
+    #+begin_src emacs-lisp
+      (defun bind-java-dap-keys ()
+        (define-key java-mode-map (kbd "M-s-l t t") 'dap-java-run-test-method)
+        (define-key java-mode-map (kbd "M-s-l t d") 'dap-java-debug-test-method))
+      (with-eval-after-load 'java-mode (bind-java-dap-keys))
+    #+end_src
+
 ** Codeium
 
    Try out codeium AI.
@@ -2688,6 +2775,7 @@
 
     #+begin_src emacs-lisp
       (use-package dap-mode
+        :pin melpa-stable
         :ensure t
         :after lsp-mode
         :hook ((lsp-mode . dap-mode)
@@ -2859,6 +2947,142 @@
                (setq-local completion-at-point-functions '(codeium-completion-at-point))))
     #+end_src
 
+** Kotlin
+
+*** Kotlin Mode
+
+    Set up Kotlin mode for editing Kotlin files.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package kotlin-mode
+        :ensure t
+        :config
+        (add-hook 'kotlin-mode-hook
+                  (lambda ()
+                    (setq-local completion-at-point-functions
+                                (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point)))))
+        :mode ("\\.kt\\'" "\\.kts\\'"))
+    #+END_SRC
+
+*** Gradle Mode
+
+    Add support for Gradle build tool commonly used with Kotlin projects.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package gradle-mode
+        :ensure t
+        :hook (kotlin-mode . gradle-mode))
+    #+END_SRC
+
+*** Flycheck Kotlin
+
+    Setup Flycheck for Kotlin syntax checking.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package flycheck-kotlin
+        :ensure t
+        :hook (kotlin-mode . flycheck-mode))
+    #+END_SRC
+
+*** LSP for Kotlin
+
+    Configure LSP support for Kotlin using the Kotlin Language Server.
+    Make sure to install the Kotlin Language Server separately.
+
+    #+BEGIN_SRC emacs-lisp
+      ;; Customize some kotlin-specific LSP settings if needed
+      (with-eval-after-load 'lsp-mode
+        (setq lsp-kotlin-compiler-jvm-target "11")
+        (setq lsp-kotlin-server-path "~/emacs-bankruptcy/.cache/lsp/kotlin/server/bin/kotlin-language-server")
+        (setq lsp-kotlin-debug-adapter-enabled t))
+    #+END_SRC
+
+*** Kotlin REPL
+
+    Setup REPL for interactive Kotlin development.
+
+    #+BEGIN_SRC emacs-lisp
+      (defun kotlin-repl ()
+        "Run Kotlin REPL in a comint buffer."
+        (interactive)
+        (let ((buffer (comint-check-proc "Kotlin REPL")))
+          (unless buffer
+            (setq buffer (make-comint "Kotlin REPL" "kotlinc" nil))
+            (with-current-buffer buffer
+              (kotlin-mode)
+              (setq comint-process-echoes t)))
+          (pop-to-buffer buffer)))
+
+      (defun kotlin-send-region (start end)
+        "Send region to Kotlin REPL."
+        (interactive "r")
+        (let ((code (buffer-substring-no-properties start end)))
+          (let ((buffer (get-buffer-create "*Kotlin REPL*")))
+            (unless (comint-check-proc buffer)
+              (kotlin-repl))
+            (comint-send-string buffer (concat code "\n")))))
+
+      (defun kotlin-send-buffer ()
+        "Send current buffer to Kotlin REPL."
+        (interactive)
+        (kotlin-send-region (point-min) (point-max)))
+
+      (defun kotlin-send-line ()
+        "Send current line to Kotlin REPL."
+        (interactive)
+        (kotlin-send-region (line-beginning-position) (line-end-position)))
+
+      (add-hook 'kotlin-mode-hook
+                (lambda ()
+                  (local-set-key (kbd "C-c C-z") 'kotlin-repl)
+                  (local-set-key (kbd "C-c C-r") 'kotlin-send-region)
+                  (local-set-key (kbd "C-c C-c") 'kotlin-send-buffer)
+                  (local-set-key (kbd "C-c C-l") 'kotlin-send-line)))
+    #+END_SRC
+
+*** DAP for Kotlin
+
+    Configure Debug Adapter Protocol for Kotlin.
+
+    #+BEGIN_SRC emacs-lisp
+      (with-eval-after-load 'dap-mode
+        (require 'dap-java)  ;; Kotlin can use Java debugger
+
+        ;; Custom template for Kotlin debugging
+        (dap-register-debug-template "Kotlin App"
+                                    (list :type "java"
+                                          :request "launch"
+                                          :args ""
+                                          :cwd nil
+                                          :hostName "localhost"
+                                          :mainClass "MainKt"
+                                          :projectName nil
+                                          :name "Kotlin Debug")))
+    #+END_SRC
+
+*** Kotlin Snippets
+
+    Add Kotlin code snippets for quicker development.
+
+    #+BEGIN_SRC emacs-lisp
+      (with-eval-after-load 'yasnippet
+        (add-to-list 'yas-snippet-dirs (concat user-emacs-directory "snippets/kotlin"))
+        (yas-reload-all))
+    #+END_SRC
+
+*** Projectile Integration for Kotlin Projects
+
+    Configure Projectile to recognize Kotlin projects.
+
+    #+BEGIN_SRC emacs-lisp
+      (projectile-register-project-type 'kotlin-gradle '("build.gradle.kts")
+                                       :project-file "build.gradle.kts"
+                                       :compile "./gradlew build"
+                                       :test "./gradlew test"
+                                       :run "./gradlew run"
+                                       :test-suffix "Test")
+    #+END_SRC
+
 ** pastebins
 
    gist, pastebin, refheap. All good ways of sharing snippets of code
@@ -2894,91 +3118,6 @@
        :config
        (editorconfig-mode 1))
    #+end_src
-
-** Language Server Protocol
-
-*** LSP config
-
-    This is my set up for the Language Server Protocol.
-
-    #+begin_src emacs-lisp
-      (use-package lsp-mode
-        :ensure t
-        :init ; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
-        (setq lsp-keymap-prefix "M-s-l")
-        :hook (;;  concrete major-modes to use lsp (e. g. clojure-mode)
-               (clojure-mode . lsp-deferred)
-               (clojurec-mode . lsp-deferred)
-               (clojurescript-mode . lsp-deferred)
-               (js2-mode . lsp-deferred)
-               (typescript-mode . lsp-deferred)
-               (java-mode . lsp-deferred)
-               (terraform-mode . lsp-deferred)
-               (yaml-mode . lsp-deferred)
-               (erlang-mode . lsp-deferred)
-               ;; if you want which-key integration
-               (lsp-mode . lsp-enable-which-key-integration)
-               (lsp-mode . flycheck-mode)
-               (lsp-mode . lsp-lens-mode))
-        :commands lsp
-        :config
-        (setq lsp-completion-enable nil)
-        (setq lsp-completion-mode nil) ; Let cape deal with completion backends
-        (setq gc-cons-threshold 1000000)
-        (setq read-process-output-max (* 1024 1024 2))
-        (setq lsp-idle-delay 0.3)
-        ;; ELP, added as priority 0 (> -1) so takes priority over the built-in one
-        (lsp-register-client
-         (make-lsp-client :new-connection (lsp-stdio-connection '("elp" "server"))
-                          :major-modes '(erlang-mode)
-                          :priority 0
-                          :server-id 'erlang-language-platform))
-        )
-    #+end_src
-
-    Set up ui
-
-    #+begin_src emacs-lisp
-      (use-package lsp-ui
-        :ensure t
-        :after lsp-mode
-        :bind (("C-<tab>" . lsp-ui-doc-focus-frame))
-        :commands lsp-ui-mode
-        :config
-        (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
-      )
-    #+end_src
-
-    Add in consult support.
-
-    #+begin_src emacs-lisp
-      (use-package consult-lsp
-        :ensure t
-        :after lsp-mode
-        :config
-        (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
-    #+end_src
-
-*** LSP for Java
-
-    Add in Java LSP and config for it and dap-java.
-
-    #+begin_src emacs-lisp
-      (use-package lsp-java
-        :ensure t
-        :after lsp-mode
-        :config
-        (require 'dap-java))
-    #+end_src
-
-    Bind debug Java keys after loading Java mode
-
-    #+begin_src emacs-lisp
-      (defun bind-java-dap-keys ()
-        (define-key java-mode-map (kbd "M-s-l t t") 'dap-java-run-test-method)
-        (define-key java-mode-map (kbd "M-s-l t d") 'dap-java-debug-test-method))
-      (with-eval-after-load 'java-mode (bind-java-dap-keys))
-    #+end_src
 
 * Data Modes
 
