@@ -98,9 +98,9 @@ If there is a folder you care to run from higher than this level, you need to mo
   "Run gradle command with `GRADLE-TASKS' and options supplied."
   (gradle-kill-compilation-buffer)
   (let ((default-directory
-	  (gradle-run-from-dir (if gradle-use-gradlew
-				   'gradle-is-gradlew-dir
-				 'gradle-is-project-dir))))
+	 (gradle-run-from-dir (if gradle-use-gradlew
+				  'gradle-is-gradlew-dir
+				'gradle-is-project-dir))))
     (compile (gradle-make-command gradle-tasks))))
 
 (defun gradle-make-command (gradle-tasks)

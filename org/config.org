@@ -86,7 +86,6 @@
                                  (height . 100)))
    #+END_SRC
 
-
 ** Auto indent on newline
 
    Again something lifted from
@@ -282,7 +281,6 @@
      (setq plstore-cache-passphrase-for-symmetric-encryption t)
    #+end_src
 
-
 ** Unmap key bindings to suspend emacs
 
    Annoying if I catch C-z and Emacs suspends.
@@ -292,6 +290,7 @@
        (global-unset-key (kbd "C-z"))
        (global-unset-key (kbd "C-x C-z")))
    #+end_src
+
 
 * Macintosh Specific Setup
 ** command key as meta
@@ -601,8 +600,8 @@
    #+begin_src emacs-lisp :tangle yes
      ;; Use Company backends as Capfs.
      (setq-local completion-at-point-functions
-       (mapcar #'cape-company-to-capf
-         (list #'company-files #'company-keywords #'company-dabbrev)))
+                 (mapcar #'cape-company-to-capf
+                         (list #'company-files #'company-keywords #'company-dabbrev)))
    #+end_src
 
 ** Vertico for completion
@@ -2032,7 +2031,7 @@
         :commands lsp-ui-mode
         :config
         (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
-      )
+        )
     #+end_src
 
     Add in consult support.
@@ -2092,7 +2091,7 @@
        ;; optionally set a timer, which might speed up things as the
        ;; codeium local language server takes ~0.2s to start up
        (add-hook 'emacs-startup-hook
-         (lambda () (run-with-timer 0.1 nil #'codeium-init)))
+                 (lambda () (run-with-timer 0.1 nil #'codeium-init)))
 
        ;; :defer t ;; lazy loading, if you want
        :config
@@ -2849,8 +2848,6 @@
    #+begin_src emacs-lisp :tangle yes
      (use-package terraform-mode
        :ensure t
-       :hook
-       (outline-minor-mode)
        :config
        (add-hook 'terraform-mode-hook
                  (lambda ()
@@ -2867,14 +2864,14 @@
     #+begin_src emacs-lisp
       (setq load-path (cons "~/.kerl/builds/27.3/otp_src_27.3/lib/tools/emacs" load-path))
       (defun set-erlang-completion
-        ()
+          ()
         (interactive)
         (setq lsp-completion-enable nil)
         (setq-local
-             completion-at-point-functions (list
-                                            (cape-capf-super
-                                             #'codeium-completion-at-point
-                                             #'lsp-completion-at-point))))
+         completion-at-point-functions (list
+                                        (cape-capf-super
+                                         #'codeium-completion-at-point
+                                         #'lsp-completion-at-point))))
       (use-package erlang :load-path
         ("~/.kerl/builds/27.3/otp_src_27.3/lib/tools/emacs")
         :mode
@@ -2960,7 +2957,8 @@
         (add-hook 'kotlin-mode-hook
                   (lambda ()
                     (setq-local completion-at-point-functions
-                                (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point)))))
+                                (list (cape-capf-super #'lsp-completion-at-point #'codeium-completion-at-point)))))
+        (add-hook 'kotlin-mode-hook 'my-paredit-nonlisp)
         :mode ("\\.kt\\'" "\\.kts\\'"))
     #+END_SRC
 
@@ -2993,8 +2991,8 @@
       ;; Customize some kotlin-specific LSP settings if needed
       (with-eval-after-load 'lsp-mode
         (setq lsp-kotlin-compiler-jvm-target "11")
-        (setq lsp-kotlin-server-path "~/emacs-bankruptcy/.cache/lsp/kotlin/server/bin/kotlin-language-server")
-        (setq lsp-kotlin-debug-adapter-enabled t))
+        (setq lsp-kotlin-debug-adapter-enabled t)
+        )
     #+END_SRC
 
 *** Kotlin REPL
