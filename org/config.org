@@ -2702,6 +2702,23 @@
          (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers))))
      #+END_SRC
 
+**** Clerk shortcut
+
+     Shortcut to start Clerk.
+
+     #+begin_src emacs-lisp :tangle yes
+       (defun clerk-show ()
+         (interactive)
+         (when-let
+             ((filename
+               (buffer-file-name)))
+           (save-buffer)
+           (cider-interactive-eval
+            (concat "(nextjournal.clerk/show! \"" filename "\")"))))
+
+       (define-key clojure-mode-map (kbd "<M-return>") 'clerk-show)
+     #+end_src
+
 ** JavaScript
 
 *** js2 mode
