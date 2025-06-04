@@ -936,6 +936,7 @@
        ((lisp-mode . paredit-mode)
         (clojure-mode . paredit-mode)
         (erlang-mode . paredit-mode)
+        (haskell-mode . paredit-mode)
         (python-mode . paredit-mode)))
    #+END_SRC
 
@@ -1988,7 +1989,7 @@
 
     #+begin_src emacs-lisp
       (use-package lsp-mode
-        :pin melpa-stable
+        :vc (lsp-mode :url "https://github.com/emacs-lsp/lsp-mode.git")
         :ensure t
         :init ; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
         (setq lsp-keymap-prefix "M-s-l")
@@ -2067,6 +2068,15 @@
         (define-key java-mode-map (kbd "M-s-l t d") 'dap-java-debug-test-method))
       (with-eval-after-load 'java-mode (bind-java-dap-keys))
     #+end_src
+
+** LSP for Haskell
+
+   Add in Haskell lsp
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package lsp-haskell
+       :ensure t)
+   #+end_src
 
 ** Codeium
 
@@ -3209,7 +3219,15 @@
 
    #+begin_src emacs-lisp :tangle yes
      (use-package haskell-mode
-       :ensure t)
+       :ensure t
+       :hook ((haskell-mode . my-paredit-nonlisp)
+              (haskell-mode . lsp)
+              (haskell-mode .
+                 (lambda ()
+                   (setq-local completion-at-point-functions
+                               (list #'lsp-completion-at-point #'cape-dabbrev #'cape-file))))
+              ))
+
    #+end_src
 
 ** pastebins

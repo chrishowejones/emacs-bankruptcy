@@ -1,3 +1,7 @@
 ;;; -*- lisp-data -*-
-(("/Users/chrishowe-jones/.emacs.d/")
+(("/Users/chrishowe-jones/emacs-bankruptcy/")
+ ("/Users/chrishowe-jones/emacs-bankruptcy/elpa/lsp-mode/")
+ ("/Users/chrishowe-jones/emacs-bankruptcy/elpa/pytest/")
+ ("/Users/chrishowe-jones/emacs-bankruptcy/elpa/nose/")
+ ("/Users/chrishowe-jones/.emacs.d/")
  ("/Users/chrishowe-jones/.emacs.d/elpa/vc-use-package/"))
