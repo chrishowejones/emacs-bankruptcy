@@ -46,6 +46,15 @@
      (require 'vc-use-package)
    #+end_src
 
+** Try to try out emacs packages
+
+   Install try to allow me to experiment with packages.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package try
+       :ensure t)
+   #+end_src
+
 * Local Config
 
 ** custom.el
@@ -1989,7 +1998,6 @@
 
     #+begin_src emacs-lisp
       (use-package lsp-mode
-        :vc (lsp-mode :url "https://github.com/emacs-lsp/lsp-mode.git")
         :ensure t
         :init ; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
         (setq lsp-keymap-prefix "M-s-l")
@@ -2017,11 +2025,11 @@
         (setq read-process-output-max (* 1024 1024 2))
         (setq lsp-idle-delay 0.3)
         ;; ELP, added as priority 0 (> -1) so takes priority over the built-in one
-        (lsp-register-client
-         (make-lsp-client :new-connection (lsp-stdio-connection '("elp" "server"))
-                          :major-modes '(erlang-mode)
-                          :priority 0
-                          :server-id 'erlang-language-platform))
+        ;; (lsp-register-client
+        ;;  (make-lsp-client :new-connection (lsp-stdio-connection '("elp" "server"))
+        ;;                   :major-modes '(erlang-mode)
+        ;;                   :priority 0
+        ;;                   :server-id 'erlang-language-platform))
         )
     #+end_src
 
@@ -2933,9 +2941,9 @@
 
     #+begin_src emacs-lisp
       (add-hook 'erlang-mode-hook
-                      (lambda ()
-                        (flycheck-select-checker 'erlang)
-                        (flycheck-mode)))
+                (lambda ()
+                  (flycheck-select-checker 'erlang)
+                  (flycheck-mode)))
     #+end_src
 
 *** Distel
@@ -3178,14 +3186,14 @@
 
         ;; Custom template for Kotlin debugging
         (dap-register-debug-template "Kotlin App"
-                                    (list :type "java"
-                                          :request "launch"
-                                          :args ""
-                                          :cwd nil
-                                          :hostName "localhost"
-                                          :mainClass "MainKt"
-                                          :projectName nil
-                                          :name "Kotlin Debug")))
+                                     (list :type "java"
+                                           :request "launch"
+                                           :args ""
+                                           :cwd nil
+                                           :hostName "localhost"
+                                           :mainClass "MainKt"
+                                           :projectName nil
+                                           :name "Kotlin Debug")))
     #+END_SRC
 
 *** Kotlin Snippets
@@ -3204,20 +3212,20 @@
 
     #+BEGIN_SRC emacs-lisp
       (projectile-register-project-type 'kotlin-gradle '("build.gradle.kts")
-                                       :project-file "build.gradle.kts"
-                                       :compile "./gradlew build"
-                                       :test "./gradlew test"
-                                       :run "./gradlew run"
-                                       :test-suffix "Test")
+                                        :project-file "build.gradle.kts"
+                                        :compile "./gradlew build"
+                                        :test "./gradlew test"
+                                        :run "./gradlew run"
+                                        :test-suffix "Test")
     #+END_SRC
 
 ** Haskell
 
 *** Haskell mode
 
-   Install and require Haskell mode.
+    Install and require Haskell mode.
 
-   #+begin_src emacs-lisp :tangle yes
+    #+begin_src emacs-lisp :tangle yes
      (use-package haskell-mode
        :ensure t
        :hook ((haskell-mode . my-paredit-nonlisp)

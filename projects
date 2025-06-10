@@ -1,5 +1,9 @@
 ;;; -*- lisp-data -*-
-(("/Users/chrishowe-jones/emacs-bankruptcy/")
+(("/home/chris/emacs-bankruptcy/")
+ ("/home/chris/emacs-bankruptcy/elpa/pytest/")
+ ("/home/chris/emacs-bankruptcy/elpa/nose/")
+ ("/home/chris/emacs-bankruptcy/elpa/lsp-mode/")
+ ("/Users/chrishowe-jones/emacs-bankruptcy/")
  ("/Users/chrishowe-jones/emacs-bankruptcy/elpa/lsp-mode/")
  ("/Users/chrishowe-jones/emacs-bankruptcy/elpa/pytest/")
  ("/Users/chrishowe-jones/emacs-bankruptcy/elpa/nose/")
