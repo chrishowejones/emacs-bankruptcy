@@ -170,7 +170,7 @@
 
    #+BEGIN_SRC emacs-lisp
      (use-package loccur :ensure t)
-     (global-set-key (kbd "C-M-o") 'loccur-current)
+     (global-set-key (kbd "M-o") 'loccur-current)
      (global-set-key (kbd "C-M-S-o") 'loccur)
    #+END_SRC
 
@@ -345,8 +345,16 @@
     #+BEGIN_SRC emacs-lisp
       (use-package vscode-dark-plus-theme
         :ensure t)
-      (enable-theme 'vscode-dark-plus)
     #+END_SRC
+
+
+*** Modus themes
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package modus-themes
+        :ensure t
+        :init (load-theme 'modus-vivendi-tinted))
+    #+end_src
 
 ** Default font height
 
