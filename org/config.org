@@ -353,7 +353,15 @@
     #+begin_src emacs-lisp :tangle yes
       (use-package modus-themes
         :ensure t
-        :init (load-theme 'modus-vivendi-tinted))
+        :init (load-theme 'modus-vivendi-tinted :no-confirm))
+    #+end_src
+
+
+*** ef themes
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package ef-themes
+        :ensure t)
     #+end_src
 
 ** Default font height
