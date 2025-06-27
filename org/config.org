@@ -2168,15 +2168,24 @@
 
 ** Copilot
 
-   Add in copilot mode.
+*** Add in copilot mode.
 
-   #+begin_src emacs-lisp
-     (use-package copilot
-       :vc (copilot :url "https://github.com/copilot-emacs/copilot.el"
-                    :branch "main")
-       ;; :hook prog-mode
-       )
-   #+end_src
+    #+begin_src emacs-lisp
+      (use-package copilot
+        :vc (copilot :url "https://github.com/copilot-emacs/copilot.el"
+                     :branch "main")
+        ;; :hook prog-mode
+        )
+    #+end_src
+
+
+*** Add in copilot chat
+
+    #+begin_src emacs-lisp
+      (use-package copilot-chat
+        :ensure t)
+      (add-hook 'git-commit-setup-hook 'copilot-chat-insert-commit-message)
+    #+end_src
 
 ** Gptel
 
@@ -3242,15 +3251,18 @@
     Install and require Haskell mode.
 
     #+begin_src emacs-lisp :tangle yes
-     (use-package haskell-mode
-       :ensure t
-       :hook ((haskell-mode . my-paredit-nonlisp)
-              (haskell-mode . lsp)
-              (haskell-mode .
-                 (lambda ()
-                   (setq-local completion-at-point-functions
-                               (list #'lsp-completion-at-point #'cape-dabbrev #'cape-file))))
-              ))
+      (use-package haskell-mode
+        :ensure t
+        :hook ((haskell-mode . my-paredit-nonlisp)
+               (haskell-mode . lsp)
+               (haskell-mode .
+                  (lambda ()
+                    (setq-local completion-at-point-functions
+                                (list #'lsp-completion-at-point #'cape-dabbrev #'cape-file))))
+               ))
+      (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+   #+end_src
+
 
    #+end_src
 
