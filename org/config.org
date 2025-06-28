@@ -3321,7 +3321,8 @@
 
    #+begin_src emacs-lisp
      (use-package pdf-tools
-       :ensure t)
+       :ensure t
+       :config (pdf-tools-install))
    #+end_src
 
 * Notification Systems
@@ -3358,3 +3359,9 @@
        :ensure t)
      (exec-path-from-shell-initialize)
    #+END_SRC
+
+** Start emacs as a server
+
+   #+begin_src emacs-lisp
+     (server-start)
+   #+end_src
