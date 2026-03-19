@@ -1,5 +1,9 @@
 ;;; -*- lisp-data -*-
 (("/home/chris/emacs-bankruptcy/")
+ ("/home/chris/emacs-bankruptcy/elpa/claude-code-ide/")
+ ("/home/chris/emacs-bankruptcy/elpa/claude-code-mode/")
+ ("/home/chris/clojure/rk-backend/")
+ ("/home/chris/emacs-bankruptcy/elpa/code-review/")
  ("/home/chris/emacs-bankruptcy/elpa/pytest/")
  ("/home/chris/emacs-bankruptcy/elpa/nose/")
  ("/home/chris/emacs-bankruptcy/elpa/lsp-mode/")

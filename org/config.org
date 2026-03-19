@@ -92,7 +92,9 @@
 
    #+BEGIN_SRC emacs-lisp
      (setq initial-frame-alist '((top . 0) (left . 0) (width . 200)
-                                 (height . 100)))
+                                      (height . 100)))
+     (add-to-list 'default-frame-alist '(height . 100)) ;; Vertical frame size
+     (add-to-list 'default-frame-alist '(width . 200)) ;; Horizontal frame size
    #+END_SRC
 
 ** Auto indent on newline
@@ -276,7 +278,7 @@
 
 ** Set auth sources to use gpg
 
-   Set auth sources to use the .authinfo.gpg file.
+   Set auth sources to use the .authinfo.gpg file. Used by tools like Forge.
 
    #+begin_src emacs-lisp :tangle yes
      (setq auth-sources '("~/.authinfo.gpg"))
@@ -323,6 +325,26 @@
        (setq mac-command-modifier 'super)
        (setq mac-option-modifier 'meta))
    #+END_SRC
+
+   Function to remap meta and super keys for Mac keyboard on linux and not mac.
+
+   #+begin_src emacs-lisp
+     (defun linux-mac-keyboard-remap()
+       "Remap meta and super to suit an external Mac keyboard on a linux pc"
+       (interactive)
+       (setq x-meta-keysym 'super)
+       (setq x-super-keysym 'meta))
+   #+end_src
+
+   Function to remap meta and super keys for normal keyboard on linux and not mac.
+
+   #+begin_src emacs-lisp
+     (defun normal-keyboard-remap()
+       "Map meta and super to suit a normal keyboard on a linux pc"
+       (interactive)
+       (setq x-meta-keysym 'meta)
+       (setq x-super-keysym 'super))
+   #+end_src
 
 * Make it Pretty
 
@@ -607,10 +629,10 @@
        ;; used by `completion-at-point'.  The order of the functions matters, the
        ;; first function returning a result wins.  Note that the list of buffer-local
        ;; completion functions takes precedence over the global list.
-       ;; (add-hook 'completion-at-point-functions #'cape-dabbrev)
-       ;; (add-hook 'completion-at-point-functions #'cape-file)
-       ;; (add-hook 'completion-at-point-functions #'cape-elisp-block)
-       ;; (add-hook 'completion-at-point-functions #'cape-history)
+       (add-hook 'completion-at-point-functions #'cape-dabbrev)
+       (add-hook 'completion-at-point-functions #'cape-file)
+       (add-hook 'completion-at-point-functions #'cape-elisp-block)
+       (add-hook 'completion-at-point-functions #'cape-history)
        ;; ...
        ;; (add-hook 'prog-mode-hook
        ;;           (lambda ()
@@ -905,10 +927,6 @@
      (use-package treemacs-magit
        :after treemacs magit
        :ensure t)
-     (use-package treemacs-projectile
-       :after treemacs projectile
-       :ensure t)
-
      (use-package treemacs-icons-dired
        :after treemacs dired
        :ensure t
@@ -1095,10 +1113,12 @@
         :after magit)
     #+end_src
 
+    #+RESULTS:
+
 
 *** Code review
 
-    Use code review from a branch on a different repo that has a fix.
+    Use code review
 
     #+begin_src emacs-lisp
       (use-package code-review
@@ -2200,6 +2220,28 @@
          :key anthropic-key))
    #+end_src
 
+** Claude Code
+
+   Use Claude code in Emacs.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package claude-code-ide
+       :vc (claude-code-ide :url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
+       :bind ("C-c C-'" . claude-code-ide-menu) ; Set your favorite keybinding
+       :config
+       (claude-code-ide-emacs-tools-setup))
+                                             ; Optionally enable Emacs MCP tools
+   #+end_src
+
+** vterm
+
+   Use vterm terminal emulator.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package vterm
+       :ensure t)
+   #+end_src
+
 ** shell
 
    #+BEGIN_SRC emacs-lisp
@@ -2514,7 +2556,7 @@
         (clojure-mode .
                       (lambda ()
                         (setq-local completion-at-point-functions
-                                    (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point))))))
+                                    (list (cape-capf-super #'lsp-completion-at-point #'codeium-completion-at-point))))))
     #+end_src
 
 **** boot
@@ -2568,7 +2610,7 @@
       I also want to be able to navigate to the "-" characters in words.
 
       #+BEGIN_SRC emacs-lisp
-        (add-hook 'cider-mode-hook 'subword-mode)
+        ;;(add-hook 'cider-mode-hook 'subword-mode)
         ;; (add-hook 'cider-mode-hook (lambda () (setq lsp-enable-completion-at-point nil)))
       #+END_SRC
 
