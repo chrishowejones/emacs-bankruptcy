@@ -46,6 +46,15 @@
      (require 'vc-use-package)
    #+end_src
 
+** Try to try out emacs packages
+
+   Install try to allow me to experiment with packages.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package try
+       :ensure t)
+   #+end_src
+
 * Local Config
 
 ** custom.el
@@ -83,9 +92,10 @@
 
    #+BEGIN_SRC emacs-lisp
      (setq initial-frame-alist '((top . 0) (left . 0) (width . 200)
-                                 (height . 100)))
+                                      (height . 100)))
+     (add-to-list 'default-frame-alist '(height . 100)) ;; Vertical frame size
+     (add-to-list 'default-frame-alist '(width . 200)) ;; Horizontal frame size
    #+END_SRC
-
 
 ** Auto indent on newline
 
@@ -162,7 +172,7 @@
 
    #+BEGIN_SRC emacs-lisp
      (use-package loccur :ensure t)
-     (global-set-key (kbd "C-M-o") 'loccur-current)
+     (global-set-key (kbd "M-o") 'loccur-current)
      (global-set-key (kbd "C-M-S-o") 'loccur)
    #+END_SRC
 
@@ -268,7 +278,7 @@
 
 ** Set auth sources to use gpg
 
-   Set auth sources to use the .authinfo.gpg file.
+   Set auth sources to use the .authinfo.gpg file. Used by tools like Forge.
 
    #+begin_src emacs-lisp :tangle yes
      (setq auth-sources '("~/.authinfo.gpg"))
@@ -282,7 +292,6 @@
      (setq plstore-cache-passphrase-for-symmetric-encryption t)
    #+end_src
 
-
 ** Unmap key bindings to suspend emacs
 
    Annoying if I catch C-z and Emacs suspends.
@@ -292,6 +301,7 @@
        (global-unset-key (kbd "C-z"))
        (global-unset-key (kbd "C-x C-z")))
    #+end_src
+
 
 * Macintosh Specific Setup
 ** command key as meta
@@ -316,6 +326,26 @@
        (setq mac-option-modifier 'meta))
    #+END_SRC
 
+   Function to remap meta and super keys for Mac keyboard on linux and not mac.
+
+   #+begin_src emacs-lisp
+     (defun linux-mac-keyboard-remap()
+       "Remap meta and super to suit an external Mac keyboard on a linux pc"
+       (interactive)
+       (setq x-meta-keysym 'super)
+       (setq x-super-keysym 'meta))
+   #+end_src
+
+   Function to remap meta and super keys for normal keyboard on linux and not mac.
+
+   #+begin_src emacs-lisp
+     (defun normal-keyboard-remap()
+       "Map meta and super to suit a normal keyboard on a linux pc"
+       (interactive)
+       (setq x-meta-keysym 'meta)
+       (setq x-super-keysym 'super))
+   #+end_src
+
 * Make it Pretty
 
 ** color themes
@@ -337,8 +367,24 @@
     #+BEGIN_SRC emacs-lisp
       (use-package vscode-dark-plus-theme
         :ensure t)
-      (enable-theme 'vscode-dark-plus)
     #+END_SRC
+
+
+*** Modus themes
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package modus-themes
+        :ensure t
+        :init (load-theme 'modus-vivendi-tinted :no-confirm))
+    #+end_src
+
+
+*** ef themes
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package ef-themes
+        :ensure t)
+    #+end_src
 
 ** Default font height
 
@@ -583,10 +629,10 @@
        ;; used by `completion-at-point'.  The order of the functions matters, the
        ;; first function returning a result wins.  Note that the list of buffer-local
        ;; completion functions takes precedence over the global list.
-       ;; (add-hook 'completion-at-point-functions #'cape-dabbrev)
-       ;; (add-hook 'completion-at-point-functions #'cape-file)
-       ;; (add-hook 'completion-at-point-functions #'cape-elisp-block)
-       ;; (add-hook 'completion-at-point-functions #'cape-history)
+       (add-hook 'completion-at-point-functions #'cape-dabbrev)
+       (add-hook 'completion-at-point-functions #'cape-file)
+       (add-hook 'completion-at-point-functions #'cape-elisp-block)
+       (add-hook 'completion-at-point-functions #'cape-history)
        ;; ...
        ;; (add-hook 'prog-mode-hook
        ;;           (lambda ()
@@ -601,8 +647,8 @@
    #+begin_src emacs-lisp :tangle yes
      ;; Use Company backends as Capfs.
      (setq-local completion-at-point-functions
-       (mapcar #'cape-company-to-capf
-         (list #'company-files #'company-keywords #'company-dabbrev)))
+                 (mapcar #'cape-company-to-capf
+                         (list #'company-files #'company-keywords #'company-dabbrev)))
    #+end_src
 
 ** Vertico for completion
@@ -881,10 +927,6 @@
      (use-package treemacs-magit
        :after treemacs magit
        :ensure t)
-     (use-package treemacs-projectile
-       :after treemacs projectile
-       :ensure t)
-
      (use-package treemacs-icons-dired
        :after treemacs dired
        :ensure t
@@ -936,7 +978,9 @@
        :hook
        ((lisp-mode . paredit-mode)
         (clojure-mode . paredit-mode)
-        (erlang-mode . paredit-mode)))
+        (erlang-mode . paredit-mode)
+        (haskell-mode . paredit-mode)
+        (python-mode . paredit-mode)))
    #+END_SRC
 
 ** paredit spaces for non s-expr langs
@@ -963,6 +1007,7 @@
      ;; (add-hook 'typescript-mode-hook 'my-paredit-nonlisp)
      ;; (add-hook 'typescript-ts-mode-hook 'my-paredit-nonlisp)
      ;; (add-hook 'java-mode-hook 'my-paredit-nonlisp)
+     (add-hook 'python-mode-hook 'my-paredit-nonlisp)
    #+END_SRC
 
 ** SmartParens
@@ -1068,10 +1113,12 @@
         :after magit)
     #+end_src
 
+    #+RESULTS:
+
 
 *** Code review
 
-    Use code review from a branch on a different repo that has a fix.
+    Use code review
 
     #+begin_src emacs-lisp
       (use-package code-review
@@ -1979,6 +2026,102 @@
 
 * Programming Modes
 
+** Language Server Protocol
+
+*** LSP config
+
+    This is my set up for the Language Server Protocol.
+
+    #+begin_src emacs-lisp
+      (use-package lsp-mode
+        :ensure t
+        :init ; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
+        (setq lsp-keymap-prefix "M-s-l")
+        :hook (;;  concrete major-modes to use lsp (e. g. clojure-mode)
+               (clojure-mode . lsp-deferred)
+               (clojurec-mode . lsp-deferred)
+               (clojurescript-mode . lsp-deferred)
+               (js2-mode . lsp-deferred)
+               (typescript-mode . lsp-deferred)
+               (java-mode . lsp-deferred)
+               (terraform-mode . lsp-deferred)
+               (yaml-mode . lsp-deferred)
+               (erlang-mode . lsp-deferred)
+               (kotlin-mode . lsp-deferred)
+               (python-mode . lsp-deferred)
+               ;; if you want which-key integration
+               (lsp-mode . lsp-enable-which-key-integration)
+               (lsp-mode . flycheck-mode)
+               (lsp-mode . lsp-lens-mode))
+        :commands lsp
+        :config
+        (setq lsp-completion-enable nil)
+        (setq lsp-completion-mode nil) ; Let cape deal with completion backends
+        (setq gc-cons-threshold 1000000)
+        (setq read-process-output-max (* 1024 1024 2))
+        (setq lsp-idle-delay 0.3)
+        ;; ELP, added as priority 0 (> -1) so takes priority over the built-in one
+        ;; (lsp-register-client
+        ;;  (make-lsp-client :new-connection (lsp-stdio-connection '("elp" "server"))
+        ;;                   :major-modes '(erlang-mode)
+        ;;                   :priority 0
+        ;;                   :server-id 'erlang-language-platform))
+        )
+    #+end_src
+
+    Set up ui
+
+    #+begin_src emacs-lisp
+      (use-package lsp-ui
+        :ensure t
+        :after lsp-mode
+        :bind (("C-<tab>" . lsp-ui-doc-focus-frame))
+        :commands lsp-ui-mode
+        :config
+        (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
+        )
+    #+end_src
+
+    Add in consult support.
+
+    #+begin_src emacs-lisp
+      (use-package consult-lsp
+        :ensure t
+        :after lsp-mode
+        :config
+        (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
+    #+end_src
+
+*** LSP for Java
+
+    Add in Java LSP and config for it and dap-java.
+
+    #+begin_src emacs-lisp
+      (use-package lsp-java
+        :ensure t
+        :after lsp-mode
+        :config
+        (require 'dap-java))
+    #+end_src
+
+    Bind debug Java keys after loading Java mode
+
+    #+begin_src emacs-lisp
+      (defun bind-java-dap-keys ()
+        (define-key java-mode-map (kbd "M-s-l t t") 'dap-java-run-test-method)
+        (define-key java-mode-map (kbd "M-s-l t d") 'dap-java-debug-test-method))
+      (with-eval-after-load 'java-mode (bind-java-dap-keys))
+    #+end_src
+
+** LSP for Haskell
+
+   Add in Haskell lsp
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package lsp-haskell
+       :ensure t)
+   #+end_src
+
 ** Codeium
 
    Try out codeium AI.
@@ -2005,14 +2148,14 @@
        ;; optionally set a timer, which might speed up things as the
        ;; codeium local language server takes ~0.2s to start up
        (add-hook 'emacs-startup-hook
-         (lambda () (run-with-timer 0.1 nil #'codeium-init)))
+                 (lambda () (run-with-timer 0.1 nil #'codeium-init)))
 
        ;; :defer t ;; lazy loading, if you want
        :config
        (setq use-dialog-box t) ;; do not use popup boxes
 
        ;; if you don't want to use customize to save the api-key
-       ;; (setq codeium/metadata/api_key "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
+       ;; (setq codeium/metadata/api_key anthropic-key)
 
        ;; get codeium status in the modeline
        (setq codeium-mode-line-enable
@@ -2045,15 +2188,24 @@
 
 ** Copilot
 
-   Add in copilot mode.
+*** Add in copilot mode.
 
-   #+begin_src emacs-lisp
-     (use-package copilot
-       :vc (copilot :url "https://github.com/copilot-emacs/copilot.el"
-                    :branch "main")
-       ;; :hook prog-mode
-       )
-   #+end_src
+    #+begin_src emacs-lisp
+      (use-package copilot
+        :vc (copilot :url "https://github.com/copilot-emacs/copilot.el"
+                     :branch "main")
+        ;; :hook prog-mode
+        )
+    #+end_src
+
+
+*** Add in copilot chat
+
+    #+begin_src emacs-lisp
+      (use-package copilot-chat
+        :ensure t)
+      (add-hook 'git-commit-setup-hook 'copilot-chat-insert-commit-message)
+    #+end_src
 
 ** Gptel
 
@@ -2066,6 +2218,28 @@
        (gptel-make-anthropic "Claude"          ;Any name you want
          :stream t                             ;Streaming responses
          :key anthropic-key))
+   #+end_src
+
+** Claude Code
+
+   Use Claude code in Emacs.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package claude-code-ide
+       :vc (claude-code-ide :url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
+       :bind ("C-c C-'" . claude-code-ide-menu) ; Set your favorite keybinding
+       :config
+       (claude-code-ide-emacs-tools-setup))
+                                             ; Optionally enable Emacs MCP tools
+   #+end_src
+
+** vterm
+
+   Use vterm terminal emulator.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package vterm
+       :ensure t)
    #+end_src
 
 ** shell
@@ -2089,7 +2263,6 @@
      (use-package restclient-jq
        :ensure t
        :hook (restclient . restclient-jq))
-
    #+END_SRC
 
 ** prog-mode
@@ -2383,7 +2556,7 @@
         (clojure-mode .
                       (lambda ()
                         (setq-local completion-at-point-functions
-                                    (list (cape-capf-super #'codeium-completion-at-point #'lsp-completion-at-point))))))
+                                    (list (cape-capf-super #'lsp-completion-at-point #'codeium-completion-at-point))))))
     #+end_src
 
 **** boot
@@ -2437,7 +2610,7 @@
       I also want to be able to navigate to the "-" characters in words.
 
       #+BEGIN_SRC emacs-lisp
-        (add-hook 'cider-mode-hook 'subword-mode)
+        ;;(add-hook 'cider-mode-hook 'subword-mode)
         ;; (add-hook 'cider-mode-hook (lambda () (setq lsp-enable-completion-at-point nil)))
       #+END_SRC
 
@@ -2614,6 +2787,23 @@
          (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers))))
      #+END_SRC
 
+**** Clerk shortcut
+
+     Shortcut to start Clerk.
+
+     #+begin_src emacs-lisp :tangle yes
+       (defun clerk-show ()
+         (interactive)
+         (when-let
+             ((filename
+               (buffer-file-name)))
+           (save-buffer)
+           (cider-interactive-eval
+            (concat "(nextjournal.clerk/show! \"" filename "\")"))))
+
+       (define-key clojure-mode-map (kbd "<M-return>") 'clerk-show)
+     #+end_src
+
 ** JavaScript
 
 *** js2 mode
@@ -2689,6 +2879,7 @@
 
     #+begin_src emacs-lisp
       (use-package dap-mode
+        :pin melpa-stable
         :ensure t
         :after lsp-mode
         :hook ((lsp-mode . dap-mode)
@@ -2762,8 +2953,6 @@
    #+begin_src emacs-lisp :tangle yes
      (use-package terraform-mode
        :ensure t
-       :hook
-       (outline-minor-mode)
        :config
        (add-hook 'terraform-mode-hook
                  (lambda ()
@@ -2778,18 +2967,18 @@
     Install erlang mode
 
     #+begin_src emacs-lisp
-      (setq load-path (cons "~/.kerl/builds/27.3/otp_src_27.3/lib/tools/emacs" load-path))
+      (setq load-path (cons "~/.kerl/builds/27.3.4/otp_src_27.3.4/lib/tools/emacs" load-path))
       (defun set-erlang-completion
-        ()
+          ()
         (interactive)
         (setq lsp-completion-enable nil)
         (setq-local
-             completion-at-point-functions (list
-                                            (cape-capf-super
-                                             #'codeium-completion-at-point
-                                             #'lsp-completion-at-point))))
+         completion-at-point-functions (list
+                                        (cape-capf-super
+                                         #'codeium-completion-at-point
+                                         #'lsp-completion-at-point))))
       (use-package erlang :load-path
-        ("~/.kerl/builds/27.3/otp_src_27.3/lib/tools/emacs")
+        ("~/.kerl/builds/27.3.4/otp_src_27.3.4/lib/tools/emacs")
         :mode
         (("\\.erl?$" . erlang-mode)
          ("rebar\\.config$" . erlang-mode)
@@ -2804,11 +2993,11 @@
          ("\\Emakefile" . erlang-mode))
         :config
         (require 'erlang-start)
-        (setq erlang-root-dir "~/.kerl/builds/27.2/otp_src_27.3/")
-        (setq exec-path (cons "~/.kerl/builds/27.3/otp_src_27.3/bin" exec-path))
-        (setq erlang-man-root-dir "~/.kerl/builds/27.3/otp_src_27.3/man")
-        :hook
-        (my-paredit-nonlisp set-erlang-completion)
+        (setq erlang-root-dir "~/.kerl/builds/27.2/otp_src_27.3.4/")
+        (setq exec-path (cons "~/.kerl/builds/27.3/otp_src_27.3.4/bin" exec-path))
+        (setq erlang-man-root-dir "~/.kerl/builds/27.3/otp_src_27.3.4/man")
+        (add-hook 'erlang-mode-hook 'my-paredit-nonlisp)
+        (add-hook 'erlang-mode-hook 'set-erlang-completion)
         )
     #+end_src
 
@@ -2847,6 +3036,278 @@
       ;;         (car (split-string (shell-command-to-string "hostname"))))))
     #+end_src
 
+** Python
+
+   Python mode is installed by default but I want to add hooks for code completion
+
+
+*** LSP
+
+    Install the ms lsp server.
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package lsp-python-ms
+        :ensure t
+        :init (setq lsp-python-ms-auto-install-server t)
+        :hook (python-mode . (lambda ()
+                               (require 'lsp-python-ms)
+                               (lsp-deferred)))
+        :config
+        ;; for executable of language server, if it's not symlinked on your PATH
+        (setq lsp-python-ms-executable
+              "~/python-projects/python-language-server/output/bin/Release/osx-x64/publish/Microsoft.Python.LanguageServer")
+        )
+    #+end_src
+
+*** Completion
+
+    #+begin_src emacs-lisp
+      ;; (add-hook 'python-mode-hook
+      ;;           (lambda ()
+      ;;             (setq-local completion-at-point-functions
+      ;;                         (list (cape-capf-super #'codeium-completion-at-point)))))
+    #+end_src
+
+*** Anaconda mode
+
+    Add anaconda mode for code completion and code navigation.
+
+    #+begin_src emacs-lisp :tangle yes
+      ;; (use-package anaconda-mode
+      ;;   :ensure t
+      ;;   :hook ((python-mode . anaconda-mode)
+      ;;          (python-mode . anaconda-eldoc-mode)))
+    #+end_src
+
+
+*** Company Anaconda mode
+
+    Add company anaconda
+
+    #+begin_src emacs-lisp :tangle yes
+      ;; (use-package company-anaconda
+      ;;   :ensure t
+      ;;   :config
+      ;;   (eval-after-load "company"
+      ;;     '(add-to-list 'company-backends '(company-anaconda :with company-capf)))
+      ;;   ;; Use Company backends as Capfs.
+      ;;   (add-hook 'python-mode-hook
+      ;;             (setq-local completion-at-point-functions
+      ;;               (list (cape-capf-super  #'codeium-completion-at-point )))))
+    #+end_src
+
+*** Nose for testing
+
+    Add nose mode for running nose tests.
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package nose
+        :vc (nose :url "https://github.com/syl20bnr/nose.el")
+        :config
+        ;; (add-hook 'python-mode-hook
+        ;;           (lambda ()
+        ;;             (local-set-key "\C-ca" 'nosetests-all)
+        ;;             (local-set-key "\C-cm" 'nosetests-module)
+        ;;             (local-set-key "\C-cs" 'nosetests-suite)
+        ;;             (local-set-key "\C-c." 'nosetests-one)
+        ;;             (local-set-key "\C-cpa" 'nosetests-pdb-all)
+        ;;             (local-set-key "\C-cpm" 'nosetests-pdb-module)
+        ;;             (local-set-key "\C-cps" 'nosetests-pdb-suite)
+        ;;             (local-set-key "\C-cp." 'nosetests-pdb-one)))
+        )
+    #+end_src
+
+
+*** Pytest for testing
+
+    Add pytest mode for testing with pytest
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package pytest
+        :vc (pytest :url "https://github.com/ionrock/pytest-el")
+        :config
+        (add-hook 'python-mode-hook
+                  (lambda ()
+                    (local-set-key "\C-ca" 'pytest-all)
+                    (local-set-key "\C-cm" 'pytest-module)
+                    (local-set-key "\C-c." 'pytest-one)
+                    (local-set-key "\C-cc" 'pytest-again)
+                    (local-set-key "\C-cd" 'pytest-directory)
+                    (local-set-key "\C-cpa" 'pytest-pdb-all)
+                    (local-set-key "\C-cpm" 'pytest-pdb-module)
+                    (local-set-key "\C-cp." 'pytest-pdb-one))))
+    #+end_src
+
+
+*** Pyvenv
+
+    Used to integrate with venv
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package pyvenv
+        :ensure t
+        :hook (python . pyvenv))
+    #+end_src
+
+** Kotlin
+
+*** Kotlin Mode
+
+    Set up Kotlin mode for editing Kotlin files.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package kotlin-mode
+        :ensure t
+        :config
+        (add-hook 'kotlin-mode-hook
+                  (lambda ()
+                    (setq-local completion-at-point-functions
+                                (list (cape-capf-super #'lsp-completion-at-point #'codeium-completion-at-point)))))
+        (add-hook 'kotlin-mode-hook 'my-paredit-nonlisp)
+        :mode ("\\.kt\\'" "\\.kts\\'"))
+    #+END_SRC
+
+*** Gradle Mode
+
+    Add support for Gradle build tool commonly used with Kotlin projects.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package gradle-mode
+        :ensure t
+        :hook (kotlin-mode . gradle-mode))
+    #+END_SRC
+
+*** Flycheck Kotlin
+
+    Setup Flycheck for Kotlin syntax checking.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package flycheck-kotlin
+        :ensure t
+        :hook (kotlin-mode . flycheck-mode))
+    #+END_SRC
+
+*** LSP for Kotlin
+
+    Configure LSP support for Kotlin using the Kotlin Language Server.
+    Make sure to install the Kotlin Language Server separately.
+
+    #+BEGIN_SRC emacs-lisp
+      ;; Customize some kotlin-specific LSP settings if needed
+      (with-eval-after-load 'lsp-mode
+        (setq lsp-kotlin-compiler-jvm-target "11")
+        (setq lsp-kotlin-debug-adapter-enabled t)
+        )
+    #+END_SRC
+
+*** Kotlin REPL
+
+    Setup REPL for interactive Kotlin development.
+
+    #+BEGIN_SRC emacs-lisp
+      (defun kotlin-repl ()
+        "Run Kotlin REPL in a comint buffer."
+        (interactive)
+        (let ((buffer (comint-check-proc "Kotlin REPL")))
+          (unless buffer
+            (setq buffer (make-comint "Kotlin REPL" "kotlinc" nil))
+            (with-current-buffer buffer
+              (kotlin-mode)
+              (setq comint-process-echoes t)))
+          (pop-to-buffer buffer)))
+
+      (defun kotlin-send-region (start end)
+        "Send region to Kotlin REPL."
+        (interactive "r")
+        (let ((code (buffer-substring-no-properties start end)))
+          (let ((buffer (get-buffer-create "*Kotlin REPL*")))
+            (unless (comint-check-proc buffer)
+              (kotlin-repl))
+            (comint-send-string buffer (concat code "\n")))))
+
+      (defun kotlin-send-buffer ()
+        "Send current buffer to Kotlin REPL."
+        (interactive)
+        (kotlin-send-region (point-min) (point-max)))
+
+      (defun kotlin-send-line ()
+        "Send current line to Kotlin REPL."
+        (interactive)
+        (kotlin-send-region (line-beginning-position) (line-end-position)))
+
+      (add-hook 'kotlin-mode-hook
+                (lambda ()
+                  (local-set-key (kbd "C-c C-z") 'kotlin-repl)
+                  (local-set-key (kbd "C-c C-r") 'kotlin-send-region)
+                  (local-set-key (kbd "C-c C-c") 'kotlin-send-buffer)
+                  (local-set-key (kbd "C-c C-l") 'kotlin-send-line)))
+    #+END_SRC
+
+*** DAP for Kotlin
+
+    Configure Debug Adapter Protocol for Kotlin.
+
+    #+BEGIN_SRC emacs-lisp
+      (with-eval-after-load 'dap-mode
+        (require 'dap-java)  ;; Kotlin can use Java debugger
+
+        ;; Custom template for Kotlin debugging
+        (dap-register-debug-template "Kotlin App"
+                                     (list :type "java"
+                                           :request "launch"
+                                           :args ""
+                                           :cwd nil
+                                           :hostName "localhost"
+                                           :mainClass "MainKt"
+                                           :projectName nil
+                                           :name "Kotlin Debug")))
+    #+END_SRC
+
+*** Kotlin Snippets
+
+    Add Kotlin code snippets for quicker development.
+
+    #+BEGIN_SRC emacs-lisp
+      (with-eval-after-load 'yasnippet
+        (add-to-list 'yas-snippet-dirs (concat user-emacs-directory "snippets/kotlin"))
+        (yas-reload-all))
+    #+END_SRC
+
+*** Projectile Integration for Kotlin Projects
+
+    Configure Projectile to recognize Kotlin projects.
+
+    #+BEGIN_SRC emacs-lisp
+      (projectile-register-project-type 'kotlin-gradle '("build.gradle.kts")
+                                        :project-file "build.gradle.kts"
+                                        :compile "./gradlew build"
+                                        :test "./gradlew test"
+                                        :run "./gradlew run"
+                                        :test-suffix "Test")
+    #+END_SRC
+
+** Haskell
+
+*** Haskell mode
+
+    Install and require Haskell mode.
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package haskell-mode
+        :ensure t
+        :hook ((haskell-mode . my-paredit-nonlisp)
+               (haskell-mode . lsp)
+               (haskell-mode .
+                  (lambda ()
+                    (setq-local completion-at-point-functions
+                                (list #'lsp-completion-at-point #'cape-dabbrev #'cape-file))))
+               ))
+      (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+   #+end_src
+
+
+   #+end_src
+
 ** pastebins
 
    gist, pastebin, refheap. All good ways of sharing snippets of code
@@ -2883,91 +3344,6 @@
        (editorconfig-mode 1))
    #+end_src
 
-** Language Server Protocol
-
-*** LSP config
-
-    This is my set up for the Language Server Protocol.
-
-    #+begin_src emacs-lisp
-      (use-package lsp-mode
-        :ensure t
-        :init ; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
-        (setq lsp-keymap-prefix "M-s-l")
-        :hook (;;  concrete major-modes to use lsp (e. g. clojure-mode)
-               (clojure-mode . lsp-deferred)
-               (clojurec-mode . lsp-deferred)
-               (clojurescript-mode . lsp-deferred)
-               (js2-mode . lsp-deferred)
-               (typescript-mode . lsp-deferred)
-               (java-mode . lsp-deferred)
-               (terraform-mode . lsp-deferred)
-               (yaml-mode . lsp-deferred)
-               (erlang-mode . lsp-deferred)
-               ;; if you want which-key integration
-               (lsp-mode . lsp-enable-which-key-integration)
-               (lsp-mode . flycheck-mode)
-               (lsp-mode . lsp-lens-mode))
-        :commands lsp
-        :config
-        (setq lsp-completion-enable nil)
-        (setq lsp-completion-mode nil) ; Let cape deal with completion backends
-        (setq gc-cons-threshold 1000000)
-        (setq read-process-output-max (* 1024 1024 2))
-        (setq lsp-idle-delay 0.3)
-        ;; ELP, added as priority 0 (> -1) so takes priority over the built-in one
-        (lsp-register-client
-         (make-lsp-client :new-connection (lsp-stdio-connection '("elp" "server"))
-                          :major-modes '(erlang-mode)
-                          :priority 0
-                          :server-id 'erlang-language-platform))
-        )
-    #+end_src
-
-    Set up ui
-
-    #+begin_src emacs-lisp
-      (use-package lsp-ui
-        :ensure t
-        :after lsp-mode
-        :bind (("C-<tab>" . lsp-ui-doc-focus-frame))
-        :commands lsp-ui-mode
-        :config
-        (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
-      )
-    #+end_src
-
-    Add in consult support.
-
-    #+begin_src emacs-lisp
-      (use-package consult-lsp
-        :ensure t
-        :after lsp-mode
-        :config
-        (define-key lsp-mode-map [remap xref-find-apropos] #'consult-lsp-symbols))
-    #+end_src
-
-*** LSP for Java
-
-    Add in Java LSP and config for it and dap-java.
-
-    #+begin_src emacs-lisp
-      (use-package lsp-java
-        :ensure t
-        :after lsp-mode
-        :config
-        (require 'dap-java))
-    #+end_src
-
-    Bind debug Java keys after loading Java mode
-
-    #+begin_src emacs-lisp
-      (defun bind-java-dap-keys ()
-        (define-key java-mode-map (kbd "M-s-l t t") 'dap-java-run-test-method)
-        (define-key java-mode-map (kbd "M-s-l t d") 'dap-java-debug-test-method))
-      (with-eval-after-load 'java-mode (bind-java-dap-keys))
-    #+end_src
-
 * Data Modes
 
 ** Dockerfile mode
@@ -2987,7 +3363,8 @@
 
    #+begin_src emacs-lisp
      (use-package pdf-tools
-       :ensure t)
+       :ensure t
+       :config (pdf-tools-install))
    #+end_src
 
 * Notification Systems
@@ -3024,3 +3401,9 @@
        :ensure t)
      (exec-path-from-shell-initialize)
    #+END_SRC
+
+** Start emacs as a server
+
+   #+begin_src emacs-lisp
+     (server-start)
+   #+end_src
