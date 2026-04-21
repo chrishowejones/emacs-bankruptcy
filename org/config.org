@@ -1063,10 +1063,10 @@
       (use-package buffer-move
         :ensure t
         :config
-        (global-set-key (kbd "<s-up>")     'buf-move-up)
-        (global-set-key (kbd "<s-down>")   'buf-move-down)
-        (global-set-key (kbd "<s-left>")   'buf-move-left)
-        (global-set-key (kbd "<s-right>")  'buf-move-right))
+        (global-set-key (kbd "<M-up>")     'buf-move-up)
+        (global-set-key (kbd "<M-down>")   'buf-move-down)
+        (global-set-key (kbd "<M-left>")   'buf-move-left)
+        (global-set-key (kbd "<M-right>")  'buf-move-right))
     #+END_SRC
 
 ** git
@@ -2036,7 +2036,7 @@
       (use-package lsp-mode
         :ensure t
         :init ; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
-        (setq lsp-keymap-prefix "M-s-l")
+        (setq lsp-keymap-prefix "s-l")
         :hook (;;  concrete major-modes to use lsp (e. g. clojure-mode)
                (clojure-mode . lsp-deferred)
                (clojurec-mode . lsp-deferred)
