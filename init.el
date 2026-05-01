@@ -42,6 +42,8 @@
     (package-install p))
   (require p))
 
+(setq package-install-upgrade-built-in 't)
+
 (defvar native-comp-deferred-compilation-deny-list nil)
 
 ;; org-mode always needs to be installed in an emacs where it isn't loaded.
