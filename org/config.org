@@ -375,7 +375,7 @@
     #+begin_src emacs-lisp :tangle yes
       (use-package modus-themes
         :ensure t
-        :init (load-theme 'modus-vivendi-tinted :no-confirm))
+        :init (load-theme 'modus-vivendi-deuteranopia :no-confirm))
     #+end_src
 
 
@@ -931,6 +931,8 @@
        :after treemacs dired
        :ensure t
        :config (treemacs-icons-dired-mode))
+     (use-package treemacs-projectile
+       :ensure t)
    #+END_SRC
 
 ** Command log mode
