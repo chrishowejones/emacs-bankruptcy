@@ -953,7 +953,7 @@
    Set s-i as imenu keybinding.
 
    #+begin_src emacs-lisp :tangle yes
-     (global-set-key (kbd "s-i") 'imenu)
+     (global-set-key (kbd "M-s-i") 'imenu)
    #+end_src
 
 ** Winner mode
@@ -2037,7 +2037,7 @@
     #+begin_src emacs-lisp
       (use-package lsp-mode
         :ensure t
-        :init ; set prefix for lsp-command-keymap - use meta-super-l ("M-s-l")
+        :init ; set prefix for lsp-command-keymap - use meta-super-l ("s-l")
         (setq lsp-keymap-prefix "s-l")
         :hook (;;  concrete major-modes to use lsp (e. g. clojure-mode)
                (clojure-mode . lsp-deferred)
