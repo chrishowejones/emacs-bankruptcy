@@ -953,7 +953,7 @@
    Set s-i as imenu keybinding.
 
    #+begin_src emacs-lisp :tangle yes
-     (global-set-key (kbd "M-s-i") 'imenu)
+     (global-set-key (kbd "s-i") 'imenu)
    #+end_src
 
 ** Winner mode
