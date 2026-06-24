@@ -72,6 +72,15 @@
 
 * Globals
 
+** Plstore to store OAuth tokens
+
+   Cache passphrase for symmetrical encryption.
+
+   #+begin_src emacs-lisp
+     (setq plstore-cache-passphrase-for-symmetric-encryption t)
+     (setq epa-pinentry-mode 'loopback)
+   #+end_src
+
 ** passwords and encrypted things
 
    It is good to store your passwords and things in an encrypted
@@ -282,14 +291,6 @@
 
    #+begin_src emacs-lisp :tangle yes
      (setq auth-sources '("~/.authinfo.gpg"))
-   #+end_src
-
-** Plstore to store OAuth tokens
-
-   Cache passphrase for symmetrical encryption.
-
-   #+begin_src emacs-lisp
-     (setq plstore-cache-passphrase-for-symmetric-encryption t)
    #+end_src
 
 ** Unmap key bindings to suspend emacs
@@ -1682,341 +1683,339 @@
       #+BEGIN_SRC emacs-lisp
         (use-package org-gcal
           :ensure t)
-        (setq plstore-cache-passphrase-for-symmetric-encryption t)
       #+END_SRC
 
-***** Agenda Windows
+******* Agenda Windows
 
-      I'm not quite sure what possessed the org-mode people to
-      presume that they knew best about how my windows should be
-      arranged when I look at an agenda. There is a solution to that
-      though. Just use the current window, like every other command
-      that opens something up. Re-arrange frame indeed.
+        I'm not quite sure what possessed the org-mode people to
+        presume that they knew best about how my windows should be
+        arranged when I look at an agenda. There is a solution to that
+        though. Just use the current window, like every other command
+        that opens something up. Re-arrange frame indeed.
 
-      #+BEGIN_SRC emacs-lisp
-        (setq org-agenda-window-setup 'current-window)
-      #+END_SRC
+        #+BEGIN_SRC emacs-lisp
+          (setq org-agenda-window-setup 'current-window)
+        #+END_SRC
 
-***** Agenda Files
+******* Agenda Files
 
-      There are things for me and mine. Things I do for money. Things
-      I do for the community I'm in. Let me know if you think my
-      worldview is too small.
+        There are things for me and mine. Things I do for money. Things
+        I do for the community I'm in. Let me know if you think my
+        worldview is too small.
 
-      And somethings we need in the agenda even though we don't know
-      where to file it yet which is why refile is in here.
+        And somethings we need in the agenda even though we don't know
+        where to file it yet which is why refile is in here.
 
-      #+BEGIN_SRC emacs-lisp
-        (setq org-agenda-files '("~/org/notes.org" "~/org/personal.org" "~/org/gmail-schedule.org"))
-      #+END_SRC
+        #+BEGIN_SRC emacs-lisp
+          (setq org-agenda-files '("~/org/notes.org" "~/org/personal.org" "~/org/gmail-schedule.org"))
+        #+END_SRC
 
-***** Agenda Sorting
+******* Agenda Sorting
 
-      I want to sort my tasks in the agenda by the deadline, then
-      schedule and then priority.
+        I want to sort my tasks in the agenda by the deadline, then
+        schedule and then priority.
 
-      Todo items I want to sort by deadline, schedule and then
-      priority, but I usually filter out the things with deadline and
-      schedule time in most agenda views.
+        Todo items I want to sort by deadline, schedule and then
+        priority, but I usually filter out the things with deadline and
+        schedule time in most agenda views.
 
-      Tags and search are the same as the default values.
+        Tags and search are the same as the default values.
 
-      #+BEGIN_SRC emacs-lisp
-        (setq org-agenda-sorting-strategy
-              '((agenda time-up
-                        timestamp-up
-                        priority-down
-                        habit-down
+        #+BEGIN_SRC emacs-lisp
+          (setq org-agenda-sorting-strategy
+                '((agenda time-up
+                          timestamp-up
+                          priority-down
+                          habit-down
+                          category-keep)
+                  (todo priority-down
+                        category-keep
+                        todo-state-up
+                        tag-up
+                        effort-down)
+                  (tags priority-down
                         category-keep)
-                (todo priority-down
-                      category-keep
-                      todo-state-up
-                      tag-up
-                      effort-down)
-                (tags priority-down
-                      category-keep)
-                (search category-keep)))
-      #+END_SRC
+                  (search category-keep)))
+        #+END_SRC
 
-***** Custom Agendas
+******* Custom Agendas
 
-      The real power of org-agenda starts to kick in when you create
-      your own custom agenda commands that get the things *you* want
-      out of your org files.
+        The real power of org-agenda starts to kick in when you create
+        your own custom agenda commands that get the things *you* want
+        out of your org files.
 
-****** What am I doing in the Week Countdown?
+******** What am I doing in the Week Countdown?
 
-       My default view, as I mostly use org for keeping my working
-       days in line is around the Current Week Countdown.
+         My default view, as I mostly use org for keeping my working
+         days in line is around the Current Week Countdown.
 
-       This is a composite agenda view that shows the agenda by date
-       at the top and the todo list below that.
+         This is a composite agenda view that shows the agenda by date
+         at the top and the todo list below that.
 
-       The agenda spans one week and starts on a Monday (weekday
-       1).
+         The agenda spans one week and starts on a Monday (weekday
+         1).
 
-       It filters the todo list is a pretty bad way as I was having
-       quite a bit of trouble with some of the regular expressions. I
-       do have it so that it finds the DOING, WAITING and BLOCKED
-       tasks and skips the DONE ones so that my view isn't too
-       cluttered as I try to find the next task.
+         It filters the todo list is a pretty bad way as I was having
+         quite a bit of trouble with some of the regular expressions. I
+         do have it so that it finds the DOING, WAITING and BLOCKED
+         tasks and skips the DONE ones so that my view isn't too
+         cluttered as I try to find the next task.
 
-       It is also skips todo items that have a deadline or are
-       scheduled as I have them already in the agenda at the top. It
-       also overrides the text that describes the todo list. By
-       default it is the regular expression we are using to filter the
-       todo list.
+         It is also skips todo items that have a deadline or are
+         scheduled as I have them already in the agenda at the top. It
+         also overrides the text that describes the todo list. By
+         default it is the regular expression we are using to filter the
+         todo list.
 
-       I also remove items that are scheduled or with deadlines from
-       the weekly agenda when they are done. This is so I can keep the
-       clutter down in this view and decide on what I want my next
-       step to be.
+         I also remove items that are scheduled or with deadlines from
+         the weekly agenda when they are done. This is so I can keep the
+         clutter down in this view and decide on what I want my next
+         step to be.
 
-       The todo items are also filtered to only show things that have
-       the Owner property set to my name.
+         The todo items are also filtered to only show things that have
+         the Owner property set to my name.
+
+         #+BEGIN_SRC emacs-lisp
+           (setq org-agenda-custom-commands
+                 '(("Cm" "My Week Countdown"
+                    ((agenda "My Week Countdown"
+                             ((org-agenda-span 'week)
+                              (org-agenda-start-on-weekday 1)
+                              (org-agenda-skip-deadline-if-done t)
+                              (org-agenda-skip-scheduled-if-done t)))
+                     (tags-todo "TODO={^[DCWBT].+[^E]$}+Owner=\"Chris\""
+                                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
+                                 (org-agenda-overriding-header "My tasks for the Current Week Countdown: ")))))
+                   ("Cw" "Workflow Status"
+                    ((todo "WAITING"
+                           ((org-agenda-overriding-header "Waiting on External")
+                            (org-agenda-files org-agenda-files)))
+                     (todo "REVIEW"
+                           ((org-agenda-overriding-header "In Review")
+                            (org-agenda-files org-agenda-files)))
+                     (todo "PLAN"
+                           ((org-agenda-overriding-header "In Planning")
+                            (org-agenda-todo-list-sublevels nil)
+                            (org-agenda-files org-agenda-files)))
+                     (todo "BACKLOG"
+                           ((org-agenda-overriding-header "Backlog")
+                            (org-agenda-todo-list-sublevels nil)
+                            (org-agenda-files org-agenda-files)))
+                     (todo "DOING"
+                           ((org-agenda-overriding-header "Active")
+                            (org-agenda-files org-agenda-files)))
+                     (todo "COMPLETED"
+                           ((org-agenda-overriding-header "Completed")
+                            (org-agenda-files org-agenda-files)))
+                     (todo "CANCELLED"
+                           ((org-agenda-overriding-header "Cancelled")
+                            (org-agenda-files org-agenda-files)))))
+                   ))
+         #+END_SRC
+
+******** My Window
+
+         I need to know what I was doing on the last working day and I'd
+         like to know what is coming up in the next 7 days.
+
+         #+BEGIN_SRC emacs-lisp
+           (add-to-list
+            'org-agenda-custom-commands
+            '("Cn" "My Window"
+              ((agenda "My Window"
+                       ((org-agenda-span 10)
+                        (org-agenda-start-day "-3d")
+                        (org-agenda-skip-deadline-if-done t)
+                        (org-agenda-skip-scheduled-if-done t)))
+               (tags-todo "TODO={^[DCWBT].+[^E]$}+Owner=\"Chris\""
+                          ((org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
+                           (org-agenda-overriding-header "My window."))))))
+         #+END_SRC
+
+******** org-agenda hotkey
+
+         #+BEGIN_SRC emacs-lisp
+           (global-set-key (kbd "C-c a") 'org-agenda)
+         #+END_SRC
+
+****** Time Tracking and Estimates
+
+       org-mode is huge. It does so much, but my reason for using it
+       was so that I could track effort vs estimates. It makes me
+       happier than a burn down chart, but probably just because I'm
+       writing elisp to do it rather than excel or google docs. This
+       hack works on my mind, but YMMV.
+
+******* clocking in, out and persistence
+
+        It is true, emacs crashes, I forget to clock out, there is just
+        life, ok? So, when we clock in to a new task we'll be prompted
+        to complete the time for the old task. Just to keep things
+        straight.
+
+        There is more about measuring idle time in the org-mode docs
+        [[http://orgmode.org/manual/Resolving-idle-time.html][here]].
+
+        #+BEGIN_SRC emacs-lisp
+          (setq org-clock-persist 'history)
+          (org-clock-persistence-insinuate)
+        #+END_SRC
+
+******* Tracking effort vs estimates with clocksum
+
+        I think of days as being working days rather than groups of 24
+        hours (I'm damaged, what can I say). So I want to see sums of
+        times always in hours rather than as days. Otherwise I just get
+        confused and wonder why spending three eight hour days working on
+        something gets summed up as just one day.
+
+        I found out about this bit of configuration on [[http://stackoverflow.com/questions/17929979/emacs-org-mode-how-to-stop-total-in-column-view-showing-number-of-days][Stack Overflow]].
+
+        This is really handy when looking at things in column mode in
+        org. I use column mode as an alternative to burn down charts to
+        track effort vs estimates.
+
+        #+BEGIN_SRC emacs-lisp
+          (setq org-time-clocksum-format
+                '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
+        #+END_SRC
+
+****** Put those logs in a drawer
+
+       It may be big and heavy and wood, but mostly I don't want to see
+       log messages for state change.
 
        #+BEGIN_SRC emacs-lisp
-         (setq org-agenda-custom-commands
-               '(("Cm" "My Week Countdown"
-                  ((agenda "My Week Countdown"
-                           ((org-agenda-span 'week)
-                            (org-agenda-start-on-weekday 1)
-                            (org-agenda-skip-deadline-if-done t)
-                            (org-agenda-skip-scheduled-if-done t)))
-                   (tags-todo "TODO={^[DCWBT].+[^E]$}+Owner=\"Chris\""
-                              ((org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
-                               (org-agenda-overriding-header "My tasks for the Current Week Countdown: ")))))
-                 ("Cw" "Workflow Status"
-                  ((todo "WAITING"
-                         ((org-agenda-overriding-header "Waiting on External")
-                          (org-agenda-files org-agenda-files)))
-                   (todo "REVIEW"
-                         ((org-agenda-overriding-header "In Review")
-                          (org-agenda-files org-agenda-files)))
-                   (todo "PLAN"
-                         ((org-agenda-overriding-header "In Planning")
-                          (org-agenda-todo-list-sublevels nil)
-                          (org-agenda-files org-agenda-files)))
-                   (todo "BACKLOG"
-                         ((org-agenda-overriding-header "Backlog")
-                          (org-agenda-todo-list-sublevels nil)
-                          (org-agenda-files org-agenda-files)))
-                   (todo "DOING"
-                         ((org-agenda-overriding-header "Active")
-                          (org-agenda-files org-agenda-files)))
-                   (todo "COMPLETED"
-                         ((org-agenda-overriding-header "Completed")
-                          (org-agenda-files org-agenda-files)))
-                   (todo "CANCELLED"
-                         ((org-agenda-overriding-header "Cancelled")
-                          (org-agenda-files org-agenda-files)))))
-                 ))
+         (setq org-log-into-drawer t)
        #+END_SRC
 
-****** My Window
-
-       I need to know what I was doing on the last working day and I'd
-       like to know what is coming up in the next 7 days.
+       We also want to put the clocking in and out into the drawer.
 
        #+BEGIN_SRC emacs-lisp
-         (add-to-list
-          'org-agenda-custom-commands
-          '("Cn" "My Window"
-            ((agenda "My Window"
-                     ((org-agenda-span 10)
-                      (org-agenda-start-day "-3d")
-                      (org-agenda-skip-deadline-if-done t)
-                      (org-agenda-skip-scheduled-if-done t)))
-             (tags-todo "TODO={^[DCWBT].+[^E]$}+Owner=\"Chris\""
-                        ((org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
-                         (org-agenda-overriding-header "My window."))))))
+         (setq org-clock-into-drawer t)
        #+END_SRC
 
-****** org-agenda hotkey
+****** You can depend on...
+
+       The sub tasks that are underneath the main task.
 
        #+BEGIN_SRC emacs-lisp
-         (global-set-key (kbd "C-c a") 'org-agenda)
+         (setq org-enforce-todo-dependencies t)
        #+END_SRC
 
-**** Time Tracking and Estimates
+***** Capturing, Templates and Refiling
 
-     org-mode is huge. It does so much, but my reason for using it
-     was so that I could track effort vs estimates. It makes me
-     happier than a burn down chart, but probably just because I'm
-     writing elisp to do it rather than excel or google docs. This
-     hack works on my mind, but YMMV.
+****** Default Notes File
 
-***** clocking in, out and persistence
+       I don't want to think about things when I'm just capturing
+       them. I can refile them later.
 
-      It is true, emacs crashes, I forget to clock out, there is just
-      life, ok? So, when we clock in to a new task we'll be prompted
-      to complete the time for the old task. Just to keep things
-      straight.
+       #+BEGIN_SRC emacs-lisp
+         (setq org-default-notes-file (concat org-directory "/notes.org"))
+       #+END_SRC
 
-      There is more about measuring idle time in the org-mode docs
-      [[http://orgmode.org/manual/Resolving-idle-time.html][here]].
+****** Capture Hot Key
+
+       Let's capture things with a quick Vulcan Nerve Pinch on
+       C-c o.
+
+       #+BEGIN_SRC emacs-lisp
+         (global-set-key (kbd "C-c o") 'org-capture)
+       #+END_SRC
+
+****** Capture Templates
+
+       To do, respond, notes, journals, meetings and phone calls. These
+       are the things we want to keep track of and clock in and out of
+       let's see how we get on with them.
+
+       We also have a way of tracking things we are doing RFN as well
+       as capturing things for the future.
+
+       #+BEGIN_SRC emacs-lisp
+         (setq org-capture-templates
+               '(("c" "Contacts" entry (file "~/org/contacts.org")
+                  "* %(org-contacts-template-name)\n:PROPERTIES:\n:EMAIL: %(org-contacts-template-email)\n:PHONE:\n:ALIAS:\n:NICKNAME:\n:IGNORE:\n:ICON:\n:NOTE:\n:ADDRESS:\n:BIRTHDAY:\n:LAST_READ_MAIL:\n:END:" :empty-lines-after 1)
+                 ("t" "Doing RIGHT NOW" entry (file+datetree org-default-notes-file)
+                  "* DOING %?\n%n\n%U\n%a\n" :clock-in t :clock-resume t :empty-lines-after 1)
+                 ("f" "Do in the Future" entry (file+datetree org-default-notes-file)
+                  "* TODO %?\n%^{Owner}p\n%U\n%a\n" :empty-lines-after 1)
+                 ("r" "respond" entry (file+datetree org-default-notes-file)
+                  "* TODO Respond to %:from on %:subject\nSCHEDULED: %t\n%^{Owner}p\n%U\n%a\n"
+                  :clock-in t :clock-resume t :empty-lines-after 1)
+                 ("n" "note" entry (file+datetree org-default-notes-file)
+                  "* %? :NOTE:\n%U\n%a\n" :clock-resume t :empty-lines-after 1)
+                 ("j" "Journal" entry (file+datetree org-default-notes-file)
+                  "* %?\n%U\n" :clock-in t :clock-resume t :empty-lines-after 1 :empty-lines-after 1)
+                 ("m" "Meeting" entry (file+datetree org-default-notes-file)
+                  "* MEETING with %? :MEETING:\n%^{Owner}p\n%U" :clock-in t :clock-resume t :empty-lines-after 1)
+                 ("p" "Phone call" entry (file+datetree org-default-notes-file)
+                  "* PHONE %? :PHONE:\n%^{Owner}p\n%U" :clock-in t :clock-resume t :empty-lines-after 1)))
+       #+END_SRC
+
+****** Refiling rules
+
+       We want to be able to refile things in to an archive file
+       and in files that we create our agenda from.
+
+       #+BEGIN_SRC emacs-lisp
+         (setq org-refile-targets
+               '((nil :maxlevel . 9)
+                 (org-agenda-files :maxlevel . 9)
+                 ("~/org/refile.org" :maxlevel . 9)))
+         (advice-add 'org-refile :after 'org-save-all-org-buffers)
+       #+END_SRC
+
+***** org and the pomodoro technique
+
+      When I need to just grind through something or find a way to keep
+      myself focused when I'm having trouble I like to use the
+      [[http://www.pomodorotechnique.com/][pomodoro technique]]. Luckily there is org-pomodoro that let's us
+      put these two great things together.
 
       #+BEGIN_SRC emacs-lisp
-        (setq org-clock-persist 'history)
-        (org-clock-persistence-insinuate)
+        (use-package org-pomodoro
+          :ensure t)
+        (add-hook 'org-mode-hook
+                  (lambda () (local-set-key (kbd "M-s-p") 'org-pomodoro)))
       #+END_SRC
 
-***** Tracking effort vs estimates with clocksum
+****** A hotkey in Org Agenda
 
-      I think of days as being working days rather than groups of 24
-      hours (I'm damaged, what can I say). So I want to see sums of
-      times always in hours rather than as days. Otherwise I just get
-      confused and wonder why spending three eight hour days working on
-      something gets summed up as just one day.
+       I can clock in and out in Org Agendas, I'd like to be able to
+       start Pomodoros as well.
 
-      I found out about this bit of configuration on [[http://stackoverflow.com/questions/17929979/emacs-org-mode-how-to-stop-total-in-column-view-showing-number-of-days][Stack Overflow]].
+       #+BEGIN_SRC emacs-lisp
+         (add-hook 'org-agenda-mode-hook
+                   (lambda () (local-set-key (kbd "P") 'org-pomodoro)))
+       #+END_SRC
 
-      This is really handy when looking at things in column mode in
-      org. I use column mode as an alternative to burn down charts to
-      track effort vs estimates.
+***** redtick for pomodoro
+
+      Bruce recommended redtick for pomodoro's outside of org mode so
+      going to give it a go.
 
       #+BEGIN_SRC emacs-lisp
-        (setq org-time-clocksum-format
-              '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
+        (use-package redtick :ensure t)
       #+END_SRC
 
-**** Put those logs in a drawer
+***** Comment do what I mean in org
 
-     It may be big and heavy and wood, but mostly I don't want to see
-     log messages for state change.
+      Add in key binding for comment-dwim
 
-     #+BEGIN_SRC emacs-lisp
-       (setq org-log-into-drawer t)
-     #+END_SRC
+      #+begin_src emacs-lisp :tangle yes
+        (add-hook 'org-mode-hook (lambda () (local-set-key (kbd "C-;") 'org-comment-dwim)))
+      #+end_src
 
-     We also want to put the clocking in and out into the drawer.
+***** Improve Company completion for org
 
-     #+BEGIN_SRC emacs-lisp
-       (setq org-clock-into-drawer t)
-     #+END_SRC
+      Company completion doesn't work well in Org mode. Adding
+      pcomplete-completions-at-point in org-mode should fix some of these issues.
 
-**** You can depend on...
-
-     The sub tasks that are underneath the main task.
-
-     #+BEGIN_SRC emacs-lisp
-       (setq org-enforce-todo-dependencies t)
-     #+END_SRC
-
-*** Capturing, Templates and Refiling
-
-**** Default Notes File
-
-     I don't want to think about things when I'm just capturing
-     them. I can refile them later.
-
-     #+BEGIN_SRC emacs-lisp
-       (setq org-default-notes-file (concat org-directory "/notes.org"))
-     #+END_SRC
-
-**** Capture Hot Key
-
-     Let's capture things with a quick Vulcan Nerve Pinch on
-     C-c o.
-
-     #+BEGIN_SRC emacs-lisp
-       (global-set-key (kbd "C-c o") 'org-capture)
-     #+END_SRC
-
-**** Capture Templates
-
-     To do, respond, notes, journals, meetings and phone calls. These
-     are the things we want to keep track of and clock in and out of
-     let's see how we get on with them.
-
-     We also have a way of tracking things we are doing RFN as well
-     as capturing things for the future.
-
-     #+BEGIN_SRC emacs-lisp
-       (setq org-capture-templates
-             '(("c" "Contacts" entry (file "~/org/contacts.org")
-                "* %(org-contacts-template-name)\n:PROPERTIES:\n:EMAIL: %(org-contacts-template-email)\n:PHONE:\n:ALIAS:\n:NICKNAME:\n:IGNORE:\n:ICON:\n:NOTE:\n:ADDRESS:\n:BIRTHDAY:\n:LAST_READ_MAIL:\n:END:" :empty-lines-after 1)
-               ("t" "Doing RIGHT NOW" entry (file+datetree org-default-notes-file)
-                "* DOING %?\n%n\n%U\n%a\n" :clock-in t :clock-resume t :empty-lines-after 1)
-               ("f" "Do in the Future" entry (file+datetree org-default-notes-file)
-                "* TODO %?\n%^{Owner}p\n%U\n%a\n" :empty-lines-after 1)
-               ("r" "respond" entry (file+datetree org-default-notes-file)
-                "* TODO Respond to %:from on %:subject\nSCHEDULED: %t\n%^{Owner}p\n%U\n%a\n"
-                :clock-in t :clock-resume t :empty-lines-after 1)
-               ("n" "note" entry (file+datetree org-default-notes-file)
-                "* %? :NOTE:\n%U\n%a\n" :clock-resume t :empty-lines-after 1)
-               ("j" "Journal" entry (file+datetree org-default-notes-file)
-                "* %?\n%U\n" :clock-in t :clock-resume t :empty-lines-after 1 :empty-lines-after 1)
-               ("m" "Meeting" entry (file+datetree org-default-notes-file)
-                "* MEETING with %? :MEETING:\n%^{Owner}p\n%U" :clock-in t :clock-resume t :empty-lines-after 1)
-               ("p" "Phone call" entry (file+datetree org-default-notes-file)
-                "* PHONE %? :PHONE:\n%^{Owner}p\n%U" :clock-in t :clock-resume t :empty-lines-after 1)))
-     #+END_SRC
-
-**** Refiling rules
-
-     We want to be able to refile things in to an archive file
-     and in files that we create our agenda from.
-
-     #+BEGIN_SRC emacs-lisp
-       (setq org-refile-targets
-             '((nil :maxlevel . 9)
-               (org-agenda-files :maxlevel . 9)
-               ("~/org/refile.org" :maxlevel . 9)))
-       (advice-add 'org-refile :after 'org-save-all-org-buffers)
-     #+END_SRC
-
-*** org and the pomodoro technique
-
-    When I need to just grind through something or find a way to keep
-    myself focused when I'm having trouble I like to use the
-    [[http://www.pomodorotechnique.com/][pomodoro technique]]. Luckily there is org-pomodoro that let's us
-    put these two great things together.
-
-    #+BEGIN_SRC emacs-lisp
-      (use-package org-pomodoro
-        :ensure t)
-      (add-hook 'org-mode-hook
-                (lambda () (local-set-key (kbd "M-s-p") 'org-pomodoro)))
-    #+END_SRC
-
-**** A hotkey in Org Agenda
-
-     I can clock in and out in Org Agendas, I'd like to be able to
-     start Pomodoros as well.
-
-     #+BEGIN_SRC emacs-lisp
-       (add-hook 'org-agenda-mode-hook
-                 (lambda () (local-set-key (kbd "P") 'org-pomodoro)))
-     #+END_SRC
-
-*** redtick for pomodoro
-
-    Bruce recommended redtick for pomodoro's outside of org mode so
-    going to give it a go.
-
-    #+BEGIN_SRC emacs-lisp
-      (use-package redtick :ensure t)
-    #+END_SRC
-
-*** Comment do what I mean in org
-
-    Add in key binding for comment-dwim
-
-    #+begin_src emacs-lisp :tangle yes
-      (add-hook 'org-mode-hook (lambda () (local-set-key (kbd "C-;") 'org-comment-dwim)))
-    #+end_src
-
-*** Improve Company completion for org
-
-    Company completion doesn't work well in Org mode. Adding
-    pcomplete-completions-at-point in org-mode should fix some of these issues.
-
-    #+begin_src emacs-lisp
-      (add-hook 'org-mode-hook
-                (lambda () (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)))
-    #+end_src
-
+      #+begin_src emacs-lisp
+        (add-hook 'org-mode-hook
+                  (lambda () (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)))
+      #+end_src
 
 ** Org faces
 
@@ -2062,6 +2061,8 @@
         (setq gc-cons-threshold 1000000)
         (setq read-process-output-max (* 1024 1024 2))
         (setq lsp-idle-delay 0.3)
+        (setq lsp-clojure-custom-server-command '("bash" "-c" "/opt/homebrew/bin/clojure-lsp"))
+
         ;; ELP, added as priority 0 (> -1) so takes priority over the built-in one
         ;; (lsp-register-client
         ;;  (make-lsp-client :new-connection (lsp-stdio-connection '("elp" "server"))
@@ -2840,18 +2841,18 @@
     Coloring for JS and Typescript.
 
     #+begin_src emacs-lisp
-      (use-package tree-sitter
-        :ensure t
-        :config
-        ;; activate tree-sitter on any buffer containing code for which it has a parser available
-        (global-tree-sitter-mode)
-        ;; you can easily see the difference tree-sitter-hl-mode makes for python, ts or tsx
-        ;; by switching on and off
-        (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+      ;; (use-package tree-sitter
+      ;;   :ensure t
+      ;;   :config
+      ;;   ;; activate tree-sitter on any buffer containing code for which it has a parser available
+      ;;   (global-tree-sitter-mode)
+      ;;   ;; you can easily see the difference tree-sitter-hl-mode makes for python, ts or tsx
+      ;;   ;; by switching on and off
+      ;;   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
 
-      (use-package tree-sitter-langs
-        :ensure t
-        :after tree-sitter)
+      ;; (use-package tree-sitter-langs
+      ;;   :ensure t
+      ;;   :after tree-sitter)
 
       ;; (setq treesit-language-source-alist
       ;;       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
