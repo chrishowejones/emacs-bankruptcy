@@ -2061,7 +2061,6 @@
         (setq gc-cons-threshold 1000000)
         (setq read-process-output-max (* 1024 1024 2))
         (setq lsp-idle-delay 0.3)
-        (setq lsp-clojure-custom-server-command '("bash" "-c" "/opt/homebrew/bin/clojure-lsp"))
 
         ;; ELP, added as priority 0 (> -1) so takes priority over the built-in one
         ;; (lsp-register-client
