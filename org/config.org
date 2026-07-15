@@ -77,9 +77,25 @@
    Cache passphrase for symmetrical encryption.
 
    #+begin_src emacs-lisp
+     (setq epg-gpg-program "/opt/homebrew/bin/gpg")
      (setq plstore-cache-passphrase-for-symmetric-encryption t)
      (setq epa-pinentry-mode 'loopback)
    #+end_src
+
+** Add pinentry to allow pin for code signing
+
+     In order to allow magit to prompt for a passcode for a GPG signature we need to install
+     pinentry and start the pinentry server.
+
+     You also need to add `allow-emacs-pinentry` to `~/.gnupg/gpg-agent.conf` and reload the gpg agent using
+     `gpgconf --reload gpg-agent`
+
+     #+begin_src emacs-lisp
+       (use-package pinentry
+         :ensure t
+         :after magit
+         :config (pinentry-start))
+     #+end_src
 
 ** passwords and encrypted things
 
@@ -1080,7 +1096,13 @@
 
     #+BEGIN_SRC emacs-lisp
       (use-package magit
-        :ensure t)
+        :ensure t
+        :demand t
+        :config
+        (require 'magit-autorevert)
+        (unless (boundp 'magit-auto-revert-mode)
+          (custom-initialize-set 'magit-auto-revert-mode
+                                 (not (or global-auto-revert-mode noninteractive)))))
     #+END_SRC
 
     I use magit-status a lot. So let's bind it to C-x g.
@@ -1089,21 +1111,6 @@
       (global-set-key (kbd "C-x g") 'magit-status)
     #+END_SRC
 
-
-**** Add pinentry to allow pin for code signing
-
-     In order to allow magit to prompt for a passcode for a GPG signature we need to install
-     pinentry and start the pinentry server.
-
-     You also need to add `allow-emacs-pinentry` to `~/.gnupg/gpg-agent.conf` and reload the gpg agent using
-     `gpgconf --reload gpg-agent`
-
-     #+begin_src emacs-lisp
-       (use-package pinentry
-         :ensure t
-         :after magit
-         :config (pinentry-start))
-     #+end_src
 
 *** forge
 
@@ -2100,21 +2107,46 @@
     Add in Java LSP and config for it and dap-java.
 
     #+begin_src emacs-lisp
+      (defun my/vscode-ext-path (glob)
+        "Return the newest directory under ~/.vscode/extensions matching GLOB."
+        (car (last (sort (file-expand-wildcards
+                          (expand-file-name glob "~/.vscode/extensions"))
+                         #'string<))))
+
       (use-package lsp-java
         :ensure t
         :after lsp-mode
         :config
-        (require 'dap-java))
-      (setq lsp-java-server-install-dir "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/")
+        (require 'dap-java)
+        (require 'lsp-jt)
+        (setq lsp-java-bundles nil)
+        (setq lsp-jt-root "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/java-test/extension/server/")
+        (setq lsp-java-vmargs
+              (list "-XX:+UseParallelGC"
+                    "-XX:GCTimeRatio=4"
+                    "-XX:AdaptiveSizePolicyWeight=90"
+                    "-Dsun.zip.disableMemoryMapping=true"
+                    "-Xmx2G"
+                    "-Xms100m"
+                    (concat "-javaagent:"
+                            (expand-file-name "~/.m2/repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar"))))
+        (add-hook 'lsp-mode-hook #'lsp-lens-mode)
+        (add-hook 'lsp-configure-hook #'lsp-jt-lens-mode)
+        (add-hook 'lsp-jt-test-run-finished-hook #'lsp-jt--schedule-refresh-lens)
+        (add-hook 'lsp-jt-test-run-finished-hook #'lsp-jt-report-open)
+        (add-hook 'lsp-configure-hook
+                  (lambda ()
+                    (when (derived-mode-p 'java-mode)
+                      (lsp-completion-mode 1)))))
     #+end_src
 
     Bind debug Java keys after loading Java mode
 
     #+begin_src emacs-lisp
       (defun bind-java-dap-keys ()
-        (define-key java-mode-map (kbd "M-s-l t t") 'dap-java-run-test-method)
-        (define-key java-mode-map (kbd "M-s-l t d") 'dap-java-debug-test-method))
-      (with-eval-after-load 'java-mode (bind-java-dap-keys))
+        (define-key java-mode-map (kbd "s-l t t") 'dap-java-run-test-method)
+        (define-key java-mode-map (kbd "s-l t d") 'dap-java-debug-test-method))
+      (with-eval-after-load 'cc-mode (bind-java-dap-keys))
     #+end_src
 
 ** LSP for Haskell
@@ -3395,6 +3427,15 @@
        (delete-trailing-whitespace)
        (indent-buffer))
      (global-set-key (kbd "C-c n") 'cleanup-buffer)
+   #+end_src
+
+** envrc so that direnv runs
+
+   I want to user direnv to set env vars per project.
+
+   #+begin_src emacs-lisp
+     (use-package envrc
+       :hook (after-init . envrc-global-mode))
    #+end_src
 
 * Misc

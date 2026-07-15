@@ -1,0 +1,4 @@
+/Users/chowejones/.emacs.d/elpa/vterm-20260528.1919/build/CMakeFiles/vterm-module.dir
+/Users/chowejones/.emacs.d/elpa/vterm-20260528.1919/build/CMakeFiles/run.dir
+/Users/chowejones/.emacs.d/elpa/vterm-20260528.1919/build/CMakeFiles/edit_cache.dir
+/Users/chowejones/.emacs.d/elpa/vterm-20260528.1919/build/CMakeFiles/rebuild_cache.dir

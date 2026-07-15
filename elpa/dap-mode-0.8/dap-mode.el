@@ -864,8 +864,8 @@ will be reversed."
   "Get only the buffers featuring at least one breakpoint"
   ;; extract the list of buffers featuring a breakpoint from their first breakpoint marker
   ;; (as stored in the LSP metadata)
-  (--map (marker-buffer (plist-get (car it) :marker))
-         (ht-values (dap--get-breakpoints))))
+  (--keep (-some-> (plist-get (car it) :marker) marker-buffer)
+          (ht-values (dap--get-breakpoints))))
 
 (defun dap--refresh-breakpoints ()
   "Refresh breakpoints for DEBUG-SESSION."
@@ -887,7 +887,8 @@ will be reversed."
 
   (run-hook-with-args 'dap-stack-frame-changed-hook debug-session)
   (run-hook-with-args 'dap-terminated-hook debug-session)
-  (dap--refresh-breakpoints)
+  (with-demoted-errors "dap--refresh-breakpoints failed: %s"
+    (dap--refresh-breakpoints))
 
   (when-let ((cleanup-fn (plist-get
                           (dap--debug-session-launch-args debug-session)
