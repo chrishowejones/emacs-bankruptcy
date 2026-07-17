@@ -229,6 +229,9 @@
    #+BEGIN_SRC emacs-lisp
      (use-package window-number
        :ensure t)
+     ;; Load window-number and unset C-x C-j
+     (with-eval-after-load "window-number"
+     (define-key window-number-mode-map (kbd "C-x C-j") nil))
      (window-number-mode t)
      (window-number-meta-mode t)
    #+END_SRC
@@ -1043,6 +1046,8 @@
    #+BEGIN_SRC emacs-lisp
      (require 'dired)
      (setq dired-listing-switches "-alh")
+     (require 'dired-x)
+     (global-set-key (kbd "C-x C-j") 'dired-jump)
    #+END_SRC
 
 ** Mouse Avoidance
@@ -1440,6 +1445,16 @@
 
 * Text Modes
 
+** Pandoc mode
+
+   Pandoc mode for viewing html, pdf, markdown, etc.
+
+   #+begin_src emacs-lisp
+     (use-package pandoc-mode
+       :ensure t
+       :hook (markdown-mode . pandoc-mode))
+   #+end_src
+
 ** Markdown mode
 
    Markdown mode used for viewing markdown formatted text.
@@ -1448,7 +1463,7 @@
      (use-package markdown-mode
        :ensure t
        :mode ("README\\.md\\'" . gfm-mode)
-       :init (setq markdown-command "multimarkdown")
+       :init (setq markdown-command "pandoc")
        :hook
        highlight-indentation-current-column-mode)
    #+end_src
