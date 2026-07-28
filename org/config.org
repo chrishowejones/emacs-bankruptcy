@@ -606,7 +606,10 @@
                      company-tooltip-align-annotations 't             ; align annotations to the right tooltip border
                      company-idle-delay 0.4                           ; decrease delay before autocompletion popup shows
                      company-begin-commands '(self-insert-command)    ; start autocompletion only after typing
-                     company-frontends '(company-pseudo-tooltip-unless-just-one-frontend company-preview-if-just-one-frontend)
+                     ;; NOTE: company-preview-if-just-one-frontend draws inline "ghost text",
+                     ;; which visually collides with copilot's overlay suggestions. Dropped
+                     ;; so company only ever shows the tooltip, leaving ghost-text to copilot.
+                     company-frontends '(company-pseudo-tooltip-unless-just-one-frontend)
                      company-tooltip-flip-when-above t)
        (global-set-key (kbd "C-M-i") 'company-complete)
        (global-set-key (kbd "C-c /") 'company-files)        ; Force complete file names on "C-c /" key
@@ -2211,8 +2214,17 @@
       (use-package copilot
         :vc (copilot :url "https://github.com/copilot-emacs/copilot.el"
                      :branch "main")
-        ;; :hook prog-mode
-        )
+        :hook (prog-mode . copilot-mode)
+        :bind (:map copilot-completion-map
+                    ("<tab>" . copilot-accept-completion)
+                    ("TAB" . copilot-accept-completion)
+                    ("C-<tab>" . copilot-accept-completion-by-word)
+                    ("C-TAB" . copilot-accept-completion-by-word)
+                    ("C-g" . copilot-clear-overlay))
+        :config
+        ;; Don't pop up copilot's ghost text while company's dropdown is
+        ;; already showing candidates -- avoids the two UIs overlapping.
+        (add-to-list 'copilot-disable-predicates (lambda () (company-tooltip-visible-p))))
     #+end_src
 
 
