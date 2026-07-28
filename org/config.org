@@ -231,7 +231,7 @@
        :ensure t)
      ;; Load window-number and unset C-x C-j
      (with-eval-after-load "window-number"
-     (define-key window-number-mode-map (kbd "C-x C-j") nil))
+       (define-key window-number-mode-map (kbd "C-x C-j") nil))
      (window-number-mode t)
      (window-number-meta-mode t)
    #+END_SRC
@@ -334,7 +334,7 @@
 
    #+begin_src emacs-lisp
      (defun linux-mac-keyboard-remap()
-       "Remap meta and super to suit an external Mac keyboard on a linux pc"
+       "Remap meta and super to suit an external Mac keyboard on a linux pc and map meta window keys to super-n"
        (interactive)
        (setq x-meta-keysym 'super)
        (setq x-super-keysym 'meta))
@@ -2984,7 +2984,7 @@
     Install erlang mode
 
     #+begin_src emacs-lisp
-      (setq load-path (cons "~/.kerl/builds/27.3.4/otp_src_27.3.4/lib/tools/emacs" load-path))
+      (setq load-path (cons "/home/chris/.kerl/builds/27.3/otp_src_27.3/lib/tools/emacs" load-path))
       (defun set-erlang-completion
           ()
         (interactive)
@@ -2995,7 +2995,7 @@
                                          #'codeium-completion-at-point
                                          #'lsp-completion-at-point))))
       (use-package erlang :load-path
-        ("~/.kerl/builds/27.3.4/otp_src_27.3.4/lib/tools/emacs")
+        ("~/.kerl/builds/27.3/otp_src_27.3/lib/tools/emacs")
         :mode
         (("\\.erl?$" . erlang-mode)
          ("rebar\\.config$" . erlang-mode)
@@ -3010,9 +3010,9 @@
          ("\\Emakefile" . erlang-mode))
         :config
         (require 'erlang-start)
-        (setq erlang-root-dir "~/.kerl/builds/27.2/otp_src_27.3.4/")
-        (setq exec-path (cons "~/.kerl/builds/27.3/otp_src_27.3.4/bin" exec-path))
-        (setq erlang-man-root-dir "~/.kerl/builds/27.3/otp_src_27.3.4/man")
+        (setq erlang-root-dir "~/.kerl/builds/27.3/otp_src_27.3/")
+        (setq exec-path (cons "~/.kerl/builds/27.3/otp_src_27.3/bin" exec-path))
+        (setq erlang-man-root-dir "~/.kerl/builds/27.3/otp_src_27.3/man")
         (add-hook 'erlang-mode-hook 'my-paredit-nonlisp)
         (add-hook 'erlang-mode-hook 'set-erlang-completion)
         )
