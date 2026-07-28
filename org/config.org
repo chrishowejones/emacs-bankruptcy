@@ -2885,7 +2885,7 @@
            (cider-interactive-eval
             (concat "(nextjournal.clerk/show! \"" filename "\")"))))
 
-       (define-key clojure-mode-map (kbd "<M-return>") 'clerk-show)
+       ;;(define-key clojure-mode-map (kbd "<M-return>") 'clerk-show)
      #+end_src
 
 ** JavaScript
