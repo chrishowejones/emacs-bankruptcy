@@ -493,17 +493,6 @@
        (apheleia-global-mode +1))
    #+END_SRC
 
-** Editor Config
-
-   Add in mode to support .editorconfig
-
-   #+begin_src emacs-lisp
-     (use-package editorconfig
-       :ensure t
-       :config
-       (editorconfig-mode 1))
-   #+end_src
-
 ** Highlight indentation
 
    Useful to highlight indentation for whitespace dependent modes like YAML, Python, etc.
@@ -940,7 +929,8 @@
 
    #+BEGIN_SRC emacs-lisp
      (use-package treemacs
-       :ensure t)
+       :ensure t
+       :config (treemacs-project-follow-mode t))
      ;; (use-package treemacs-magit
      ;;   :after treemacs magit
      ;;   :ensure t)
@@ -2107,37 +2097,43 @@
     Add in Java LSP and config for it and dap-java.
 
     #+begin_src emacs-lisp
-      (defun my/vscode-ext-path (glob)
-        "Return the newest directory under ~/.vscode/extensions matching GLOB."
-        (car (last (sort (file-expand-wildcards
-                          (expand-file-name glob "~/.vscode/extensions"))
-                         #'string<))))
+            (defun my/vscode-ext-path (glob)
+              "Return the newest directory under ~/.vscode/extensions matching GLOB."
+              (car (last (sort (file-expand-wildcards
+                                (expand-file-name glob "~/.vscode/extensions"))
+                               #'string<))))
 
-      (use-package lsp-java
-        :ensure t
-        :after lsp-mode
-        :config
-        (require 'dap-java)
-        (require 'lsp-jt)
-        (setq lsp-java-bundles nil)
-        (setq lsp-jt-root "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/java-test/extension/server/")
-        (setq lsp-java-vmargs
-              (list "-XX:+UseParallelGC"
-                    "-XX:GCTimeRatio=4"
-                    "-XX:AdaptiveSizePolicyWeight=90"
-                    "-Dsun.zip.disableMemoryMapping=true"
-                    "-Xmx2G"
-                    "-Xms100m"
-                    (concat "-javaagent:"
-                            (expand-file-name "~/.m2/repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar"))))
-        (add-hook 'lsp-mode-hook #'lsp-lens-mode)
-        (add-hook 'lsp-configure-hook #'lsp-jt-lens-mode)
-        (add-hook 'lsp-jt-test-run-finished-hook #'lsp-jt--schedule-refresh-lens)
-        (add-hook 'lsp-jt-test-run-finished-hook #'lsp-jt-report-open)
-        (add-hook 'lsp-configure-hook
-                  (lambda ()
-                    (when (derived-mode-p 'java-mode)
-                      (lsp-completion-mode 1)))))
+            (use-package lsp-java
+              :ensure t
+              :after lsp-mode
+              :config
+              (require 'dap-java)
+              (require 'lsp-jt)
+              (setq lsp-java-bundles nil)
+              (setq lsp-jt-root "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/java-test/extension/server/")
+              (setq lsp-java-vmargs
+                    (list "-XX:+UseParallelGC"
+                          "-XX:GCTimeRatio=4"
+                          "-XX:AdaptiveSizePolicyWeight=90"
+                          "-Dsun.zip.disableMemoryMapping=true"
+                          "-Xmx2G"
+                          "-Xms100m"
+                          (concat "-javaagent:"
+                                  (expand-file-name "~/.m2/repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar"))))
+              (add-hook 'lsp-mode-hook #'lsp-lens-mode)
+              (add-hook 'lsp-configure-hook #'lsp-jt-lens-mode)
+              (add-hook 'lsp-jt-test-run-finished-hook #'lsp-jt--schedule-refresh-lens)
+              (add-hook 'lsp-jt-test-run-finished-hook #'lsp-jt-report-open)
+              (add-hook 'lsp-configure-hook
+                        (lambda ()
+                          (when (derived-mode-p 'java-mode)
+                            (lsp-completion-mode 1))))
+              (add-hook 'lsp-configure-hook
+                        (lambda ()
+                          ;; Force Emacs to use normal CC-mode indentation logic for regions
+                          ;; instead of handing control over to the LSP server
+                          (setq-local indent-region-function #'c-indent-region)
+                          (setq-local ))))
     #+end_src
 
     Bind debug Java keys after loading Java mode
@@ -2145,7 +2141,8 @@
     #+begin_src emacs-lisp
       (defun bind-java-dap-keys ()
         (define-key java-mode-map (kbd "s-l t t") 'dap-java-run-test-method)
-        (define-key java-mode-map (kbd "s-l t d") 'dap-java-debug-test-method))
+        (define-key java-mode-map (kbd "s-l t d") 'dap-java-debug-test-method)
+        (define-key java-mode-map (kbd "s-l t c") 'dap-java-run-test-class))
       (with-eval-after-load 'cc-mode (bind-java-dap-keys))
     #+end_src
 
@@ -3375,9 +3372,16 @@
 
    #+begin_src emacs-lisp
      (use-package editorconfig
-       :ensure t
-       :config
-       (editorconfig-mode 1))
+          :ensure t
+          :config
+          (editorconfig-mode 1))
+     ;; Bind EditorConfig variables explicitly to Java CC-mode hooks
+     (add-hook 'editorconfig-after-apply-functions
+               (lambda (props)
+                 (when (derived-mode-p 'java-mode)
+                   (let ((indent-size (gethash 'indent_size props)))
+                     (when indent-size
+                       (setq c-basic-offset (string-to-number indent-size)))))))
    #+end_src
 
 * Data Modes
