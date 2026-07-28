@@ -245,6 +245,9 @@
    #+BEGIN_SRC emacs-lisp
      (use-package window-number
        :ensure t)
+     ;; Load window-number and unset C-x C-j
+     (with-eval-after-load "window-number"
+       (define-key window-number-mode-map (kbd "C-x C-j") nil))
      (window-number-mode t)
      (window-number-meta-mode t)
    #+END_SRC
@@ -347,7 +350,7 @@
 
    #+begin_src emacs-lisp
      (defun linux-mac-keyboard-remap()
-       "Remap meta and super to suit an external Mac keyboard on a linux pc"
+       "Remap meta and super to suit an external Mac keyboard on a linux pc and map meta window keys to super-n"
        (interactive)
        (setq x-meta-keysym 'super)
        (setq x-super-keysym 'meta))
@@ -608,7 +611,16 @@
                      company-tooltip-align-annotations 't             ; align annotations to the right tooltip border
                      company-idle-delay 0.4                           ; decrease delay before autocompletion popup shows
                      company-begin-commands '(self-insert-command)    ; start autocompletion only after typing
-                     company-frontends '(company-pseudo-tooltip-unless-just-one-frontend company-preview-if-just-one-frontend)
+                     ;; company-preview-if-just-one-frontend is needed: the tooltip frontend
+                     ;; hides its dropdown when exactly one candidate remains (e.g. after typing
+                     ;; enough of a method name to disambiguate it), so without the preview
+                     ;; frontend that single-candidate case shows nothing at all. Its inline
+                     ;; ghost text can visually collide with copilot's overlay; that's handled
+                     ;; by suppressing copilot's overlay whenever company has any candidates
+                     ;; (see copilot-disable-predicates in the Copilot section) rather than by
+                     ;; dropping this frontend.
+                     company-frontends '(company-pseudo-tooltip-unless-just-one-frontend
+                                          company-preview-if-just-one-frontend)
                      company-tooltip-flip-when-above t)
        (global-set-key (kbd "C-M-i") 'company-complete)
        (global-set-key (kbd "C-c /") 'company-files)        ; Force complete file names on "C-c /" key
@@ -1049,6 +1061,8 @@
    #+BEGIN_SRC emacs-lisp
      (require 'dired)
      (setq dired-listing-switches "-alh")
+     (require 'dired-x)
+     (global-set-key (kbd "C-x C-j") 'dired-jump)
    #+END_SRC
 
 ** Mouse Avoidance
@@ -1437,6 +1451,16 @@
 
 * Text Modes
 
+** Pandoc mode
+
+   Pandoc mode for viewing html, pdf, markdown, etc.
+
+   #+begin_src emacs-lisp
+     (use-package pandoc-mode
+       :ensure t
+       :hook (markdown-mode . pandoc-mode))
+   #+end_src
+
 ** Markdown mode
 
    Markdown mode used for viewing markdown formatted text.
@@ -1445,7 +1469,7 @@
      (use-package markdown-mode
        :ensure t
        :mode ("README\\.md\\'" . gfm-mode)
-       :init (setq markdown-command "multimarkdown")
+       :init (setq markdown-command "pandoc")
        :hook
        highlight-indentation-current-column-mode)
    #+end_src
@@ -2058,7 +2082,6 @@
         (setq gc-cons-threshold 1000000)
         (setq read-process-output-max (* 1024 1024 2))
         (setq lsp-idle-delay 0.3)
-        (setq lsp-clojure-custom-server-command '("bash" "-c" "/opt/homebrew/bin/clojure-lsp"))
 
         ;; ELP, added as priority 0 (> -1) so takes priority over the built-in one
         ;; (lsp-register-client
@@ -2134,6 +2157,18 @@
                           ;; instead of handing control over to the LSP server
                           (setq-local indent-region-function #'c-indent-region)
                           (setq-local ))))
+    #+end_src
+
+    Keep codeium out of Java buffers -- copilot already provides inline AI
+    suggestions there, and codeium's capf would just double up with it
+    without adding anything (unlike kotlin/typescript/clojure, java has no
+    codeium+lsp capf combo to begin with).
+
+    #+begin_src emacs-lisp
+      (add-hook 'java-mode-hook
+                (lambda ()
+                  (setq-local completion-at-point-functions
+                              (list #'lsp-completion-at-point #'cape-dabbrev #'cape-file))))
     #+end_src
 
     Bind debug Java keys after loading Java mode
@@ -2227,8 +2262,24 @@
       (use-package copilot
         :vc (copilot :url "https://github.com/copilot-emacs/copilot.el"
                      :branch "main")
-        ;; :hook prog-mode
-        )
+        :hook (prog-mode . copilot-mode)
+        :bind (:map copilot-completion-map
+                    ("<tab>" . copilot-accept-completion)
+                    ("TAB" . copilot-accept-completion)
+                    ("C-<tab>" . copilot-accept-completion-by-word)
+                    ("C-TAB" . copilot-accept-completion-by-word)
+                    ("C-g" . copilot-clear-overlay))
+        :config
+        ;; Don't pop up copilot's ghost text while company has any candidates
+        ;; live -- whether shown as a dropdown or (for a single remaining
+        ;; candidate) as company's own inline preview -- to avoid the two
+        ;; overlays overlapping.
+        (add-to-list 'copilot-disable-predicates (lambda () (bound-and-true-p company-candidates)))
+        ;; Clojure has no single indent-width variable the way python/lisp do
+        ;; (clojure-mode indents semantically), so copilot--infer-indentation-offset
+        ;; warns it found nothing. 2 spaces matches standard Clojure style.
+        (dolist (mode '(clojure-mode clojurec-mode clojurescript-mode))
+          (add-to-list 'copilot-indentation-alist (list mode 2))))
     #+end_src
 
 
@@ -3000,7 +3051,7 @@
     Install erlang mode
 
     #+begin_src emacs-lisp
-      (setq load-path (cons "~/.kerl/builds/27.3.4/otp_src_27.3.4/lib/tools/emacs" load-path))
+      (setq load-path (cons "/home/chris/.kerl/builds/27.3/otp_src_27.3/lib/tools/emacs" load-path))
       (defun set-erlang-completion
           ()
         (interactive)
@@ -3011,7 +3062,7 @@
                                          #'codeium-completion-at-point
                                          #'lsp-completion-at-point))))
       (use-package erlang :load-path
-        ("~/.kerl/builds/27.3.4/otp_src_27.3.4/lib/tools/emacs")
+        ("~/.kerl/builds/27.3/otp_src_27.3/lib/tools/emacs")
         :mode
         (("\\.erl?$" . erlang-mode)
          ("rebar\\.config$" . erlang-mode)
@@ -3026,9 +3077,9 @@
          ("\\Emakefile" . erlang-mode))
         :config
         (require 'erlang-start)
-        (setq erlang-root-dir "~/.kerl/builds/27.2/otp_src_27.3.4/")
-        (setq exec-path (cons "~/.kerl/builds/27.3/otp_src_27.3.4/bin" exec-path))
-        (setq erlang-man-root-dir "~/.kerl/builds/27.3/otp_src_27.3.4/man")
+        (setq erlang-root-dir "~/.kerl/builds/27.3/otp_src_27.3/")
+        (setq exec-path (cons "~/.kerl/builds/27.3/otp_src_27.3/bin" exec-path))
+        (setq erlang-man-root-dir "~/.kerl/builds/27.3/otp_src_27.3/man")
         (add-hook 'erlang-mode-hook 'my-paredit-nonlisp)
         (add-hook 'erlang-mode-hook 'set-erlang-completion)
         )
