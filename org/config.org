@@ -606,10 +606,16 @@
                      company-tooltip-align-annotations 't             ; align annotations to the right tooltip border
                      company-idle-delay 0.4                           ; decrease delay before autocompletion popup shows
                      company-begin-commands '(self-insert-command)    ; start autocompletion only after typing
-                     ;; NOTE: company-preview-if-just-one-frontend draws inline "ghost text",
-                     ;; which visually collides with copilot's overlay suggestions. Dropped
-                     ;; so company only ever shows the tooltip, leaving ghost-text to copilot.
-                     company-frontends '(company-pseudo-tooltip-unless-just-one-frontend)
+                     ;; company-preview-if-just-one-frontend is needed: the tooltip frontend
+                     ;; hides its dropdown when exactly one candidate remains (e.g. after typing
+                     ;; enough of a method name to disambiguate it), so without the preview
+                     ;; frontend that single-candidate case shows nothing at all. Its inline
+                     ;; ghost text can visually collide with copilot's overlay; that's handled
+                     ;; by suppressing copilot's overlay whenever company has any candidates
+                     ;; (see copilot-disable-predicates in the Copilot section) rather than by
+                     ;; dropping this frontend.
+                     company-frontends '(company-pseudo-tooltip-unless-just-one-frontend
+                                          company-preview-if-just-one-frontend)
                      company-tooltip-flip-when-above t)
        (global-set-key (kbd "C-M-i") 'company-complete)
        (global-set-key (kbd "C-c /") 'company-files)        ; Force complete file names on "C-c /" key
@@ -2234,9 +2240,11 @@
                     ("C-TAB" . copilot-accept-completion-by-word)
                     ("C-g" . copilot-clear-overlay))
         :config
-        ;; Don't pop up copilot's ghost text while company's dropdown is
-        ;; already showing candidates -- avoids the two UIs overlapping.
-        (add-to-list 'copilot-disable-predicates (lambda () (company-tooltip-visible-p))))
+        ;; Don't pop up copilot's ghost text while company has any candidates
+        ;; live -- whether shown as a dropdown or (for a single remaining
+        ;; candidate) as company's own inline preview -- to avoid the two
+        ;; overlays overlapping.
+        (add-to-list 'copilot-disable-predicates (lambda () (bound-and-true-p company-candidates))))
     #+end_src
 
 
