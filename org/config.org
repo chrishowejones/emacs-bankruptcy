@@ -2124,6 +2124,18 @@
         (require 'dap-java))
     #+end_src
 
+    Keep codeium out of Java buffers -- copilot already provides inline AI
+    suggestions there, and codeium's capf would just double up with it
+    without adding anything (unlike kotlin/typescript/clojure, java has no
+    codeium+lsp capf combo to begin with).
+
+    #+begin_src emacs-lisp
+      (add-hook 'java-mode-hook
+                (lambda ()
+                  (setq-local completion-at-point-functions
+                              (list #'lsp-completion-at-point #'cape-dabbrev #'cape-file))))
+    #+end_src
+
     Bind debug Java keys after loading Java mode
 
     #+begin_src emacs-lisp
