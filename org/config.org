@@ -2275,6 +2275,9 @@
         ;; candidate) as company's own inline preview -- to avoid the two
         ;; overlays overlapping.
         (add-to-list 'copilot-disable-predicates (lambda () (bound-and-true-p company-candidates)))
+        ;; Disable copilot in scratch and temp buffers
+        (add-to-list 'copilot-disable-predicates
+               (lambda () (string-prefix-p "*" (buffer-name))))
         ;; Clojure has no single indent-width variable the way python/lisp do
         ;; (clojure-mode indents semantically), so copilot--infer-indentation-offset
         ;; warns it found nothing. 2 spaces matches standard Clojure style.
@@ -2343,10 +2346,11 @@
 
    #+BEGIN_SRC emacs-lisp
      (use-package restclient
-       :ensure t)
+        :ensure t)
      (use-package restclient-jq
-       :ensure t
-       :hook (restclient . restclient-jq))
+        :ensure t
+        :hook (restclient . restclient-jq))
+     (require 'aws-sign)
    #+END_SRC
 
 ** prog-mode

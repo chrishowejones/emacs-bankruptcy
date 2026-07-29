@@ -46,6 +46,9 @@
 
 (defvar native-comp-deferred-compilation-deny-list nil)
 
+;; add nonelpa dir to load path
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/nonelpa"))
+
 ;; org-mode always needs to be installed in an emacs where it isn't loaded.
 ;; (when (not (package-installed-p 'gnu))
 ;;   (package-install 'org))
