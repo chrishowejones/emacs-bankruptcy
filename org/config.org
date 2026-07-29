@@ -2610,7 +2610,27 @@
         (clojure-mode .
                       (lambda ()
                         (setq-local completion-at-point-functions
-                                    (list (cape-capf-super #'lsp-completion-at-point #'codeium-completion-at-point))))))
+                                    (list #'lsp-completion-at-point)))))
+    #+end_src
+
+    Compojure's route macros (GET/POST/PUT/DELETE/ANY) aren't known to
+    clojure-mode, so with the default clojure-indent-style ('always-align)
+    it treats them as plain function calls and aligns their body under the
+    first argument instead of the usual 2-space macro-body indent. This
+    only matters for buffer-local reindenting (e.g. paredit-reindent-defun,
+    which uses clojure-mode's own indent-line-function); clojure-lsp's
+    formatter already knows about them and gets it right regardless.
+
+    #+begin_src emacs-lisp
+      (with-eval-after-load 'clojure-mode
+        (define-clojure-indent
+          (GET 2)
+          (POST 2)
+          (PUT 2)
+          (DELETE 2)
+          (PATCH 2)
+          (ANY 2)
+          (context 2)))
     #+end_src
 
 **** boot
