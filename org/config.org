@@ -2120,43 +2120,51 @@
     Add in Java LSP and config for it and dap-java.
 
     #+begin_src emacs-lisp
-            (defun my/vscode-ext-path (glob)
-              "Return the newest directory under ~/.vscode/extensions matching GLOB."
-              (car (last (sort (file-expand-wildcards
-                                (expand-file-name glob "~/.vscode/extensions"))
-                               #'string<))))
+      (defun my/vscode-ext-path (glob)
+        "Return the newest directory under ~/.vscode/extensions matching GLOB."
+        (car (last (sort (file-expand-wildcards
+                          (expand-file-name glob "~/.vscode/extensions"))
+                         #'string<))))
 
-            (use-package lsp-java
-              :ensure t
-              :after lsp-mode
-              :config
-              (require 'dap-java)
-              (require 'lsp-jt)
-              (setq lsp-java-bundles nil)
-              (setq lsp-jt-root "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/java-test/extension/server/")
-              (setq lsp-java-vmargs
-                    (list "-XX:+UseParallelGC"
-                          "-XX:GCTimeRatio=4"
-                          "-XX:AdaptiveSizePolicyWeight=90"
-                          "-Dsun.zip.disableMemoryMapping=true"
-                          "-Xmx2G"
-                          "-Xms100m"
-                          (concat "-javaagent:"
-                                  (expand-file-name "~/.m2/repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar"))))
-              (add-hook 'lsp-mode-hook #'lsp-lens-mode)
-              (add-hook 'lsp-configure-hook #'lsp-jt-lens-mode)
-              (add-hook 'lsp-jt-test-run-finished-hook #'lsp-jt--schedule-refresh-lens)
-              (add-hook 'lsp-jt-test-run-finished-hook #'lsp-jt-report-open)
-              (add-hook 'lsp-configure-hook
-                        (lambda ()
-                          (when (derived-mode-p 'java-mode)
-                            (lsp-completion-mode 1))))
-              (add-hook 'lsp-configure-hook
-                        (lambda ()
-                          ;; Force Emacs to use normal CC-mode indentation logic for regions
-                          ;; instead of handing control over to the LSP server
-                          (setq-local indent-region-function #'c-indent-region)
-                          (setq-local ))))
+      (use-package lsp-java
+        :ensure t
+        :after lsp-mode
+        :config
+        (require 'dap-java)
+        (require 'lsp-jt)
+        (setq lsp-java-bundles nil)
+        (setq lsp-jt-root "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/java-test/extension/server/")
+        (setq lsp-java-vmargs
+              (list "-XX:+UseParallelGC"
+                    "-XX:GCTimeRatio=4"
+                    "-XX:AdaptiveSizePolicyWeight=90"
+                    "-Dsun.zip.disableMemoryMapping=true"
+                    "-Xmx2G"
+                    "-Xms100m"
+                    (concat "-javaagent:"
+                            (expand-file-name "~/.m2/repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar"))))
+        (setq lsp-java-test-config '(:vmArgs ["-XX:+EnableDynamicAgentLoading"]))
+        (add-hook 'lsp-mode-hook #'lsp-lens-mode)
+        (add-hook 'lsp-configure-hook #'lsp-jt-lens-mode)
+        (add-hook 'lsp-jt-test-run-finished-hook #'lsp-jt--schedule-refresh-lens)
+        (add-hook 'lsp-jt-test-run-finished-hook #'lsp-jt-report-open)
+        (add-hook 'lsp-configure-hook
+                  (lambda ()
+                    (when (derived-mode-p 'java-mode)
+                      (lsp-completion-mode 1))))
+        (add-hook 'lsp-configure-hook
+                  (lambda ()
+                    ;; Force Emacs to use normal CC-mode indentation logic for regions
+                    ;; instead of handing control over to the LSP server
+                    (setq-local indent-region-function #'c-indent-region)
+                    (setq-local ))))
+
+      (with-eval-after-load 'dap-java
+        (dap-register-debug-template
+         "Java Test"
+         (list :type "java"
+               :request "launch"
+               :vmArgs "-XX:+EnableDynamicAgentLoading")))
     #+end_src
 
     Keep codeium out of Java buffers -- copilot already provides inline AI
