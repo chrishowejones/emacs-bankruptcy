@@ -1,5 +1,7 @@
 ;;; -*- lisp-data -*-
 (("/Users/chowejones/emacs-bankruptcy/")
+ ("/Users/chowejones/emacs-bankruptcy/elpa/markdown-mermaid/")
+ ("/Users/chowejones/emacs-bankruptcy/elpa/openapi/")
  ("/Users/chowejones/emacs-bankruptcy/elpa/pytest/")
  ("/Users/chowejones/emacs-bankruptcy/elpa/nose/")
  ("/Users/chowejones/emacs-bankruptcy/elpa/vite-test-mode/")

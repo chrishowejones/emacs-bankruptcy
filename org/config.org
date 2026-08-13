@@ -494,6 +494,9 @@
        (add-to-list 'apheleia-mode-alist '(rjsx-mode . prettier))
        (add-to-list 'apheleia-mode-alist '(clojure-mode . clj-zprint))
        (apheleia-global-mode +1))
+     (with-eval-after-load 'apheleia
+       (setf (alist-get 'yaml-mode apheleia-mode-alist nil 'remove) nil)
+       (setf (alist-get 'yaml-ts-mode apheleia-mode-alist nil 'remove) nil))
    #+END_SRC
 
 ** Highlight indentation
@@ -1472,6 +1475,21 @@
        :init (setq markdown-command "pandoc")
        :hook
        highlight-indentation-current-column-mode)
+     (defun chris/markdown-export-pdf ()
+       "Convert the current markdown buffer to PDF using pandoc."
+       (interactive)
+       (unless (executable-find "pandoc")
+         (user-error "pandoc not found on PATH"))
+       (let* ((file (buffer-file-name))
+              (pdf-file (concat (file-name-sans-extension file) ".pdf")))
+         (unless file
+           (user-error "Buffer is not visiting a file"))
+         (compile (format "pandoc %s -o %s"
+                          (shell-quote-argument file)
+                          (shell-quote-argument pdf-file)))))
+
+     (with-eval-after-load 'markdown-mode
+       (define-key markdown-mode-map (kbd "C-c C-e p") #'chris/markdown-export-pdf))
    #+end_src
 
 ** html, yaml, xml
@@ -1485,6 +1503,14 @@
         :hook
         highlight-indentation-current-column-mode)
     #+END_SRC
+
+*** Openapi mode
+
+    #+begin_src emacs-lisp :tangle yes
+      (use-package openapi-mode
+        :vc (openapi :url "https://github.com/xshyamx/openapi-mode" :rev :newest)
+        :hook (yaml-mode . openapi-mode))
+    #+end_src
 
 *** web mode
 
@@ -2046,6 +2072,27 @@
      (require 'org-faces)
    #+END_SRC
 
+** Mermaid diagrams
+
+   Mermaid diagram mode
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package mermaid-mode
+       :ensure t)
+   #+end_src
+
+
+** Mermaid in markdown
+
+   Mermaid diagrams in markdown files.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package markdown-mermaid
+       :vc (markdown-mermaid :url "https://github.com/pasunboneleve/markdown-mermaid" :rev :newest)
+       :bind (:map markdown-mode-map
+                   ("C-c m" . markdown-mermaid-preview)))
+   #+end_src
+
 * Programming Modes
 
 ** Language Server Protocol
@@ -2158,6 +2205,12 @@
                     ;; instead of handing control over to the LSP server
                     (setq-local indent-region-function #'c-indent-region)
                     (setq-local ))))
+
+      (advice-add 'lsp--error :around
+                  (lambda (orig fmt &rest args)
+                    (unless (string-match "vscode\\.java\\.test"
+                                          (apply #'format fmt args))
+                      (apply orig fmt args))))
 
       (with-eval-after-load 'dap-java
         (dap-register-debug-template
@@ -3418,16 +3471,6 @@
       (use-package gist
         :ensure t)
     #+END_SRC
-
-** Apheleia
-
-   auto-format different source code files extremely intelligently
-   https://github.com/radian-software/apheleia
-
-   #+BEGIN_SRC emacs-lisp
-     (use-package apheleia
-       :ensure t)
-   #+END_SRC
 
 ** EditorConfig
 
