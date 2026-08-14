@@ -2149,7 +2149,7 @@
         :commands lsp-ui-mode
         :config
         (setq lsp-ui-doc-show-with-cursor nil) ; Set to t if you want doc popup at cursor rather than mouse over
-        )
+        (setq lsp-ui-doc-include-signature t))
     #+end_src
 
     Add in consult support.
@@ -2181,13 +2181,12 @@
         (require 'lsp-jt)
         (setq lsp-java-bundles nil)
         (setq lsp-jt-root "~/.emacs.d/.cache/lsp/eclipse.jdt.ls/java-test/extension/server/")
+        (setq lsp-response-timeout 30)
         (setq lsp-java-vmargs
-              (list "-XX:+UseParallelGC"
-                    "-XX:GCTimeRatio=4"
-                    "-XX:AdaptiveSizePolicyWeight=90"
-                    "-Dsun.zip.disableMemoryMapping=true"
-                    "-Xmx2G"
-                    "-Xms100m"
+              (list "-XX:+UseG1GC"
+                    "-XX:+UseStringDeduplication"
+                    "-Xmx4G"
+                    "-Xms512m"
                     (concat "-javaagent:"
                             (expand-file-name "~/.m2/repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar"))))
         (setq lsp-java-test-config '(:vmArgs ["-XX:+EnableDynamicAgentLoading"]))
