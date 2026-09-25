@@ -2191,7 +2191,7 @@
                             (expand-file-name "~/.m2/repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar"))))
         (setq lsp-java-test-config '(:vmArgs ["-XX:+EnableDynamicAgentLoading"]))
         (add-hook 'lsp-mode-hook #'lsp-lens-mode)
-        (add-hook 'lsp-configure-hook #'lsp-jt-lens-mode)
+        (add-hook 'java-mode-hook #'lsp-jt-lens-mode)
         (add-hook 'lsp-jt-test-run-finished-hook #'lsp-jt--schedule-refresh-lens)
         (add-hook 'lsp-jt-test-run-finished-hook #'lsp-jt-report-open)
         (add-hook 'lsp-configure-hook
@@ -2342,7 +2342,8 @@
         ;; (clojure-mode indents semantically), so copilot--infer-indentation-offset
         ;; warns it found nothing. 2 spaces matches standard Clojure style.
         (dolist (mode '(clojure-mode clojurec-mode clojurescript-mode))
-          (add-to-list 'copilot-indentation-alist (list mode 2))))
+          (add-to-list 'copilot-indentation-alist (list mode 2)))
+        (setq copilot-max-char-warning-disabled t))
     #+end_src
 
 
